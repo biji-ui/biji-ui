@@ -1,0 +1,9 @@
+
+[package]
+name = "biji-ui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+leptos = { version = "0.6", features = ["nightly"] }
+leptos-use = { version = "0.10" }
