@@ -1,0 +1,9 @@
+[[language]]
+name = "rust"
+
+[language-server.rust-analyzer.config]
+rustfmt.overrideCommand = [
+    "sh",
+    "-c",
+    "rustywind --output-css-file ${WORKSPACE_PATH}/style/main.scss --custom-regex \"(?:[\\\"'])([_a-zA-Z0-9\\.\\s\\-:\\[\\]/]+)[\\\"']\\.style\\(\\)\" --stdin | rustywind --output-css-file ${WORKSPACE_PATH}/style/main.scss --custom-regex \"(?:(?:class|(?:const\\s\\b.*_STYLE\\:\\s\\&str))\\s*=\\s*[\\\"']([_a-zA-Z0-9\\.\\s\\-:\\[\\]/]+)[\\\"'])\" --stdin | leptosfmt --config-file ${WORKSPACE_PATH}/leptosfmt.toml --stdin --rustfmt",
+]

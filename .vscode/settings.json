@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.rustfmt.overrideCommand": [
+      "sh",
+      "-c",
+      "rustywind --output-css-file ${workspaceFolder}/style/main.scss --custom-regex \"(?:[\\\"'])([_a-zA-Z0-9\\.\\s\\-:\\[\\]/]+)[\\\"']\\.style\\(\\)\" --stdin | rustywind --output-css-file ${workspaceFolder}/style/main.scss --custom-regex \"(?:(?:class|(?:const\\s\\b.*_STYLE\\:\\s\\&str))\\s*=\\s*[\\\"']([_a-zA-Z0-9\\.\\s\\-:\\[\\]/]+)[\\\"'])\" --stdin | leptosfmt --config-file ${workspaceFolder}/leptosfmt.toml --stdin --rustfmt"
+    ]
+  }
+  
