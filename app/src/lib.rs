@@ -11,6 +11,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 pub mod error_template;
+pub mod icons;
 pub mod pages;
 
 #[component]
