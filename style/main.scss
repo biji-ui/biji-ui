@@ -676,6 +676,10 @@ body {
   display: inline-flex;
 }
 
+.contents {
+  display: contents;
+}
+
 .hidden {
   display: none;
 }
@@ -723,6 +727,10 @@ body {
 
 .max-w-2xl {
   max-width: 42rem;
+}
+
+.max-w-none {
+  max-width: none;
 }
 
 .flex-auto {
