@@ -1,13 +1,17 @@
 use leptos::*;
 use leptos_router::*;
 
+pub mod accordion;
 pub mod dropdown_menu;
 
 #[component]
 pub fn DocsPage() -> impl IntoView {
     let location = use_location();
 
-    let components = [("/docs/dropdown-menu", "Dropdown Menu")];
+    let components = [
+        ("/docs/accordion", "Accordion"),
+        ("/docs/dropdown-menu", "Dropdown Menu"),
+    ];
 
     view! {
         <div class="relative mx-auto flex w-full flex-auto justify-center sm:px-2 max-w-8xl lg:px-8 xl:px-12">

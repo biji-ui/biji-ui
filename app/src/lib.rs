@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crate::{
     error_template::{AppError, ErrorTemplate},
-    pages::docs::{dropdown_menu::DropdownMenuDocPage, DocsPage},
+    pages::docs::{accordion::AccordionDocPage, dropdown_menu::DropdownMenuDocPage, DocsPage},
 };
 
 use biji_ui::components::menu;
@@ -35,6 +35,7 @@ pub fn App() -> impl IntoView {
                 <Routes>
                     <Route path="" view={HomePage}/>
                     <Route path="/docs/" view={DocsPage}>
+                        <Route path="accordion" view={AccordionDocPage}/>
                         <Route path="dropdown-menu" view={DropdownMenuDocPage}/>
                     </Route>
                 </Routes>
