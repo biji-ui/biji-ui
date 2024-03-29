@@ -1,5 +1,7 @@
 use leptos::*;
 
+use crate::icons;
+
 #[component]
 pub fn DropdownMenuDocPage() -> impl IntoView {
     use crate::pages::docs::DocPage;
@@ -8,7 +10,7 @@ pub fn DropdownMenuDocPage() -> impl IntoView {
         <DocPage
             title="Dropdown Menu"
             description="Displays a menu of items that users can select from when triggered."
-            example={|| view! { <DropdownMenuExample/> }}
+            example={DropdownMenuExample}
         />
     }
 }
@@ -22,7 +24,7 @@ pub fn DropdownMenuExample() -> impl IntoView {
     view! {
         <menu::Root class="w-fit">
             <menu::Trigger class="inline-flex h-10 w-10 items-center justify-center rounded-full border text-sm font-medium text-foreground border-border-input bg-background-alt shadow-btn hover:bg-muted focus-visible focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-98">
-                "..."
+                <icons::Ellipsis class="h-6 w-6 text-foreground"></icons::Ellipsis>
             </menu::Trigger>
             <menu::Content
                 class="absolute left-1/2 flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
