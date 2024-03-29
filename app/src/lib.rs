@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use crate::error_template::{AppError, ErrorTemplate};
+use crate::{
+    error_template::{AppError, ErrorTemplate},
+    pages::docs::{dropdown_menu::DropdownMenuDocPage, DocsPage},
+};
 
 use biji_ui::components::menu;
 use leptos::*;
@@ -8,6 +11,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 pub mod error_template;
+pub mod pages;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -29,6 +33,9 @@ pub fn App() -> impl IntoView {
             <main>
                 <Routes>
                     <Route path="" view={HomePage}/>
+                    <Route path="/docs/" view={DocsPage}>
+                        <Route path="dropdown-menu" view={DropdownMenuDocPage}/>
+                    </Route>
                 </Routes>
             </main>
         </Router>
@@ -46,7 +53,7 @@ fn HomePage() -> impl IntoView {
         <h1>"Biji UI"</h1>
         <h2>"Headless components for Leptos"</h2>
         <button on:click={on_click}>"Click Me: " {count}</button>
-        <menu::Root>
+        <menu::Root class="w-fit">
             <menu::Trigger>"Menu"</menu::Trigger>
             <menu::Content hide_delay={Duration::from_millis(200)}>
                 <h3>"Menu"</h3>
