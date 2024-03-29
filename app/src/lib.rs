@@ -22,7 +22,7 @@ pub fn App() -> impl IntoView {
         <Stylesheet id="leptos" href="/pkg/biji-ui.css"/>
 
         // sets the document title
-        <Title text="Welcome to Leptos"/>
+        <Title text="Biji UI"/>
 
         // content for this welcome page
         <Router fallback={|| {
