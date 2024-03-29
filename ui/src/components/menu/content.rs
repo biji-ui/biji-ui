@@ -3,13 +3,16 @@ use std::time::Duration;
 use leptos::{ev::keydown, *};
 use leptos_use::{on_click_outside, use_event_listener, use_window};
 
-use crate::custom_animated_show::CustomAnimatedShow;
+use crate::{cn, custom_animated_show::CustomAnimatedShow};
 
 use super::root::MenuContext;
 
 #[component]
 pub fn Content(
     children: ChildrenFn,
+    /// Optional CSS class to apply to both show and hide classes
+    #[prop(into, optional)]
+    class: String,
     /// Optional CSS class to apply if `when == true`
     #[prop(into, optional)]
     show_class: String,
@@ -25,8 +28,8 @@ pub fn Content(
     view! {
         <CustomAnimatedShow
             when={ctx.open}
-            show_class={show_class}
-            hide_class={hide_class}
+            show_class={cn!(class, show_class)}
+            hide_class={cn!(class, hide_class)}
             hide_delay={hide_delay}
         >
             <Events>{children()}</Events>
