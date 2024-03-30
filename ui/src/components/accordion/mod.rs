@@ -1,4 +1,5 @@
 pub mod content;
+pub mod events;
 pub mod item;
 pub mod root;
 pub mod trigger;
