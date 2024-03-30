@@ -32,14 +32,11 @@ pub fn AccordionExample() -> impl IntoView {
             {items
                 .into_iter()
                 .enumerate()
-                .map(|(i, v)| {
+                .map(|(index, (title, content))| {
                     view! {
-                        <accordion::Item
-                            value={i.to_string()}
-                            class="border-b px-1.5 group border-dark-10"
-                        >
-                            <accordion::Trigger class="flex w-full flex-1 items-center justify-between py-5 text-[15px] font-medium transition-all [&[data-state=open]>span>svg]:rotate-180">
-                                {v.0}
+                        <accordion::Item index class="border-b px-1.5 group border-dark-10">
+                            <accordion::Trigger class="flex w-full flex-1 items-center justify-between py-5 text-[15px] font-medium transition-all [&[data-state=open]>span>svg]:rotate-180 focus:outline-none focus:ring">
+                                {title}
                                 <span class="inline-flex size-8 items-center justify-center rounded-[7px] bg-transparent transition-all hover:bg-dark-10">
                                     <icons::Caret class="size-[18px] transition-all duration-200"></icons::Caret>
                                 </span>
@@ -50,7 +47,7 @@ pub fn AccordionExample() -> impl IntoView {
                                 hide_class="opacity-0 transition duration-200 ease-out"
                                 hide_delay={Duration::from_millis(200)}
                             >
-                                {v.1}
+                                {content}
                             </accordion::Content>
                         </accordion::Item>
                     }
