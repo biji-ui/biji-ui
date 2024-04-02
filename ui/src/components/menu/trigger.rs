@@ -15,15 +15,10 @@ where
 #[component]
 pub fn Trigger(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
     let ctx = expect_context::<MenuContext>();
+    let trigger_ref = ctx.trigger_ref;
 
     view! {
-        <button
-            class={class}
-            on:click={move |_| {
-                ctx.open.set(!ctx.open.get());
-            }}
-        >
-
+        <button _ref={trigger_ref} class={class}>
             {children()}
         </button>
     }

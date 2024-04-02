@@ -12,7 +12,7 @@ pub struct AccordionContext {
 }
 
 #[component]
-pub fn Root(children: ChildrenFn, #[prop(into, optional)] class: String) -> impl IntoView {
+pub fn Root(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
     let accordion_ref = create_node_ref::<Div>();
 
     let ctx = AccordionContext {
