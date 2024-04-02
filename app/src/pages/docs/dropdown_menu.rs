@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::{logging::log, *};
 
 use crate::icons;
 
@@ -28,21 +28,38 @@ pub fn DropdownMenuExample() -> impl IntoView {
             </menu::Trigger>
             <menu::Content
                 class="absolute left-1/2 flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
-                show_class="z-10 translate-y-0 -translate-x-1/2 opacity-100 transition duration-150 ease-in"
-                hide_class="-z-10 translate-y-1 -translate-x-1/2 opacity-0 transition duration-200 ease-out"
+                show_class="z-10 -translate-x-1/2 translate-y-0 opacity-100 transition duration-150 ease-in"
+                hide_class="-z-10 -translate-x-1/2 translate-y-1 opacity-0 transition duration-200 ease-out"
                 hide_delay={Duration::from_millis(200)}
             >
-                <menu::Item class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground">
-                    "Profile"
+                <menu::Item
+                    index=0
+                    class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                >
+                    <button class="flex h-full w-full" on:click={|_| log!("Profile clicked")}>
+                        "Profile"
+                    </button>
                 </menu::Item>
-                <menu::Item class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground">
+                <menu::Item
+                    index=1
+                    disabled=true
+                    class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                >
                     "Billing"
                 </menu::Item>
                 <menu::Item
-                    attr:data-disabled=true
-                    class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground"
+                    index=2
+                    class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
                 >
                     "Settings"
+                </menu::Item>
+                <menu::Item
+                    index=3
+                    class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                >
+                    <a href="/docs/accordion" class="flex h-full w-full">
+                        "Accordion"
+                    </a>
                 </menu::Item>
             </menu::Content>
         </menu::Root>
