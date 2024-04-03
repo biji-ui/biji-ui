@@ -1,0 +1,12 @@
+{
+    "name": "jspackages",
+    "version": "1.0.0",
+    "main": "build.js",
+    "scripts": {
+        "build": "node build.js"
+    },
+    "dependencies": {
+        "esbuild": "^0.20.2",
+        "highlight.js": "^11.9.0"
+    }
+}

@@ -1,6 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["app", "frontend", "server", "ui"]
+members = ["app", "frontend", "server", "ui", "jspackages"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
 
 # need to be applied only to wasm build
 [profile.release]
