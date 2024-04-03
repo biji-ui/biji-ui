@@ -18,6 +18,7 @@ thiserror.workspace = true
 leptos-use = { version = "0.10" }
 
 biji-ui = { path = "../ui" }
+jspackages = { path = "../jspackages" }
 
 [features]
 default = []

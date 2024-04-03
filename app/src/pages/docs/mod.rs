@@ -3,10 +3,13 @@ use leptos_router::*;
 
 pub mod accordion;
 pub mod dropdown_menu;
+pub mod getting_started;
 
 #[component]
 pub fn DocsPage() -> impl IntoView {
     let location = use_location();
+
+    let introduction = [("/docs/getting-started", "Getting started")];
 
     let components = [
         ("/docs/accordion", "Accordion"),
@@ -24,14 +27,25 @@ pub fn DocsPage() -> impl IntoView {
                                     "Introduction"
                                 </h2>
                                 <ul class="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800">
-                                    <li class="relative">
-                                        <a
-                                            href="/"
-                                            class="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:hidden before:bg-slate-300 dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300 hover:text-slate-600 hover:before:block"
-                                        >
-                                            "Getting started"
-                                        </a>
-                                    </li>
+                                    {introduction
+                                        .into_iter()
+                                        .map(|(path, title)| {
+                                            view! {
+                                                <li class="relative">
+                                                    <a
+                                                        href={path}
+                                                        class="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:hidden before:bg-slate-300 dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300 hover:text-slate-600 hover:before:block"
+                                                        class:font-medium={move || {
+                                                            location.pathname.get() == path
+                                                        }}
+                                                    >
+
+                                                        {title}
+                                                    </a>
+                                                </li>
+                                            }
+                                        })
+                                        .collect::<Vec<_>>()}
                                 </ul>
                             </li>
                             <li>
@@ -41,18 +55,18 @@ pub fn DocsPage() -> impl IntoView {
                                 <ul class="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800">
                                     {components
                                         .into_iter()
-                                        .map(|c| {
+                                        .map(|(path, title)| {
                                             view! {
                                                 <li class="relative">
                                                     <a
-                                                        href={c.0}
+                                                        href={path}
                                                         class="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:hidden before:bg-slate-300 dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300 hover:text-slate-600 hover:before:block"
                                                         class:font-medium={move || {
-                                                            location.pathname.get() == c.0
+                                                            location.pathname.get() == path
                                                         }}
                                                     >
 
-                                                        {c.1}
+                                                        {title}
                                                     </a>
                                                 </li>
                                             }

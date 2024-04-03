@@ -2,7 +2,10 @@ use std::time::Duration;
 
 use crate::{
     error_template::{AppError, ErrorTemplate},
-    pages::docs::{accordion::AccordionDocPage, dropdown_menu::DropdownMenuDocPage, DocsPage},
+    pages::docs::{
+        accordion::AccordionDocPage, dropdown_menu::DropdownMenuDocPage,
+        getting_started::GettingStartedPage, DocsPage,
+    },
 };
 
 use biji_ui::components::menu;
@@ -10,6 +13,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
+pub mod components;
 pub mod error_template;
 pub mod icons;
 pub mod pages;
@@ -35,6 +39,7 @@ pub fn App() -> impl IntoView {
                 <Routes>
                     <Route path="" view={HomePage}/>
                     <Route path="/docs/" view={DocsPage}>
+                        <Route path="getting-started" view={GettingStartedPage}/>
                         <Route path="accordion" view={AccordionDocPage}/>
                         <Route path="dropdown-menu" view={DropdownMenuDocPage}/>
                     </Route>
