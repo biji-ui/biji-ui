@@ -61,6 +61,46 @@ pub fn DropdownMenuExample() -> impl IntoView {
                         "Accordion"
                     </a>
                 </menu::Item>
+                <menu::SubRoot
+                    index=4
+                    class="relative cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                >
+                    <menu::Trigger class="w-full flex justify-between">
+                        "Sub menu" <icons::ChevronRight class="w-4"></icons::ChevronRight>
+                    </menu::Trigger>
+                    <menu::Content
+                        class="absolute flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                        show_class="z-10 top-0 left-[105%] opacity-100 transition duration-150 ease-in"
+                        hide_class="-z-10 top-0 left-[95%] opacity-0 transition duration-200 ease-out"
+                        hide_delay={Duration::from_millis(200)}
+                    >
+
+                        <menu::Item
+                            index=0
+                            class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                        >
+                            <button
+                                class="flex h-full w-full"
+                                on:click={|_| log!("Profile clicked")}
+                            >
+                                "Profile"
+                            </button>
+                        </menu::Item>
+                        <menu::Item
+                            index=1
+                            disabled=true
+                            class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                        >
+                            "Billing"
+                        </menu::Item>
+                        <menu::Item
+                            index=2
+                            class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                        >
+                            "Settings"
+                        </menu::Item>
+                    </menu::Content>
+                </menu::SubRoot>
             </menu::Content>
         </menu::Root>
     }
