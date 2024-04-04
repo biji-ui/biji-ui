@@ -1,6 +1,6 @@
 use leptos::*;
 
-use super::root::MenuContext;
+use crate::components::menu::contexts::MenuContext;
 
 #[component]
 pub fn TriggerFn<F, IV>(render: F) -> impl IntoView

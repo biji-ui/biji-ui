@@ -2,14 +2,7 @@ use leptos::{html::Div, *};
 
 use crate::components::menu::events::ItemEvents;
 
-use super::root::MenuContext;
-
-#[derive(Copy, Clone)]
-pub struct MenuItemContext {
-    pub index: usize,
-    pub disabled: bool,
-    pub trigger_ref: NodeRef<Div>,
-}
+use super::contexts::{MenuContext, MenuItemContext};
 
 #[component]
 pub fn Item(

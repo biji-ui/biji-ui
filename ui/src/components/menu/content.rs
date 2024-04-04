@@ -3,10 +3,10 @@ use std::time::Duration;
 use leptos::*;
 
 use crate::{
-    cn, components::menu::events::ContentEvents, custom_animated_show::CustomAnimatedShow,
+    cn,
+    components::menu::{contexts::MenuContext, events::ContentEvents},
+    custom_animated_show::CustomAnimatedShow,
 };
-
-use super::root::MenuContext;
 
 #[component]
 pub fn Content(
