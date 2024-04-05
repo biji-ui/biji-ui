@@ -1,7 +1,8 @@
 use leptos::*;
 
 use crate::components::accordion::{
-    events::ItemEvents, item::AccordionItemContext, root::AccordionContext,
+    contexts::{AccordionContext, AccordionItemContext},
+    events::ItemEvents,
 };
 
 #[component]

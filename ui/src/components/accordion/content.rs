@@ -3,7 +3,8 @@ use std::time::Duration;
 use leptos::*;
 
 use crate::{
-    cn, components::accordion::item::AccordionItemContext, custom_animated_show::CustomAnimatedShow,
+    cn, components::accordion::contexts::AccordionItemContext,
+    custom_animated_show::CustomAnimatedShow,
 };
 
 #[component]
