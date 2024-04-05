@@ -117,6 +117,12 @@ impl MenuContext {
         }
         false
     }
+
+    pub fn upsert_item(&self, index: usize, item: MenuItemContext) {
+        self.items.update(|items| {
+            *items.entry(index).or_insert(item) = item;
+        });
+    }
 }
 
 #[derive(Copy, Clone)]

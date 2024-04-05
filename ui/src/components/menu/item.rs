@@ -22,9 +22,7 @@ pub fn Item(
         trigger_ref: item_ref.clone(),
     };
 
-    root_ctx.items.update(|items| {
-        *items.entry(index).or_insert(ctx.clone()) = ctx.clone();
-    });
+    root_ctx.upsert_item(index, ctx);
 
     view! {
         <Provider value={ctx}>

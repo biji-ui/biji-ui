@@ -28,9 +28,7 @@ pub fn SubRoot(
         trigger_ref: item_ref.clone(),
     };
 
-    root_ctx.items.update(|items| {
-        *items.entry(index).or_insert(ctx.clone()) = ctx.clone();
-    });
+    root_ctx.upsert_item(index, ctx);
 
     let sub_root_ctx = MenuContext {
         open: create_rw_signal(false),
