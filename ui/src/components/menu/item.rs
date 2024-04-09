@@ -45,5 +45,4 @@ pub fn Item(
             </ItemEvents>
         </Provider>
     }
-    .into_view()
 }
