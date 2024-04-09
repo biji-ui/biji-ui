@@ -4,6 +4,7 @@ use leptos_router::*;
 pub mod accordion;
 pub mod dropdown_menu;
 pub mod getting_started;
+pub mod menubar;
 
 #[component]
 pub fn DocsPage() -> impl IntoView {
@@ -14,10 +15,11 @@ pub fn DocsPage() -> impl IntoView {
     let components = [
         ("/docs/accordion", "Accordion"),
         ("/docs/dropdown-menu", "Dropdown Menu"),
+        ("/docs/menubar", "Menubar"),
     ];
 
     view! {
-        <div class="relative mx-auto flex w-full flex-auto justify-center sm:px-2 max-w-8xl lg:px-8 xl:px-12">
+        <div class="relative mx-auto flex w-full flex-auto justify-center max-w-8xl sm:px-2 lg:px-8 xl:px-12">
             <div class="hidden lg:relative lg:block lg:flex-none">
                 <div class="sticky top-[4.75rem] -ml-0.5 h-[calc(100vh-4.75rem)] w-64 overflow-y-auto overflow-x-hidden py-16 pl-0.5 pr-8 xl:w-72 xl:pr-16">
                     <nav class="text-base lg:text-sm">
@@ -26,7 +28,7 @@ pub fn DocsPage() -> impl IntoView {
                                 <h2 class="font-medium text-slate-900 font-display dark:text-white">
                                     "Introduction"
                                 </h2>
-                                <ul class="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800">
+                                <ul class="space-y-2 lg:space-y-4 mt-2 border-l-2 border-slate-100 lg:mt-4 lg:border-slate-200 dark:border-slate-800">
                                     {introduction
                                         .into_iter()
                                         .map(|(path, title)| {
@@ -52,7 +54,7 @@ pub fn DocsPage() -> impl IntoView {
                                 <h2 class="font-medium text-slate-900 font-display dark:text-white">
                                     "Components"
                                 </h2>
-                                <ul class="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800">
+                                <ul class="space-y-2 lg:space-y-4 mt-2 border-l-2 border-slate-100 lg:mt-4 lg:border-slate-200 dark:border-slate-800">
                                     {components
                                         .into_iter()
                                         .map(|(path, title)| {
