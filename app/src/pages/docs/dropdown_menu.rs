@@ -63,9 +63,9 @@ pub fn DropdownMenuExample() -> impl IntoView {
                 </menu::Item>
                 <menu::SubRoot
                     index=4
-                    class="relative cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+                    class="flex relative cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted"
                 >
-                    <menu::Trigger class="w-full flex justify-between">
+                    <menu::Trigger class="w-full flex justify-between items-center">
                         "Sub menu" <icons::ChevronRight class="w-4"></icons::ChevronRight>
                     </menu::Trigger>
                     <menu::Content
