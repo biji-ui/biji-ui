@@ -1,32 +1,22 @@
-use std::collections::HashMap;
-
 use leptos::{html::Div, *};
 
-use crate::components::menubar::{contexts::MenubarContext, events::RootEvents};
+use crate::components::menubar::context::{MenubarContext, RootContext};
 
 #[component]
-pub fn Root(
-    children: Children,
-    #[prop(default = true)] close_on_outside_click: bool,
-    #[prop(into, optional)] class: String,
-) -> impl IntoView {
+pub fn Root(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
     let menubar_ref = create_node_ref::<Div>();
 
+    let root_ctx = RootContext::default();
     let ctx = MenubarContext {
-        in_focus: create_rw_signal(false),
-        items: create_rw_signal(HashMap::new()),
         menubar_ref,
-        current_focus: create_rw_signal(None),
-        close_on_outside_click,
+        root: create_rw_signal(root_ctx),
     };
 
     view! {
         <Provider value={ctx}>
-            <RootEvents>
-                <div _ref={menubar_ref} class={class}>
-                    {children()}
-                </div>
-            </RootEvents>
+            <div _ref={menubar_ref} class={class}>
+                <Provider value={root_ctx}>{children()}</Provider>
+            </div>
         </Provider>
     }
 }
