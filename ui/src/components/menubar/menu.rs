@@ -107,7 +107,7 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
                     item.open();
                 }
             }
-        } else if key == "ArrowDown" {
+        } else if key == "ArrowDown" || key == "Enter" {
             if !menu_ctx.open.get() {
                 menu_ctx.open();
             }
