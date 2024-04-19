@@ -18,6 +18,10 @@ pub trait Toggle {
     fn close(&self);
 }
 
+pub trait FocusActiveItem {
+    fn focus_active_item(&self) -> bool;
+}
+
 pub trait Focus {
     /// Focus on element
     fn focus(&self) -> bool;
@@ -125,6 +129,25 @@ impl RootContext {
         self.items.update(|items| {
             *items.entry(index).or_insert(item) = item;
         });
+    }
+
+    pub fn close_all(&self) {
+        self.items.try_update(|items| {
+            for item in items.values() {
+                item.open.set(false);
+            }
+        });
+    }
+}
+
+impl FocusActiveItem for RootContext {
+    fn focus_active_item(&self) -> bool {
+        if let Some(Some(item_focus)) = self.item_focus.try_get() {
+            if let Some(item) = self.items.get().get(&item_focus) {
+                return item.focus();
+            }
+        }
+        false
     }
 }
 

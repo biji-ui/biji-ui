@@ -38,6 +38,7 @@ pub fn MenubarExample() -> impl IntoView {
                     <menubar::Item index=1 class={ITEM_STYLE} disabled=true>
                         "New window"
                     </menubar::Item>
+                    <hr class="h-px bg-gray-100"/>
                     <menubar::SubMenuItem index=2 class="relative">
                         <menubar::SubMenuItemTrigger class={cn!(
                             "h-full w-full items-center justify-between", ITEM_STYLE
@@ -59,11 +60,12 @@ pub fn MenubarExample() -> impl IntoView {
                             <menubar::Item index=2 class={ITEM_STYLE}>
                                 "Copy link"
                             </menubar::Item>
+                            <hr class="h-px bg-gray-100"/>
                             <menubar::SubMenuItem index=3 class="relative">
                                 <menubar::SubMenuItemTrigger class={cn!(
                                     "h-full w-full items-center justify-between", ITEM_STYLE
                                 )}>
-                                    "Share" <icons::ChevronRight class="h-4"></icons::ChevronRight>
+                                    "More" <icons::ChevronRight class="h-4"></icons::ChevronRight>
                                 </menubar::SubMenuItemTrigger>
                                 <menubar::SubMenuItemContent
                                     class="absolute flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md left-full top-0 focus:outline-none"
@@ -72,13 +74,13 @@ pub fn MenubarExample() -> impl IntoView {
                                     hide_delay={Duration::from_millis(200)}
                                 >
                                     <menubar::Item index=0 class={ITEM_STYLE}>
-                                        "Email"
+                                        "Facebook"
                                     </menubar::Item>
                                     <menubar::Item index=1 class={ITEM_STYLE}>
-                                        "Message"
+                                        "LinkedIn"
                                     </menubar::Item>
                                     <menubar::Item index=2 class={ITEM_STYLE}>
-                                        "Copy link"
+                                        "Instagram"
                                     </menubar::Item>
                                 </menubar::SubMenuItemContent>
                             </menubar::SubMenuItem>
@@ -97,16 +99,16 @@ pub fn MenubarExample() -> impl IntoView {
                     hide_delay={Duration::from_millis(200)}
                 >
                     <menubar::Item index=0 class={ITEM_STYLE}>
-                        "New file..."
+                        "Undo"
                     </menubar::Item>
                     <menubar::Item index=1 class={ITEM_STYLE}>
-                        "New window"
+                        "Redo"
                     </menubar::Item>
                 </menubar::MenuContent>
             </menubar::Menu>
             <menubar::Menu index=2 class="relative">
                 <menubar::MenuTrigger class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted">
-                    "View"
+                    "Components"
                 </menubar::MenuTrigger>
                 <menubar::MenuContent
                     class="absolute flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
@@ -115,10 +117,10 @@ pub fn MenubarExample() -> impl IntoView {
                     hide_delay={Duration::from_millis(200)}
                 >
                     <menubar::Item index=0 class={ITEM_STYLE}>
-                        "New file..."
+                        <a href="/docs/accordion">"Accordion"</a>
                     </menubar::Item>
                     <menubar::Item index=1 class={ITEM_STYLE}>
-                        "New window"
+                        <a href="/docs/dropdown-menu">"Dropdown Menu"</a>
                     </menubar::Item>
                 </menubar::MenuContent>
             </menubar::Menu>

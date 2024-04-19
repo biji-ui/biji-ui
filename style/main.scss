@@ -802,6 +802,10 @@ body{
   height:100%
 }
 
+.h-px{
+  height:1px
+}
+
 .min-h-\[443px\]{
   min-height:443px
 }
@@ -988,6 +992,16 @@ body{
 .bg-zinc-50{
   --tw-bg-opacity:1;
   background-color:rgb(250 250 250 / var(--tw-bg-opacity))
+}
+
+.bg-gray-200{
+  --tw-bg-opacity:1;
+  background-color:rgb(229 231 235 / var(--tw-bg-opacity))
+}
+
+.bg-gray-100{
+  --tw-bg-opacity:1;
+  background-color:rgb(243 244 246 / var(--tw-bg-opacity))
 }
 
 .p-1{
