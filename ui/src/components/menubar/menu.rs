@@ -94,16 +94,14 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
         let key = evt.key();
 
         if key == "ArrowRight" {
-            let item = root_ctx.next_active_item();
-            if let Some(item) = item {
+            if let Some(item) = root_ctx.next_active_item() {
                 item.focus();
                 if menu_ctx.open.get() {
                     item.open();
                 }
             }
         } else if key == "ArrowLeft" {
-            let item = root_ctx.previous_active_item();
-            if let Some(item) = item {
+            if let Some(item) = root_ctx.previous_active_item() {
                 item.focus();
                 if menu_ctx.open.get() {
                     item.open();
@@ -113,16 +111,14 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
             if !menu_ctx.open.get() {
                 menu_ctx.open();
             }
-            let item = menu_ctx.first_active();
-            if let Some(item) = item {
+            if let Some(item) = menu_ctx.first_active() {
                 item.focus();
             }
         } else if key == "ArrowUp" {
             if !menu_ctx.open.get() {
                 menu_ctx.open();
             }
-            let item = menu_ctx.previous_active_item();
-            if let Some(item) = item {
+            if let Some(item) = menu_ctx.previous_active_item() {
                 item.focus();
             }
         }

@@ -65,20 +65,17 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
         let key = evt.key();
 
         if key == "ArrowDown" {
-            let item = menu_ctx.next_active_item();
-            if let Some(item) = item {
+            if let Some(item) = menu_ctx.next_active_item() {
                 item.focus();
             }
         } else if key == "ArrowUp" {
-            let item = menu_ctx.previous_active_item();
-            if let Some(item) = item {
+            if let Some(item) = menu_ctx.previous_active_item() {
                 item.focus();
             }
         } else if key == "ArrowRight" {
             match item_ctx {
                 ItemData::Item { .. } => {
-                    let item = root_ctx.next_active_item();
-                    if let Some(item) = item {
+                    if let Some(item) = root_ctx.next_active_item() {
                         item.focus();
                         item.open();
                     }
@@ -98,8 +95,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 menu_ctx.close();
                 menu_ctx.focus();
             } else {
-                let item = root_ctx.previous_active_item();
-                if let Some(item) = item {
+                if let Some(item) = root_ctx.previous_active_item() {
                     item.focus();
                     item.open();
                     menu_ctx.close();
