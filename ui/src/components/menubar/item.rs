@@ -83,9 +83,9 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                         item.open();
                     }
                 }
-                ItemData::SubMenuItem { context, .. } => {
-                    context.open();
-                    if let Some(item) = context.first_active() {
+                ItemData::SubMenuItem { child_context, .. } => {
+                    child_context.open();
+                    if let Some(item) = child_context.first_active() {
                         item.focus();
                     }
                 }
@@ -93,7 +93,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
         } else if key == "Escape" {
             menu_ctx.close();
             menu_ctx.focus();
-        } else if key == "ArrowLeft" || key == "Escape" {
+        } else if key == "ArrowLeft" {
             if item_ctx.is_submenu() {
                 menu_ctx.close();
                 menu_ctx.focus();
@@ -147,7 +147,7 @@ pub fn SubMenuItem(
         disabled,
         is_submenu: item_ctx.is_some(),
         parent_context: menu_ctx,
-        context: sub_menu_ctx,
+        child_context: sub_menu_ctx,
     };
 
     menu_ctx.upsert_item(index, item_ctx);
@@ -208,8 +208,8 @@ pub fn SubMenuItemTriggerEvents(children: Children) -> impl IntoView {
         if evt.key() == "Enter" {
             menu_ctx.toggle();
             match item_ctx {
-                ItemData::SubMenuItem { context, .. } => {
-                    if let Some(item) = context.first_active() {
+                ItemData::SubMenuItem { child_context, .. } => {
+                    if let Some(item) = child_context.first_active() {
                         item.focus();
                     }
                 }

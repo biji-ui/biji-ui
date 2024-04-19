@@ -303,7 +303,7 @@ pub enum ItemData {
         disabled: bool,
         is_submenu: bool,
         parent_context: MenuContext,
-        context: MenuContext,
+        child_context: MenuContext,
     },
 }
 
@@ -311,7 +311,10 @@ impl ItemData {
     pub fn get_trigger_ref(&self) -> NodeRef<Div> {
         match self {
             ItemData::Item { trigger_ref, .. } => trigger_ref.clone(),
-            ItemData::SubMenuItem { context, .. } => context.trigger_ref.clone(),
+            ItemData::SubMenuItem {
+                child_context: context,
+                ..
+            } => context.trigger_ref.clone(),
         }
     }
 
@@ -359,7 +362,10 @@ impl Focus for ItemData {
                 let _ = trigger_ref.focus();
                 true
             }
-            ItemData::SubMenuItem { context, .. } => {
+            ItemData::SubMenuItem {
+                child_context: context,
+                ..
+            } => {
                 let Some(trigger_ref) = context.trigger_ref.get() else {
                     return false;
                 };
