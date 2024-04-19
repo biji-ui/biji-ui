@@ -87,9 +87,6 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                     }
                 }
             };
-        } else if key == "Escape" {
-            menu_ctx.close();
-            menu_ctx.focus();
         } else if key == "ArrowLeft" {
             if item_ctx.is_submenu() {
                 menu_ctx.close();
@@ -111,6 +108,9 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                     }
                 }
             }
+        } else if key == "Escape" {
+            menu_ctx.close();
+            menu_ctx.focus();
         }
     });
 
