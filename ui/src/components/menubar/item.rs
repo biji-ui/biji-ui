@@ -12,7 +12,8 @@ use web_sys::{HtmlAnchorElement, HtmlButtonElement};
 use crate::{cn, components::menubar::context::ItemData, custom_animated_show::CustomAnimatedShow};
 
 use super::context::{
-    Focus, GetIndex, ManageFocus, MenuContext, NavigateActiveItems, RootContext, Toggle,
+    Focus, FocusActiveItem, GetIndex, ManageFocus, MenuContext, NavigateActiveItems, RootContext,
+    Toggle,
 };
 
 #[component]
@@ -107,12 +108,29 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                         let _ = child.click();
                     }
                 }
+                match item_ctx {
+                    ItemData::Item { .. } => {
+                        root_ctx.close_all();
+                        root_ctx.focus_active_item();
+                    }
+                    _ => {}
+                };
             }
         } else if key == "Escape" {
             menu_ctx.close();
             menu_ctx.focus();
         }
     });
+
+    match item_ctx {
+        ItemData::Item { trigger_ref, .. } => {
+            let _ = use_event_listener(trigger_ref, click, move |_| {
+                root_ctx.close_all();
+                root_ctx.focus_active_item();
+            });
+        }
+        _ => {}
+    }
 
     let _ = use_event_listener(item_ctx.get_trigger_ref(), focus, move |_| {
         menu_ctx.set_focus(Some(item_ctx.get_index()));
