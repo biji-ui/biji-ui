@@ -2,6 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 pub mod accordion;
+pub mod dialog;
 pub mod dropdown_menu;
 pub mod getting_started;
 pub mod menubar;
@@ -14,6 +15,7 @@ pub fn DocsPage() -> impl IntoView {
 
     let components = [
         ("/docs/accordion", "Accordion"),
+        ("/docs/dialog", "Dialog"),
         ("/docs/dropdown-menu", "Dropdown Menu"),
         ("/docs/menubar", "Menubar"),
     ];

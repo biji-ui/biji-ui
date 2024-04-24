@@ -3,7 +3,7 @@ use std::time::Duration;
 use crate::{
     error_template::{AppError, ErrorTemplate},
     pages::docs::{
-        accordion::AccordionDocPage, dropdown_menu::DropdownMenuDocPage,
+        accordion::AccordionDocPage, dialog::DialogDocPage, dropdown_menu::DropdownMenuDocPage,
         getting_started::GettingStartedPage, menubar::MenubarDocPage, DocsPage,
     },
 };
@@ -41,6 +41,7 @@ pub fn App() -> impl IntoView {
                     <Route path="/docs/" view={DocsPage}>
                         <Route path="getting-started" view={GettingStartedPage}/>
                         <Route path="accordion" view={AccordionDocPage}/>
+                        <Route path="dialog" view={DialogDocPage}/>
                         <Route path="dropdown-menu" view={DropdownMenuDocPage}/>
                         <Route path="menubar" view={MenubarDocPage}/>
                     </Route>
