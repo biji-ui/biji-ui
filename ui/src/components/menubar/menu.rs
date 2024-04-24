@@ -150,6 +150,7 @@ pub fn MenuContent(
     #[prop(into, optional)]
     hide_class: String,
     /// The timeout after which the component will be unmounted if `when == false`
+    #[prop(default = Duration::from_millis(200))]
     hide_delay: Duration,
 ) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
