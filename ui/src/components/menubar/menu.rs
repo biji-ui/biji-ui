@@ -16,12 +16,13 @@ use super::context::{ManageFocus, MenuContext, RootContext};
 
 #[component]
 pub fn Menu(
-    index: usize,
     #[prop(default = false)] disabled: bool,
     #[prop(into, optional)] class: String,
     children: Children,
 ) -> impl IntoView {
     let ctx = expect_context::<RootContext>();
+
+    let index = ctx.next_index();
 
     let menu_ctx = MenuContext {
         index,
@@ -30,6 +31,10 @@ pub fn Menu(
     };
 
     ctx.upsert_item(index, menu_ctx);
+
+    on_cleanup(move || {
+        ctx.remove_item(index);
+    });
 
     let _menu_ref = menu_ctx.menu_ref;
 

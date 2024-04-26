@@ -18,7 +18,6 @@ use super::context::{
 
 #[component]
 pub fn Item(
-    index: usize,
     #[prop(default = false)] disabled: bool,
     #[prop(into, optional)] class: String,
     children: Children,
@@ -29,6 +28,8 @@ pub fn Item(
 
     let trigger_ref = create_node_ref::<Div>();
 
+    let index = menu_ctx.next_index();
+
     let item_ctx = ItemData::Item {
         index,
         disabled,
@@ -37,6 +38,10 @@ pub fn Item(
     };
 
     menu_ctx.upsert_item(index, item_ctx);
+
+    on_cleanup(move || {
+        menu_ctx.remove_item(index);
+    });
 
     view! {
         <Provider value={item_ctx}>
@@ -141,7 +146,6 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
 
 #[component]
 pub fn SubMenuItem(
-    index: usize,
     #[prop(default = false)] disabled: bool,
     #[prop(into, optional)] class: String,
     children: Children,
@@ -149,6 +153,8 @@ pub fn SubMenuItem(
     let menu_ctx = expect_context::<MenuContext>();
 
     let item_ctx = use_context::<ItemData>();
+
+    let index = menu_ctx.next_index();
 
     let sub_menu_ctx = MenuContext {
         index,
@@ -165,6 +171,10 @@ pub fn SubMenuItem(
     };
 
     menu_ctx.upsert_item(index, item_ctx);
+
+    on_cleanup(move || {
+        menu_ctx.remove_item(index);
+    });
 
     view! {
         <Provider value={item_ctx}>

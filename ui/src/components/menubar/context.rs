@@ -131,12 +131,22 @@ impl RootContext {
         });
     }
 
+    pub fn remove_item(&self, index: usize) {
+        self.items.update(|items| {
+            items.remove(&index);
+        });
+    }
+
     pub fn close_all(&self) {
         self.items.try_update(|items| {
             for item in items.values() {
                 item.open.set(false);
             }
         });
+    }
+
+    pub fn next_index(&self) -> usize {
+        self.items.get_untracked().len()
     }
 }
 
@@ -227,6 +237,16 @@ impl MenuContext {
         self.items.update(|items| {
             *items.entry(index).or_insert(item) = item;
         });
+    }
+
+    pub fn remove_item(&self, index: usize) {
+        self.items.update(|items| {
+            items.remove(&index);
+        });
+    }
+
+    pub fn next_index(&self) -> usize {
+        self.items.get_untracked().len()
     }
 }
 
