@@ -9,12 +9,14 @@ use leptos_use::use_event_listener;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlAnchorElement, HtmlButtonElement};
 
-use crate::{cn, components::menubar::context::ItemData, custom_animated_show::CustomAnimatedShow};
-
-use super::context::{
-    Focus, FocusActiveItem, GetIndex, ManageFocus, MenuContext, NavigateActiveItems, RootContext,
-    Toggle,
+use crate::{
+    cn,
+    components::menubar::context::ItemData,
+    custom_animated_show::CustomAnimatedShow,
+    items::{Focus, GetIndex, ManageFocus, NavigateItems},
 };
+
+use super::context::{MenuContext, RootContext, Toggle};
 
 #[component]
 pub fn Item(
@@ -71,24 +73,24 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
         let key = evt.key();
 
         if key == "ArrowDown" {
-            if let Some(item) = menu_ctx.next_active_item() {
+            if let Some(item) = menu_ctx.navigate_next_item() {
                 item.focus();
             }
         } else if key == "ArrowUp" {
-            if let Some(item) = menu_ctx.previous_active_item() {
+            if let Some(item) = menu_ctx.navigate_previous_item() {
                 item.focus();
             }
         } else if key == "ArrowRight" {
             match item_ctx {
                 ItemData::Item { .. } => {
-                    if let Some(item) = root_ctx.next_active_item() {
+                    if let Some(item) = root_ctx.navigate_next_item() {
                         item.focus();
                         item.open();
                     }
                 }
                 ItemData::SubMenuItem { child_context, .. } => {
                     child_context.open();
-                    if let Some(item) = child_context.first_active() {
+                    if let Some(item) = child_context.navigate_first_item() {
                         item.focus();
                     }
                 }
@@ -98,7 +100,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 menu_ctx.close();
                 menu_ctx.focus();
             } else {
-                if let Some(item) = root_ctx.previous_active_item() {
+                if let Some(item) = root_ctx.navigate_previous_item() {
                     item.focus();
                     item.open();
                     menu_ctx.close();
@@ -233,7 +235,7 @@ pub fn SubMenuItemTriggerEvents(children: Children) -> impl IntoView {
             menu_ctx.toggle();
             match item_ctx {
                 ItemData::SubMenuItem { child_context, .. } => {
-                    if let Some(item) = child_context.first_active() {
+                    if let Some(item) = child_context.navigate_first_item() {
                         item.focus();
                     }
                 }

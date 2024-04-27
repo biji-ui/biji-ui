@@ -1,5 +1,6 @@
 pub mod components;
 pub mod custom_animated_show;
+pub mod items;
 
 pub trait Style {
     fn style(&self) -> String;

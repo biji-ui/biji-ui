@@ -2,13 +2,10 @@ use std::collections::HashMap;
 
 use leptos::{html::Div, *};
 
-pub trait IsActive {
-    fn is_active(&self) -> bool;
-}
-
-pub trait GetIndex<T> {
-    fn get_index(&self) -> T;
-}
+use crate::items::{
+    filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
+    ManageFocus, NavigateItems,
+};
 
 pub trait Toggle {
     fn toggle(&self);
@@ -16,91 +13,6 @@ pub trait Toggle {
     fn open(&self);
 
     fn close(&self);
-}
-
-pub trait FocusActiveItem {
-    fn focus_active_item(&self) -> bool;
-}
-
-pub trait Focus {
-    /// Focus on element
-    fn focus(&self) -> bool;
-}
-
-pub trait ManageFocus {
-    fn set_focus(&self, index: Option<usize>);
-
-    /// Check if item is in focus
-    fn item_in_focus(&self, index: usize) -> bool;
-}
-
-pub trait NavigateActiveItems<T> {
-    fn active_items(&self) -> Vec<T>;
-    fn first_active(&self) -> Option<T>;
-    fn last_active(&self) -> Option<T>;
-    fn next_active_item(&self) -> Option<T>;
-    fn previous_active_item(&self) -> Option<T>;
-}
-
-pub fn filter_active<T>(items: HashMap<usize, T>) -> Vec<T>
-where
-    T: GetIndex<usize> + IsActive + Clone,
-{
-    let mut items = items
-        .values()
-        .filter(|item| item.is_active())
-        .cloned()
-        .collect::<Vec<T>>();
-
-    items.sort_by(|a, b| a.get_index().cmp(&b.get_index()));
-
-    items
-}
-
-pub fn next_item<T>(items: Vec<T>, current_focus: Option<usize>) -> Option<T>
-where
-    T: GetIndex<usize> + Clone,
-{
-    let Some(item_focus) = current_focus else {
-        if let Some(first) = items.get(0) {
-            return Some(first.clone());
-        }
-        return None;
-    };
-
-    items
-        .iter()
-        .position(|item| item.get_index() == item_focus)
-        .map(|i| {
-            if i < items.len() - 1 {
-                items[i + 1].clone()
-            } else {
-                items[0].clone()
-            }
-        })
-}
-
-pub fn previous_item<T>(items: Vec<T>, current_focus: Option<usize>) -> Option<T>
-where
-    T: GetIndex<usize> + Clone,
-{
-    let Some(item_focus) = current_focus else {
-        if let Some(last) = items.last() {
-            return Some(last.clone());
-        }
-        return None;
-    };
-
-    items
-        .iter()
-        .position(|item| item.get_index() == item_focus)
-        .map(|i| {
-            if i > 0 {
-                items[i - 1].clone()
-            } else {
-                items[items.len() - 1].clone()
-            }
-        })
 }
 
 #[derive(Copy, Clone)]
@@ -148,10 +60,8 @@ impl RootContext {
     pub fn next_index(&self) -> usize {
         self.items.get_untracked().len()
     }
-}
 
-impl FocusActiveItem for RootContext {
-    fn focus_active_item(&self) -> bool {
+    pub fn focus_active_item(&self) -> bool {
         if let Some(Some(item_focus)) = self.item_focus.try_get() {
             if let Some(item) = self.items.get().get(&item_focus) {
                 return item.focus();
@@ -161,13 +71,15 @@ impl FocusActiveItem for RootContext {
     }
 }
 
-impl NavigateActiveItems<MenuContext> for RootContext {
-    fn active_items(&self) -> Vec<MenuContext> {
+impl FilterActiveItems<MenuContext> for RootContext {
+    fn filter_active_items(&self) -> Vec<MenuContext> {
         filter_active(self.items.get())
     }
+}
 
-    fn first_active(&self) -> Option<MenuContext> {
-        let active_items = self.active_items();
+impl NavigateItems<MenuContext> for RootContext {
+    fn navigate_first_item(&self) -> Option<MenuContext> {
+        let active_items = self.filter_active_items();
 
         if let Some(first) = active_items.get(0) {
             return Some(first.clone());
@@ -175,8 +87,8 @@ impl NavigateActiveItems<MenuContext> for RootContext {
         None
     }
 
-    fn last_active(&self) -> Option<MenuContext> {
-        let active_items = self.active_items();
+    fn navigate_last_item(&self) -> Option<MenuContext> {
+        let active_items = self.filter_active_items();
 
         if let Some(last) = active_items.last() {
             return Some(last.clone());
@@ -184,14 +96,14 @@ impl NavigateActiveItems<MenuContext> for RootContext {
         None
     }
 
-    fn next_active_item(&self) -> Option<MenuContext> {
-        let active_items = self.active_items();
+    fn navigate_next_item(&self) -> Option<MenuContext> {
+        let active_items = self.filter_active_items();
 
         next_item(active_items, self.item_focus.get())
     }
 
-    fn previous_active_item(&self) -> Option<MenuContext> {
-        let active_items = self.active_items();
+    fn navigate_previous_item(&self) -> Option<MenuContext> {
+        let active_items = self.filter_active_items();
 
         previous_item(active_items, self.item_focus.get())
     }
@@ -283,13 +195,15 @@ impl ManageFocus for MenuContext {
     }
 }
 
-impl NavigateActiveItems<ItemData> for MenuContext {
-    fn active_items(&self) -> Vec<ItemData> {
+impl FilterActiveItems<ItemData> for MenuContext {
+    fn filter_active_items(&self) -> Vec<ItemData> {
         filter_active(self.items.get())
     }
+}
 
-    fn first_active(&self) -> Option<ItemData> {
-        let active_items = self.active_items();
+impl NavigateItems<ItemData> for MenuContext {
+    fn navigate_first_item(&self) -> Option<ItemData> {
+        let active_items = self.filter_active_items();
 
         if let Some(first) = active_items.get(0) {
             return Some(first.clone());
@@ -297,8 +211,8 @@ impl NavigateActiveItems<ItemData> for MenuContext {
         None
     }
 
-    fn last_active(&self) -> Option<ItemData> {
-        let active_items = self.active_items();
+    fn navigate_last_item(&self) -> Option<ItemData> {
+        let active_items = self.filter_active_items();
 
         if let Some(last) = active_items.last() {
             return Some(last.clone());
@@ -306,14 +220,14 @@ impl NavigateActiveItems<ItemData> for MenuContext {
         None
     }
 
-    fn next_active_item(&self) -> Option<ItemData> {
-        let active_items = self.active_items();
+    fn navigate_next_item(&self) -> Option<ItemData> {
+        let active_items = self.filter_active_items();
 
         next_item(active_items, self.item_focus.get())
     }
 
-    fn previous_active_item(&self) -> Option<ItemData> {
-        let active_items = self.active_items();
+    fn navigate_previous_item(&self) -> Option<ItemData> {
+        let active_items = self.filter_active_items();
 
         previous_item(active_items, self.item_focus.get())
     }

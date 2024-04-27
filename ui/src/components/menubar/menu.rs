@@ -8,11 +8,12 @@ use leptos_use::{on_click_outside, use_event_listener};
 
 use crate::{
     cn,
-    components::menubar::context::{Focus, NavigateActiveItems, Toggle},
+    components::menubar::context::Toggle,
     custom_animated_show::CustomAnimatedShow,
+    items::{Focus, ManageFocus, NavigateItems},
 };
 
-use super::context::{ManageFocus, MenuContext, RootContext};
+use super::context::{MenuContext, RootContext};
 
 #[component]
 pub fn Menu(
@@ -77,7 +78,7 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
 
     create_effect(move |_| {
         if menu_ctx.open.get() {
-            if let Some(first) = menu_ctx.first_active() {
+            if let Some(first) = menu_ctx.navigate_first_item() {
                 first.focus();
             }
         }
@@ -99,14 +100,14 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
         let key = evt.key();
 
         if key == "ArrowRight" {
-            if let Some(item) = root_ctx.next_active_item() {
+            if let Some(item) = root_ctx.navigate_next_item() {
                 item.focus();
                 if menu_ctx.open.get() {
                     item.open();
                 }
             }
         } else if key == "ArrowLeft" {
-            if let Some(item) = root_ctx.previous_active_item() {
+            if let Some(item) = root_ctx.navigate_previous_item() {
                 item.focus();
                 if menu_ctx.open.get() {
                     item.open();
@@ -116,14 +117,14 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
             if !menu_ctx.open.get() {
                 menu_ctx.open();
             }
-            if let Some(item) = menu_ctx.first_active() {
+            if let Some(item) = menu_ctx.navigate_first_item() {
                 item.focus();
             }
         } else if key == "ArrowUp" {
             if !menu_ctx.open.get() {
                 menu_ctx.open();
             }
-            if let Some(item) = menu_ctx.previous_active_item() {
+            if let Some(item) = menu_ctx.navigate_previous_item() {
                 item.focus();
             }
         }
