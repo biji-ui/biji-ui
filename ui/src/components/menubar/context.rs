@@ -4,16 +4,8 @@ use leptos::{html::Div, *};
 
 use crate::items::{
     filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
-    ManageFocus, NavigateItems,
+    ManageFocus, NavigateItems, Toggle,
 };
-
-pub trait Toggle {
-    fn toggle(&self);
-
-    fn open(&self);
-
-    fn close(&self);
-}
 
 #[derive(Copy, Clone)]
 pub struct MenubarContext {

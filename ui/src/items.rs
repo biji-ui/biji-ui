@@ -11,6 +11,14 @@ pub trait NavigateItems<T> {
     fn navigate_previous_item(&self) -> Option<T>;
 }
 
+pub trait Toggle {
+    fn toggle(&self);
+
+    fn open(&self);
+
+    fn close(&self);
+}
+
 pub trait Focus {
     /// Focus on element
     fn focus(&self) -> bool;

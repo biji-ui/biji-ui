@@ -8,9 +8,8 @@ use leptos_use::{on_click_outside, use_event_listener};
 
 use crate::{
     cn,
-    components::menubar::context::Toggle,
     custom_animated_show::CustomAnimatedShow,
-    items::{Focus, ManageFocus, NavigateItems},
+    items::{Focus, ManageFocus, NavigateItems, Toggle},
 };
 
 use super::context::{MenuContext, RootContext};

@@ -13,10 +13,10 @@ use crate::{
     cn,
     components::menubar::context::ItemData,
     custom_animated_show::CustomAnimatedShow,
-    items::{Focus, GetIndex, ManageFocus, NavigateItems},
+    items::{Focus, GetIndex, ManageFocus, NavigateItems, Toggle},
 };
 
-use super::context::{MenuContext, RootContext, Toggle};
+use super::context::{MenuContext, RootContext};
 
 #[component]
 pub fn Item(
