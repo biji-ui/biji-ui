@@ -15,12 +15,12 @@ pub fn DialogExample() -> impl IntoView {
 
     view! {
         <dialog::Root>
-            <dialog::Trigger class="bg-indigo-600 text-white font-bold py-2 px-4 rounded hover:bg-indigo-500">
+            <dialog::Trigger class="py-2 px-4 font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500">
                 "Confirm payment"
             </dialog::Trigger>
             <dialog::Overlay
                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                show_class="east-out opacity-100 duration-300"
+                show_class="ease-out opacity-100 duration-300"
                 hide_class="ease-in opacity-0 duration-200"
                 hide_delay={Duration::from_millis(200)}
             ></dialog::Overlay>
@@ -31,9 +31,9 @@ pub fn DialogExample() -> impl IntoView {
                 hide_delay={Duration::from_millis(200)}
             >
                 <div>
-                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                    <div class="flex justify-center items-center mx-auto w-12 h-12 bg-green-100 rounded-full">
                         <svg
-                            class="h-6 w-6 text-green-600"
+                            class="w-6 h-6 text-green-600"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke-width="1.5"
@@ -62,7 +62,7 @@ pub fn DialogExample() -> impl IntoView {
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-6">
-                    <dialog::Close class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    <dialog::Close class="inline-flex justify-center py-2 px-3 w-full text-sm font-semibold text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                         "Go back to dashboard"
                     </dialog::Close>
                 </div>

@@ -43,12 +43,12 @@ pub fn AccordionExample() -> impl IntoView {
 "#;
 
     view! {
-        <main class="space-y-4 flex flex-col">
-            <h1 class="scroll-m-20 text-5xl font-semibold tracking-[-0.02em]">"Getting Started"</h1>
+        <main class="flex flex-col space-y-4">
+            <h1 class="text-5xl font-semibold scroll-m-20 tracking-[-0.02em]">"Getting Started"</h1>
             <p>"Install biji-ui using Cargo."</p>
-            <Code class="rounded-lg text-xs" code="cargo install biji-ui" language="bash"/>
+            <Code class="text-xs rounded-lg" code="cargo install biji-ui" language="bash"/>
             <p>"You can then import and start using them in your app."</p>
-            <Code class="rounded-lg text-xs" code={code} language="rust"/>
+            <Code class="text-xs rounded-lg" code={code} language="rust"/>
         </main>
     }
 }
