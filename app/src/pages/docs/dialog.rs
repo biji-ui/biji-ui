@@ -6,7 +6,13 @@ use leptos::*;
 pub fn DialogDocPage() -> impl IntoView {
     use crate::pages::docs::DocPage;
 
-    view! { <DocPage title="Dialog" description="" example={DialogExample}/> }
+    view! {
+        <DocPage
+            title="Dialog"
+            description="A window overlaid on either the primary window or another dialog window, rendering the content underneath inert."
+            example={DialogExample}
+        />
+    }
 }
 
 #[component]
