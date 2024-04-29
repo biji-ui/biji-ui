@@ -16,6 +16,7 @@ cfg-if.workspace = true
 thiserror.workspace = true
 
 leptos-use = { version = "0.10" }
+html-escape = "0.2.13"
 
 biji-ui = { path = "../ui" }
 jspackages = { path = "../jspackages" }

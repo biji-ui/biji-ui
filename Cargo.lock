@@ -82,6 +82,7 @@ version = "0.1.0"
 dependencies = [
  "biji-ui",
  "cfg-if",
+ "html-escape",
  "http 1.1.0",
  "jspackages",
  "leptos",

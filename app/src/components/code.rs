@@ -1,4 +1,5 @@
-use jspackages::highlight::{highlight, highlight_element};
+use biji_ui::cn;
+use jspackages::highlight::highlight_element;
 use leptos::{html::Code as HtmlCode, *};
 
 #[component]
@@ -12,7 +13,8 @@ pub fn Code(
     let code_ref = create_node_ref::<HtmlCode>();
 
     create_effect(move |_| {
-        set_highlighted.set(highlight(code, language));
+        let escaped_code = html_escape::encode_text(code);
+        set_highlighted.set(escaped_code.to_string());
     });
 
     create_effect(move |_| {
@@ -23,7 +25,11 @@ pub fn Code(
 
     view! {
         <pre>
-            <code class={class} _ref={code_ref} inner_html={highlighted}></code>
+            <code
+                class={cn!(class, format!("lang-{}", language))}
+                _ref={code_ref}
+                inner_html={highlighted}
+            ></code>
         </pre>
     }
 }
