@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use leptos::{
     html::{Button, Div},
-    logging::log,
     *,
 };
 
@@ -87,7 +86,6 @@ impl NavigateItems<ItemContext> for RootContext {
 
     fn navigate_next_item(&self) -> Option<ItemContext> {
         let active_items = self.filter_active_items();
-        log!("Active items {}", active_items.len());
 
         next_item(active_items, self.item_focus.get())
     }
