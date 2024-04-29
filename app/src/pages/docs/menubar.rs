@@ -9,7 +9,13 @@ use crate::icons;
 pub fn MenubarDocPage() -> impl IntoView {
     use crate::pages::docs::DocPage;
 
-    view! { <DocPage title="Menubar" description="" example={MenubarExample}/> }
+    view! {
+        <DocPage
+            title="Menubar"
+            description="Displays a menu to the user, which can consist of links or functions, triggered by a button."
+            example={MenubarExample}
+        />
+    }
 }
 
 #[component]
