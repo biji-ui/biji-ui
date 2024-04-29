@@ -31,10 +31,9 @@ pub fn AccordionExample() -> impl IntoView {
         <accordion::Root class="w-full sm:max-w-[70%]">
             {items
                 .into_iter()
-                .enumerate()
-                .map(|(index, (title, content))| {
+                .map(|(title, content)| {
                     view! {
-                        <accordion::Item index class="group border-b border-dark-10">
+                        <accordion::Item class="group border-b border-dark-10">
                             <accordion::Trigger class="flex w-full px-1.5 flex-1 items-center justify-between py-5 text-[15px] font-medium outline-none transition-all focus:rounded-xl focus:outline-none [&[data-state=open]>span>svg]:rotate-180 data-[highlighted]:bg-muted !ring-0 !ring-transparent">
                                 {title}
                                 <span class="inline-flex size-8 items-center justify-center rounded-[7px] bg-transparent transition-all hover:bg-dark-10">
