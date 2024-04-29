@@ -21,16 +21,59 @@ pub fn DocsPage() -> impl IntoView {
     ];
 
     view! {
-        <div class="relative mx-auto flex w-full flex-auto justify-center max-w-8xl sm:px-2 lg:px-8 xl:px-12">
-            <div class="hidden lg:relative lg:block lg:flex-none">
-                <div class="sticky top-[4.75rem] -ml-0.5 h-[calc(100vh-4.75rem)] w-64 overflow-y-auto overflow-x-hidden py-16 pl-0.5 pr-8 xl:w-72 xl:pr-16">
-                    <nav class="text-base lg:text-sm">
-                        <ul role="list" class="space-y-9">
-                            <li>
-                                <h2 class="font-medium text-slate-900 font-display dark:text-white">
+        <div class="h-full lg:ml-72 xl:ml-80">
+            <header class="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex">
+                <div class="contents lg:pointer-events-auto lg:block lg:w-72 lg:overflow-y-auto lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10 xl:w-80">
+                    <div class="hidden lg:flex">
+                        <a aria-label="Home" href="/">
+                            "Biji UI"
+                        </a>
+                    </div>
+                    <div
+                        class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-12 px-4 transition sm:px-6 lg:left-72 lg:z-30 lg:px-8 xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
+                        style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2;"
+                    >
+                        <div class="absolute inset-x-0 top-full h-px transition bg-zinc-900/10 dark:bg-white/10"></div>
+                        <div class=""></div>
+                        <div class="flex items-center gap-5">
+                            <nav class="hidden md:block">
+                                <ul role="list" class="flex items-center gap-8">
+                                    <li>
+                                        <a
+                                            class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                            href="https://docs.rs"
+                                        >
+                                            "API"
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                            href="/"
+                                        >
+                                            "Documentation"
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                            href="https://github.com"
+                                        >
+                                            "Support"
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <nav class="hidden lg:mt-10 lg:block">
+                        <ul role="list">
+                            <li class="relative mt-6 md:mt-0">
+                                <h2 class="text-xs font-semibold text-zinc-900 dark:text-white">
                                     "Introduction"
                                 </h2>
-                                <ul class="space-y-2 lg:space-y-4 mt-2 border-l-2 border-slate-100 lg:mt-4 lg:border-slate-200 dark:border-slate-800">
+                                <ul class="border-l border-transparent">
                                     {introduction
                                         .into_iter()
                                         .map(|(path, title)| {
@@ -38,7 +81,7 @@ pub fn DocsPage() -> impl IntoView {
                                                 <li class="relative">
                                                     <a
                                                         href={path}
-                                                        class="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:hidden before:bg-slate-300 dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300 hover:text-slate-600 hover:before:block"
+                                                        class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                                         class:font-medium={move || {
                                                             location.pathname.get() == path
                                                         }}
@@ -52,11 +95,11 @@ pub fn DocsPage() -> impl IntoView {
                                         .collect::<Vec<_>>()}
                                 </ul>
                             </li>
-                            <li>
-                                <h2 class="font-medium text-slate-900 font-display dark:text-white">
+                            <li class="relative mt-6">
+                                <h2 class="text-xs font-semibold text-zinc-900 dark:text-white">
                                     "Components"
                                 </h2>
-                                <ul class="space-y-2 lg:space-y-4 mt-2 border-l-2 border-slate-100 lg:mt-4 lg:border-slate-200 dark:border-slate-800">
+                                <ul class="border-l border-transparent">
                                     {components
                                         .into_iter()
                                         .map(|(path, title)| {
@@ -64,7 +107,7 @@ pub fn DocsPage() -> impl IntoView {
                                                 <li class="relative">
                                                     <a
                                                         href={path}
-                                                        class="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:hidden before:bg-slate-300 dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300 hover:text-slate-600 hover:before:block"
+                                                        class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                                         class:font-medium={move || {
                                                             location.pathname.get() == path
                                                         }}
@@ -81,8 +124,8 @@ pub fn DocsPage() -> impl IntoView {
                         </ul>
                     </nav>
                 </div>
-            </div>
-            <div class="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
+            </header>
+            <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
                 <Outlet/>
             </div>
         </div>
@@ -100,12 +143,10 @@ where
     IV: IntoView,
 {
     view! {
-        <article>
-            <h1 class="scroll-m-20 text-5xl font-semibold tracking-[-0.02em]">{title}</h1>
-            <p class="mb-11 mt-3 text-balance text-[21px] font-semibold leading-7 tracking-[-0.01em] text-foreground/40">
-                {description}
-            </p>
-            <div class="relative rounded-card border-2 border-muted bg-zinc-50 !ring-transparent dark:bg-neutral-900/50">
+        <article class="flex h-full flex-col pb-10 pt-16">
+            <h1 class="font-bold text-2xl mb-2">{title}</h1>
+            <p class="mb-11 mt-3 text-balance text-base">{description}</p>
+            <div class="relative rounded-2xl border-2 border-muted bg-zinc-50 !ring-transparent dark:bg-neutral-900/50">
                 <div class="flex min-h-[443px] w-full items-center justify-center p-12 preview">
                     {example()}
                 </div>

@@ -35,7 +35,7 @@ pub fn App() -> impl IntoView {
             outside_errors.insert_with_default_key(AppError::NotFound);
             view! { <ErrorTemplate outside_errors/> }.into_view()
         }}>
-            <main>
+            <div class="w-full">
                 <Routes>
                     <Route path="" view={HomePage}/>
                     <Route path="/docs/" view={DocsPage}>
@@ -46,7 +46,7 @@ pub fn App() -> impl IntoView {
                         <Route path="menubar" view={MenubarDocPage}/>
                     </Route>
                 </Routes>
-            </main>
+            </div>
         </Router>
     }
 }

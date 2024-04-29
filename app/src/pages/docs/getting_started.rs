@@ -20,10 +20,9 @@ pub fn AccordionExample() -> impl IntoView {
         <accordion::Root>
             {items
                 .into_iter()
-                .enumerate()
-                .map(|(index, (title, content))| {
+                .map(|(title, content)| {
                     view! {
-                        <accordion::Item index>
+                        <accordion::Item>
                             <accordion::Trigger>
                                 {title}
                                 <span>
@@ -43,12 +42,12 @@ pub fn AccordionExample() -> impl IntoView {
 "#;
 
     view! {
-        <main class="flex flex-col space-y-4">
-            <h1 class="text-5xl font-semibold scroll-m-20 tracking-[-0.02em]">"Getting Started"</h1>
-            <p>"Install biji-ui using Cargo."</p>
+        <article class="flex h-full flex-col pb-10 pt-16">
+            <h1 class="font-bold text-2xl mb-2">"Getting Started"</h1>
+            <p class="my-5 text-base">"Install biji-ui using Cargo."</p>
             <Code class="text-xs rounded-lg" code="cargo install biji-ui" language="bash"/>
-            <p>"You can then import and start using them in your app."</p>
+            <p class="my-5 text-base">"You can then import and start using them in your app."</p>
             <Code class="text-xs rounded-lg" code={code} language="rust"/>
-        </main>
+        </article>
     }
 }
