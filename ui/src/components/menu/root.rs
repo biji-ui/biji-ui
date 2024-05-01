@@ -28,7 +28,7 @@ pub fn Root(
     view! {
         <Provider value={ctx}>
             <RootEvents>
-                <div _ref={menu_ref} class={class}>
+                <div node_ref={menu_ref} class={class}>
                     {children()}
                 </div>
             </RootEvents>

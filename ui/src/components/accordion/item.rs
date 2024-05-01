@@ -56,11 +56,11 @@ pub fn ItemTrigger(#[prop(into, optional)] class: String, children: Children) ->
     let root_ctx = expect_context::<RootContext>();
     let item_ctx = expect_context::<ItemContext>();
 
-    let _trigger_ref = item_ctx.trigger_ref;
+    let trigger_ref = item_ctx.trigger_ref;
     view! {
         <ItemTriggerEvents>
             <button
-                _ref={_trigger_ref}
+                node_ref={trigger_ref}
                 class={class}
                 data-index={item_ctx.index}
                 data-state={move || item_ctx.data_state()}

@@ -49,7 +49,7 @@ pub fn Item(
         <Provider value={item_ctx}>
             <ItemTriggerEvents>
                 <div
-                    _ref={trigger_ref}
+                    node_ref={trigger_ref}
                     class={class}
                     tabindex=0
                     data-state={item_ctx.get_index()}
@@ -197,12 +197,12 @@ pub fn SubMenuItemTrigger(
     let item_ctx = expect_context::<MenuContext>();
     let sub_menu_ctx = expect_context::<ItemData>();
 
-    let _trigger_ref = item_ctx.trigger_ref;
+    let trigger_ref = item_ctx.trigger_ref;
 
     view! {
         <SubMenuItemTriggerEvents>
             <div
-                _ref={_trigger_ref}
+                node_ref={trigger_ref}
                 class={class}
                 tabindex=0
                 data-state={item_ctx.index}

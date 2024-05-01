@@ -27,7 +27,7 @@ pub fn Code(
         <pre>
             <code
                 class={cn!(class, format!("lang-{}", language))}
-                _ref={code_ref}
+                node_ref={code_ref}
                 inner_html={highlighted}
             ></code>
         </pre>

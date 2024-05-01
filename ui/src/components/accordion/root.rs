@@ -13,7 +13,7 @@ pub fn Root(children: Children, #[prop(into, optional)] class: String) -> impl I
 
     view! {
         <Provider value={ctx}>
-            <div _ref={accordion_ref} class={class}>
+            <div node_ref={accordion_ref} class={class}>
                 <Provider value={root_ctx}>{children()}</Provider>
             </div>
         </Provider>

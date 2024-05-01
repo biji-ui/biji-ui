@@ -18,7 +18,7 @@ pub fn Trigger(#[prop(into, optional)] class: String, children: Children) -> imp
     let _trigger_ref = ctx.trigger_ref;
 
     view! {
-        <button _ref={_trigger_ref} class={class}>
+        <button node_ref={_trigger_ref} class={class}>
             {children()}
         </button>
     }

@@ -36,11 +36,11 @@ pub fn Menu(
         ctx.remove_item(index);
     });
 
-    let _menu_ref = menu_ctx.menu_ref;
+    let menu_ref = menu_ctx.menu_ref;
 
     view! {
         <Provider value={menu_ctx}>
-            <div _ref={_menu_ref} class={class} data-index={index}>
+            <div node_ref={menu_ref} class={class} data-index={index}>
                 {children()}
             </div>
         </Provider>
@@ -52,12 +52,12 @@ pub fn MenuTrigger(#[prop(into, optional)] class: String, children: Children) ->
     let root_ctx = expect_context::<RootContext>();
     let menu_ctx = expect_context::<MenuContext>();
 
-    let _trigger_ref = menu_ctx.trigger_ref;
+    let trigger_ref = menu_ctx.trigger_ref;
 
     view! {
         <MenuTriggerEvents>
             <div
-                _ref={_trigger_ref}
+                node_ref={trigger_ref}
                 class={class}
                 data-state={menu_ctx.index}
                 data-disabled={menu_ctx.disabled}

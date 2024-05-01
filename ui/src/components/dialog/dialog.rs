@@ -13,11 +13,11 @@ use super::context::RootContext;
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogContext>();
 
-    let _trigger_ref = dialog_ctx.trigger_ref;
+    let trigger_ref = dialog_ctx.trigger_ref;
 
     view! {
         <TriggerEvents>
-            <button _ref={_trigger_ref} class={class}>
+            <button node_ref={trigger_ref} class={class}>
                 {children()}
             </button>
         </TriggerEvents>
@@ -96,7 +96,7 @@ pub fn Overlay(
             hide_delay={hide_delay}
         >
             <OverlayEvents>
-                <div _ref={overlay_ref} style="inset: 0; width: 100%; height: 100%"></div>
+                <div node_ref={overlay_ref} style="inset: 0; width: 100%; height: 100%"></div>
             </OverlayEvents>
         </CustomAnimatedShow>
     }
@@ -122,7 +122,7 @@ pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl 
 
     view! {
         <CloseEvents>
-            <button _ref={close_ref} class={class}>
+            <button node_ref={close_ref} class={class}>
                 {children()}
             </button>
         </CloseEvents>

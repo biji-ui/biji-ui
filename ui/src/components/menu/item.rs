@@ -29,7 +29,7 @@ pub fn Item(
             <ItemEvents>
                 <div
                     {..attrs}
-                    _ref={item_ref}
+                    node_ref={item_ref}
                     class={class}
                     data-state={ctx.index}
                     data-disabled={disabled}
