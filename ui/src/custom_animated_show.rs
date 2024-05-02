@@ -18,7 +18,8 @@ pub fn CustomAnimatedShow(
     /// The timeout after which the component will be unmounted if `when == false`
     hide_delay: Duration,
 ) -> impl IntoView {
-    let handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
+    let show_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
+    let hide_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
     let cls = create_rw_signal(if when.get_untracked() {
         show_class.clone()
     } else {
@@ -27,13 +28,24 @@ pub fn CustomAnimatedShow(
     let show = create_rw_signal(when.get_untracked());
 
     create_render_effect(move |_| {
+        let show_class = show_class.clone();
         if when.get() {
             // clear any possibly active timer
-            if let Some(h) = handle.get_value() {
+            if let Some(h) = show_handle.get_value() {
+                h.clear();
+            }
+            if let Some(h) = hide_handle.get_value() {
                 h.clear();
             }
 
-            cls.set(show_class.clone());
+            let h = leptos_dom::helpers::set_timeout_with_handle(
+                move || cls.set(show_class.clone()),
+                Duration::from_millis(1),
+            )
+            .expect("set timeout in AnimatedShow");
+            show_handle.set_value(Some(h));
+
+            cls.set(hide_class.clone());
             show.set(true);
         } else {
             cls.set(hide_class.clone());
@@ -41,12 +53,15 @@ pub fn CustomAnimatedShow(
             let h =
                 leptos_dom::helpers::set_timeout_with_handle(move || show.set(false), hide_delay)
                     .expect("set timeout in AnimatedShow");
-            handle.set_value(Some(h));
+            hide_handle.set_value(Some(h));
         }
     });
 
     on_cleanup(move || {
-        if let Some(Some(h)) = handle.try_get_value() {
+        if let Some(Some(h)) = show_handle.try_get_value() {
+            h.clear();
+        }
+        if let Some(Some(h)) = hide_handle.try_get_value() {
             h.clear();
         }
     });
