@@ -752,6 +752,14 @@ body{
   top:100%
 }
 
+.right-\[var\(--scrollbar-width\)\]{
+  right:var(--scrollbar-width)
+}
+
+.right-0{
+  right:0px
+}
+
 .-z-10{
   z-index:-10
 }
@@ -796,6 +804,14 @@ body{
 
 .mt-6{
   margin-top:1.5rem
+}
+
+.mr-\[var\(--scrollbar-width\)\]{
+  margin-right:var(--scrollbar-width)
+}
+
+.box-border{
+  box-sizing:border-box
 }
 
 .flex{
@@ -1213,6 +1229,18 @@ body{
   padding-top:1.5rem
 }
 
+.pr-\[var\(--scrollbar-width\)\]{
+  padding-right:var(--scrollbar-width)
+}
+
+.pr-\[calc\(var\(--scrollbar-width-nav\)\)\]{
+  padding-right:calc(var(--scrollbar-width-nav))
+}
+
+.pr-\[calc\(var\(--scrollbar-width-nav\)\+1rem\)\]{
+  padding-right:calc(var(--scrollbar-width-nav) + 1rem)
+}
+
 .text-center{
   text-align:center
 }
@@ -1610,6 +1638,18 @@ body{
   .sm\:pb-10{
     padding-bottom:2.5rem
   }
+
+  .sm\:pl-6{
+    padding-left:1.5rem
+  }
+
+  .sm\:pr-\[calc\(var\(--scrollbar-width-nav\)\)\]{
+    padding-right:calc(var(--scrollbar-width-nav))
+  }
+
+  .sm\:pr-\[calc\(var\(--scrollbar-width-nav\)\+1\.5rem\)\]{
+    padding-right:calc(var(--scrollbar-width-nav) + 1.5rem)
+  }
 }
 
 @media (min-width: 768px){
@@ -1715,6 +1755,14 @@ body{
 
   .lg\:pt-4{
     padding-top:1rem
+  }
+
+  .lg\:pl-8{
+    padding-left:2rem
+  }
+
+  .lg\:pr-\[calc\(var\(--scrollbar-width-nav\)\+2rem\)\]{
+    padding-right:calc(var(--scrollbar-width-nav) + 2rem)
   }
 
   .lg\:dark\:border-white\/10:is(.dark *){
