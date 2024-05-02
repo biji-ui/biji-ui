@@ -25,7 +25,7 @@ pub fn MenubarExample() -> impl IntoView {
     const ITEM_STYLE: &str = "flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted";
 
     view! {
-        <menubar::Root class="flex">
+        <menubar::Root class="flex" allow_item_loop=true allow_menu_loop=true>
             <menubar::Menu class="relative">
                 <menubar::Trigger class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
                     "File"
