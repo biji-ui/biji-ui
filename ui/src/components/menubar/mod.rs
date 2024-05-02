@@ -4,10 +4,10 @@ pub mod menu;
 pub mod root;
 
 pub use item::Item;
-pub use item::SubMenuItem;
-pub use item::SubMenuItemContent;
-pub use item::SubMenuItemTrigger;
+pub use item::SubMenuItem as SubMenu;
+pub use item::SubMenuItemContent as SubMenuContent;
+pub use item::SubMenuItemTrigger as SubMenuTrigger;
 pub use menu::Menu;
-pub use menu::MenuContent;
-pub use menu::MenuTrigger;
+pub use menu::MenuContent as Content;
+pub use menu::MenuTrigger as Trigger;
 pub use root::Root;
