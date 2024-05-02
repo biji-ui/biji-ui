@@ -91,7 +91,8 @@ pub fn SidebarTrigger() -> impl IntoView {
 #[component]
 pub fn Sidebar() -> impl IntoView {
     view! {
-        <dialogui::Root>
+        <dialogui::Root
+        hide_delay={Duration::from_millis(300)}>
             <dialogui::Trigger class="flex h-6 w-6 items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <SidebarTrigger/>
             </dialogui::Trigger>
@@ -100,13 +101,11 @@ pub fn Sidebar() -> impl IntoView {
                     class="transition-opacity ease-linear duration-300 fixed inset-0 top-14 bg-zinc-400/20 backdrop-blur-sm dark:bg-black/40"
                     show_class="opacity-100"
                     hide_class="opacity-0"
-                    hide_delay={Duration::from_millis(300)}
                 ></dialogui::Overlay>
                 <dialogui::Content
                     class="transition ease-in-out duration-300 fixed bottom-0 left-0 top-14 w-full overflow-y-auto bg-white px-4 pb-4 pt-6 shadow-lg shadow-zinc-900/10 ring-1 ring-zinc-900/10 min-[416px]:max-w-sm sm:px-6 sm:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
                     show_class="translate-x-0"
                     hide_class="-translate-x-full"
-                    hide_delay={Duration::from_millis(300)}
                 >
                     <div>
                         <SidebarNav/>

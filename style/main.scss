@@ -752,14 +752,6 @@ body{
   top:100%
 }
 
-.right-\[var\(--scrollbar-width\)\]{
-  right:var(--scrollbar-width)
-}
-
-.right-0{
-  right:0px
-}
-
 .-z-10{
   z-index:-10
 }
@@ -804,14 +796,6 @@ body{
 
 .mt-6{
   margin-top:1.5rem
-}
-
-.mr-\[var\(--scrollbar-width\)\]{
-  margin-right:var(--scrollbar-width)
-}
-
-.box-border{
-  box-sizing:border-box
 }
 
 .flex{
@@ -958,10 +942,6 @@ body{
 
 .translate-y-\[-50\%\]{
   --tw-translate-y:-50%;
-  transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
-}
-
-.transform{
   transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
 }
 
@@ -1209,6 +1189,10 @@ body{
   padding-right:0.75rem
 }
 
+.pr-\[calc\(var\(--scrollbar-width-nav\)\+1rem\)\]{
+  padding-right:calc(var(--scrollbar-width-nav) + 1rem)
+}
+
 .pt-1{
   padding-top:0.25rem
 }
@@ -1227,18 +1211,6 @@ body{
 
 .pt-6{
   padding-top:1.5rem
-}
-
-.pr-\[var\(--scrollbar-width\)\]{
-  padding-right:var(--scrollbar-width)
-}
-
-.pr-\[calc\(var\(--scrollbar-width-nav\)\)\]{
-  padding-right:calc(var(--scrollbar-width-nav))
-}
-
-.pr-\[calc\(var\(--scrollbar-width-nav\)\+1rem\)\]{
-  padding-right:calc(var(--scrollbar-width-nav) + 1rem)
 }
 
 .text-center{
@@ -1643,10 +1615,6 @@ body{
     padding-left:1.5rem
   }
 
-  .sm\:pr-\[calc\(var\(--scrollbar-width-nav\)\)\]{
-    padding-right:calc(var(--scrollbar-width-nav))
-  }
-
   .sm\:pr-\[calc\(var\(--scrollbar-width-nav\)\+1\.5rem\)\]{
     padding-right:calc(var(--scrollbar-width-nav) + 1.5rem)
   }
@@ -1753,16 +1721,16 @@ body{
     padding-bottom:2rem
   }
 
-  .lg\:pt-4{
-    padding-top:1rem
-  }
-
   .lg\:pl-8{
     padding-left:2rem
   }
 
   .lg\:pr-\[calc\(var\(--scrollbar-width-nav\)\+2rem\)\]{
     padding-right:calc(var(--scrollbar-width-nav) + 2rem)
+  }
+
+  .lg\:pt-4{
+    padding-top:1rem
   }
 
   .lg\:dark\:border-white\/10:is(.dark *){

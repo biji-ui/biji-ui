@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use leptos::{
     html::{Button, Div},
     *,
@@ -9,6 +11,7 @@ pub struct DialogContext {
     pub open: RwSignal<bool>,
     pub root: RwSignal<RootContext>,
     pub prevent_scroll: bool,
+    pub hide_delay: Duration,
 }
 
 impl Default for DialogContext {
@@ -18,6 +21,7 @@ impl Default for DialogContext {
             open: create_rw_signal(false),
             root: create_rw_signal(RootContext::default()),
             prevent_scroll: true,
+            hide_delay: Duration::from_millis(200),
         }
     }
 }

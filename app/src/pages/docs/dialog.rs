@@ -20,7 +20,7 @@ pub fn DialogExample() -> impl IntoView {
     use biji_ui::components::dialog;
 
     view! {
-        <dialog::Root>
+        <dialog::Root hide_delay={Duration::from_millis(200)}>
             <dialog::Trigger class="py-2 px-4 font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500">
                 "Confirm payment"
             </dialog::Trigger>
@@ -29,13 +29,11 @@ pub fn DialogExample() -> impl IntoView {
                     class="z-50 fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                     show_class="ease-out opacity-100 duration-300"
                     hide_class="ease-in opacity-0 duration-200"
-                    hide_delay={Duration::from_millis(200)}
                 ></dialog::Overlay>
                 <dialog::Content
                     class="z-50 fixed left-[50%] top-[50%] z-50 w-full max-w-[94%] translate-x-[-50%] translate-y-[-50%] bg-background p-5 sm:max-w-[490px] md:w-full rounded-lg shadow-xl transition-all"
                     show_class="ease-out duration-300 translate-y-0 opacity-100 sm:scale-100"
                     hide_class="ease-in duration-200 translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95"
-                    hide_delay={Duration::from_millis(200)}
                 >
                     <div>
                         <div class="flex justify-center items-center mx-auto w-12 h-12 bg-green-100 rounded-full">

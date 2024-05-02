@@ -1,4 +1,6 @@
-use leptos::*;
+use std::time::Duration;
+
+use leptos::{leptos_dom::helpers::TimeoutHandle, *};
 
 use crate::components::dialog::context::{DialogContext, RootContext};
 
@@ -9,11 +11,17 @@ pub fn Root(
     /// Prevent scrolling when the dialog is open
     #[prop(default = true)]
     prevent_scroll: bool,
+    /// The timeout after which the component will be unmounted if `when == false`
+    #[prop(default = Duration::from_millis(200))]
+    hide_delay: Duration,
 ) -> impl IntoView {
-    let root_ctx = RootContext::default();
+    let root_ctx = RootContext {
+        ..RootContext::default()
+    };
     let ctx = DialogContext {
         root: create_rw_signal(root_ctx),
         prevent_scroll,
+        hide_delay,
         ..Default::default()
     };
 
@@ -30,11 +38,15 @@ pub fn Root(
 
 #[component]
 pub fn RootEvents(children: Children) -> impl IntoView {
+    let hide_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
     let dialog_ctx = expect_context::<DialogContext>();
 
-    create_effect(move |_| {
+    create_render_effect(move |_| {
         if dialog_ctx.prevent_scroll {
             if dialog_ctx.open.get() {
+                if let Some(h) = hide_handle.get_value() {
+                    h.clear();
+                }
                 if let Some(doc) = document().body() {
                     let client_width = f64::from(doc.client_width());
                     let inner_width = window()
@@ -53,11 +65,18 @@ pub fn RootEvents(children: Children) -> impl IntoView {
                         .set_property("padding-right", &format!("calc({}px)", scrollbar_width));
                 }
             } else {
-                if let Some(doc) = document().body() {
-                    let _ = doc.style().remove_property("overflow");
-                    let _ = doc.style().remove_property("--scrollbar-width");
-                    let _ = doc.style().remove_property("padding-right");
-                }
+                let h = leptos_dom::helpers::set_timeout_with_handle(
+                    move || {
+                        if let Some(doc) = document().body() {
+                            let _ = doc.style().remove_property("overflow");
+                            let _ = doc.style().remove_property("--scrollbar-width");
+                            let _ = doc.style().remove_property("padding-right");
+                        }
+                    },
+                    dialog_ctx.hide_delay,
+                )
+                .expect("set timeout in AnimatedShow");
+                hide_handle.set_value(Some(h));
             }
         }
     });

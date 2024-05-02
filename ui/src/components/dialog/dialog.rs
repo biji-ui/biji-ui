@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use leptos::{ev::click, *};
 use leptos_use::use_event_listener;
 
@@ -50,9 +48,6 @@ pub fn Content(
     /// Optional CSS class to apply if `when == false`
     #[prop(into, optional)]
     hide_class: String,
-    /// The timeout after which the component will be unmounted if `when == false`
-    #[prop(default = Duration::from_millis(200))]
-    hide_delay: Duration,
 ) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogContext>();
 
@@ -63,7 +58,7 @@ pub fn Content(
             when={dialog_ctx.open}
             show_class={cn!(class, show_class)}
             hide_class={cn!(class, hide_class)}
-            hide_delay={hide_delay}
+            hide_delay={dialog_ctx.hide_delay}
         >
             {children()}
         </CustomAnimatedShow>
@@ -79,9 +74,6 @@ pub fn Overlay(
     /// Optional CSS class to apply if `when == false`
     #[prop(into, optional)]
     hide_class: String,
-    /// The timeout after which the component will be unmounted if `when == false`
-    #[prop(default = Duration::from_millis(200))]
-    hide_delay: Duration,
 ) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogContext>();
     let root_ctx = expect_context::<RootContext>();
@@ -93,7 +85,7 @@ pub fn Overlay(
             when={dialog_ctx.open}
             show_class={cn!(class, show_class)}
             hide_class={cn!(class, hide_class)}
-            hide_delay={hide_delay}
+            hide_delay={dialog_ctx.hide_delay}
         >
             <OverlayEvents>
                 <div node_ref={overlay_ref} style="inset: 0; width: 100%; height: 100%"></div>
