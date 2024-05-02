@@ -17,6 +17,8 @@ pub struct MenubarContext {
 pub struct RootContext {
     pub item_focus: RwSignal<Option<usize>>,
     pub items: RwSignal<HashMap<usize, MenuContext>>,
+    pub allow_menu_loop: bool,
+    pub allow_item_loop: bool,
 }
 
 impl Default for RootContext {
@@ -24,6 +26,8 @@ impl Default for RootContext {
         Self {
             item_focus: create_rw_signal(None),
             items: create_rw_signal(HashMap::new()),
+            allow_menu_loop: false,
+            allow_item_loop: false,
         }
     }
 }
@@ -91,13 +95,13 @@ impl NavigateItems<MenuContext> for RootContext {
     fn navigate_next_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
 
-        next_item(active_items, self.item_focus.get())
+        next_item(active_items, self.item_focus.get(), self.allow_menu_loop)
     }
 
     fn navigate_previous_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
 
-        previous_item(active_items, self.item_focus.get())
+        previous_item(active_items, self.item_focus.get(), self.allow_menu_loop)
     }
 }
 
@@ -120,6 +124,7 @@ pub struct MenuContext {
     pub trigger_ref: NodeRef<Div>,
     pub item_focus: RwSignal<Option<usize>>,
     pub items: RwSignal<HashMap<usize, ItemData>>,
+    pub allow_loop: bool,
 }
 
 impl Default for MenuContext {
@@ -132,6 +137,7 @@ impl Default for MenuContext {
             trigger_ref: NodeRef::default(),
             item_focus: create_rw_signal(None),
             items: create_rw_signal(HashMap::new()),
+            allow_loop: false,
         }
     }
 }
@@ -215,13 +221,13 @@ impl NavigateItems<ItemData> for MenuContext {
     fn navigate_next_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
 
-        next_item(active_items, self.item_focus.get())
+        next_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 
     fn navigate_previous_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
 
-        previous_item(active_items, self.item_focus.get())
+        previous_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 }
 

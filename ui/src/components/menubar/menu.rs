@@ -27,6 +27,7 @@ pub fn Menu(
     let menu_ctx = MenuContext {
         index,
         disabled,
+        allow_loop: ctx.allow_item_loop,
         ..Default::default()
     };
 

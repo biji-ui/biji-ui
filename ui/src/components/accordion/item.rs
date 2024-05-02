@@ -27,6 +27,7 @@ pub fn Item(
     let item_ctx = ItemContext {
         index,
         disabled,
+        allow_loop: root_ctx.allow_loop,
         ..Default::default()
     };
 

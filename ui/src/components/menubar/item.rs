@@ -74,22 +74,22 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
 
         match key.as_str() {
             "ArrowDown" => {
+                evt.prevent_default();
                 if let Some(item) = menu_ctx.navigate_next_item() {
-                    evt.prevent_default();
                     item.focus();
                 }
             }
             "ArrowUp" => {
+                evt.prevent_default();
                 if let Some(item) = menu_ctx.navigate_previous_item() {
-                    evt.prevent_default();
                     item.focus();
                 }
             }
             "ArrowRight" => {
+                evt.prevent_default();
                 match item_ctx {
                     ItemData::Item { .. } => {
                         if let Some(item) = root_ctx.navigate_next_item() {
-                            evt.prevent_default();
                             item.focus();
                             item.open();
                         }
@@ -97,20 +97,18 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                     ItemData::SubMenuItem { child_context, .. } => {
                         child_context.open();
                         if let Some(item) = child_context.navigate_first_item() {
-                            evt.prevent_default();
                             item.focus();
                         }
                     }
                 };
             }
             "ArrowLeft" => {
+                evt.prevent_default();
                 if item_ctx.is_submenu() {
-                    evt.prevent_default();
                     menu_ctx.close();
                     menu_ctx.focus();
                 } else {
                     if let Some(item) = root_ctx.navigate_previous_item() {
-                        evt.prevent_default();
                         item.focus();
                         item.open();
                         menu_ctx.close();
@@ -175,6 +173,7 @@ pub fn SubMenuItem(
     let sub_menu_ctx = MenuContext {
         index,
         disabled,
+        allow_loop: menu_ctx.allow_loop,
         ..Default::default()
     };
 

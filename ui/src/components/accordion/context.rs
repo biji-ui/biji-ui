@@ -20,6 +20,7 @@ pub struct AccordionContext {
 pub struct RootContext {
     pub item_focus: RwSignal<Option<usize>>,
     pub items: RwSignal<HashMap<usize, ItemContext>>,
+    pub allow_loop: bool,
 }
 
 impl Default for RootContext {
@@ -27,6 +28,7 @@ impl Default for RootContext {
         Self {
             item_focus: create_rw_signal(None),
             items: create_rw_signal(HashMap::new()),
+            allow_loop: false,
         }
     }
 }
@@ -87,13 +89,13 @@ impl NavigateItems<ItemContext> for RootContext {
     fn navigate_next_item(&self) -> Option<ItemContext> {
         let active_items = self.filter_active_items();
 
-        next_item(active_items, self.item_focus.get())
+        next_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 
     fn navigate_previous_item(&self) -> Option<ItemContext> {
         let active_items = self.filter_active_items();
 
-        previous_item(active_items, self.item_focus.get())
+        previous_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 }
 
@@ -103,6 +105,7 @@ pub struct ItemContext {
     pub open: RwSignal<bool>,
     pub disabled: bool,
     pub trigger_ref: NodeRef<Button>,
+    pub allow_loop: bool,
 }
 
 impl ItemContext {
@@ -122,6 +125,7 @@ impl Default for ItemContext {
             open: create_rw_signal(false),
             disabled: false,
             trigger_ref: NodeRef::default(),
+            allow_loop: false,
         }
     }
 }
