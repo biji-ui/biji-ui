@@ -62,12 +62,12 @@ fn HomePage() -> impl IntoView {
         <h1>"Biji UI"</h1>
         <h2>"Headless components for Leptos"</h2>
         <button on:click={on_click}>"Click Me: " {count}</button>
-        <menu::Root class="w-fit">
+        <menu::Menu class="w-fit">
             <menu::Trigger>"Menu"</menu::Trigger>
             <menu::Content hide_delay={Duration::from_millis(200)}>
                 <h3>"Menu"</h3>
                 <p>"This is a menu"</p>
             </menu::Content>
-        </menu::Root>
+        </menu::Menu>
     }
 }
