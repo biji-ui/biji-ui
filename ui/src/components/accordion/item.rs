@@ -87,11 +87,13 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
         match key.as_str() {
             "ArrowDown" => {
                 if let Some(item) = root_ctx.navigate_next_item() {
+                    evt.prevent_default();
                     item.focus();
                 }
             }
             "ArrowUp" => {
                 if let Some(item) = root_ctx.navigate_previous_item() {
+                    evt.prevent_default();
                     item.focus();
                 }
             }

@@ -72,61 +72,75 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
     let _ = use_event_listener(item_ctx.get_trigger_ref(), keydown, move |evt| {
         let key = evt.key();
 
-        if key == "ArrowDown" {
-            if let Some(item) = menu_ctx.navigate_next_item() {
-                item.focus();
-            }
-        } else if key == "ArrowUp" {
-            if let Some(item) = menu_ctx.navigate_previous_item() {
-                item.focus();
-            }
-        } else if key == "ArrowRight" {
-            match item_ctx {
-                ItemData::Item { .. } => {
-                    if let Some(item) = root_ctx.navigate_next_item() {
-                        item.focus();
-                        item.open();
-                    }
-                }
-                ItemData::SubMenuItem { child_context, .. } => {
-                    child_context.open();
-                    if let Some(item) = child_context.navigate_first_item() {
-                        item.focus();
-                    }
-                }
-            };
-        } else if key == "ArrowLeft" {
-            if item_ctx.is_submenu() {
-                menu_ctx.close();
-                menu_ctx.focus();
-            } else {
-                if let Some(item) = root_ctx.navigate_previous_item() {
+        match key.as_str() {
+            "ArrowDown" => {
+                if let Some(item) = menu_ctx.navigate_next_item() {
+                    evt.prevent_default();
                     item.focus();
-                    item.open();
-                    menu_ctx.close();
                 }
             }
-        } else if key == "Enter" {
-            if let Some(trigger_ref) = item_ctx.get_trigger_ref().get() {
-                if let Some(child) = trigger_ref.children().get_with_index(0) {
-                    if let Ok(child) = child.clone().dyn_into::<HtmlButtonElement>() {
-                        let _ = child.click();
-                    } else if let Ok(child) = child.dyn_into::<HtmlAnchorElement>() {
-                        let _ = child.click();
-                    }
+            "ArrowUp" => {
+                if let Some(item) = menu_ctx.navigate_previous_item() {
+                    evt.prevent_default();
+                    item.focus();
                 }
+            }
+            "ArrowRight" => {
                 match item_ctx {
                     ItemData::Item { .. } => {
-                        root_ctx.close_all();
-                        root_ctx.focus_active_item();
+                        if let Some(item) = root_ctx.navigate_next_item() {
+                            evt.prevent_default();
+                            item.focus();
+                            item.open();
+                        }
                     }
-                    _ => {}
+                    ItemData::SubMenuItem { child_context, .. } => {
+                        child_context.open();
+                        if let Some(item) = child_context.navigate_first_item() {
+                            evt.prevent_default();
+                            item.focus();
+                        }
+                    }
                 };
             }
-        } else if key == "Escape" {
-            menu_ctx.close();
-            menu_ctx.focus();
-        }
+            "ArrowLeft" => {
+                if item_ctx.is_submenu() {
+                    evt.prevent_default();
+                    menu_ctx.close();
+                    menu_ctx.focus();
+                } else {
+                    if let Some(item) = root_ctx.navigate_previous_item() {
+                        evt.prevent_default();
+                        item.focus();
+                        item.open();
+                        menu_ctx.close();
+                    }
+                }
+            }
+            "Enter" => {
+                if let Some(trigger_ref) = item_ctx.get_trigger_ref().get() {
+                    if let Some(child) = trigger_ref.children().get_with_index(0) {
+                        if let Ok(child) = child.clone().dyn_into::<HtmlButtonElement>() {
+                            let _ = child.click();
+                        } else if let Ok(child) = child.dyn_into::<HtmlAnchorElement>() {
+                            let _ = child.click();
+                        }
+                    }
+                    match item_ctx {
+                        ItemData::Item { .. } => {
+                            root_ctx.close_all();
+                            root_ctx.focus_active_item();
+                        }
+                        _ => {}
+                    };
+                }
+            }
+            "Escape" => {
+                menu_ctx.close();
+                menu_ctx.focus();
+            }
+            _ => {}
+        };
     });
 
     match item_ctx {
