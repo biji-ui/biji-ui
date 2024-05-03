@@ -9,10 +9,65 @@ pub mod dropdown_menu;
 pub mod getting_started;
 pub mod menubar;
 
-use biji_ui::components::dialog::{self as dialogui, context::DialogContext};
-use leptos_use::use_media_query;
+use biji_ui::components::{
+    dialog::{self as dialogui, context::DialogContext},
+    menu,
+};
+use leptos_use::{use_color_mode, use_media_query, ColorMode, UseColorModeReturn};
 
 use crate::icons;
+
+#[component]
+pub fn ThemeMode() -> impl IntoView {
+    let UseColorModeReturn { mode, set_mode, .. } = use_color_mode();
+
+    let modes = [("Light", &ColorMode::Light), ("Dark", &ColorMode::Dark)];
+
+    view! {
+        <menu::Menu class="relative">
+            <menu::Trigger class="flex h-6 w-6 items-center cursor-pointer justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
+                <icons::Sun class="h-5 w-5 stroke-zinc-900 dark:hidden"></icons::Sun>
+                <icons::Moon class="hidden h-5 w-5 stroke-white dark:block"></icons::Moon>
+            </menu::Trigger>
+            <menu::Content
+                class="transition flex absolute right-0 flex-col p-1 w-40 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
+                show_class="z-10 translate-y-0 opacity-100 duration-150 ease-in"
+                hide_class="-z-10 translate-y-1 opacity-0 duration-200 ease-out"
+                hide_delay={Duration::from_millis(200)}
+            >
+                {modes
+                    .into_iter()
+                    .map(|(title, m)| {
+                        view! {
+                            <menu::Item class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
+                                <button
+                                    on:click={move |_| { set_mode.set(m.clone()) }}
+                                    class="flex w-full justify-between align-center"
+                                >
+                                    <div class="flex gap-2">
+                                        {match m.clone() {
+                                            ColorMode::Light => {
+                                                view! { <icons::Sun class="w-4"></icons::Sun> }
+                                            }
+                                            ColorMode::Dark => {
+                                                view! { <icons::Moon class="w-4"></icons::Moon> }
+                                            }
+                                            _ => view! { <icons::SunMoon class="w-4"></icons::SunMoon> },
+                                        }}
+                                        {title}
+                                    </div>
+                                    <Show when={move || m.clone() == mode.get()}>
+                                        <icons::Check class="w-4"></icons::Check>
+                                    </Show>
+                                </button>
+                            </menu::Item>
+                        }
+                    })
+                    .collect_view()}
+            </menu::Content>
+        </menu::Menu>
+    }
+}
 
 #[component]
 pub fn TopNav() -> impl IntoView {
@@ -58,6 +113,10 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                     </ul>
                 </nav>
+                <div class="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
+                <div class="flex gap-4">
+                    <ThemeMode/>
+                </div>
             </div>
         </div>
     }
@@ -91,8 +150,7 @@ pub fn SidebarTrigger() -> impl IntoView {
 #[component]
 pub fn Sidebar() -> impl IntoView {
     view! {
-        <dialogui::Root
-        hide_delay={Duration::from_millis(300)}>
+        <dialogui::Root hide_delay={Duration::from_millis(300)}>
             <dialogui::Trigger class="flex h-6 w-6 items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <SidebarTrigger/>
             </dialogui::Trigger>
