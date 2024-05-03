@@ -5,6 +5,7 @@ pub mod chevron_right;
 pub mod ellipsis;
 pub mod moon;
 pub mod sun;
+pub mod sun_moon;
 pub mod x;
 
 pub use align_justify::AlignJustify;
@@ -14,4 +15,5 @@ pub use chevron_right::ChevronRight;
 pub use ellipsis::Ellipsis;
 pub use moon::Moon;
 pub use sun::Sun;
+pub use sun_moon::SunMoon;
 pub use x::X;
