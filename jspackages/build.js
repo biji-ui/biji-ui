@@ -1,9 +1,10 @@
 const esbuild = require("esbuild");
+
 esbuild
   .build({
-    entryPoints: ["./deps/highlight.js"],
+    entryPoints: ["./deps/shiki.js"],
     bundle: true,
-    outfile: "./output/highlight.js",
+    outfile: "./output/shiki.js",
     format: "esm",
     minify: true,
   })

@@ -1,1 +1,1 @@
-pub mod highlight;
+pub mod shiki;

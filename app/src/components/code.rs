@@ -1,6 +1,6 @@
-use biji_ui::cn;
-use jspackages::highlight::highlight_element;
-use leptos::{html::Code as HtmlCode, *};
+use jspackages::shiki::code_to_html;
+use leptos::*;
+use leptos_use::{use_color_mode, ColorMode, UseColorModeReturn};
 
 #[component]
 pub fn Code(
@@ -8,28 +8,20 @@ pub fn Code(
     code: &'static str,
     language: &'static str,
 ) -> impl IntoView {
+    let UseColorModeReturn { mode, .. } = use_color_mode();
+
     let (highlighted, set_highlighted) = create_signal(String::new());
 
-    let code_ref = create_node_ref::<HtmlCode>();
-
     create_effect(move |_| {
-        let escaped_code = html_escape::encode_text(code);
-        set_highlighted.set(escaped_code.to_string());
+        let theme = match mode.get() {
+            ColorMode::Dark => "vesper",
+            ColorMode::Light => "solarized-light",
+            _ => "vesper",
+        };
+        let code = code_to_html(code, language, theme);
+
+        set_highlighted.set(code);
     });
 
-    create_effect(move |_| {
-        if let Some(code_ref) = code_ref.get() {
-            highlight_element(&code_ref);
-        }
-    });
-
-    view! {
-        <pre>
-            <code
-                class={cn!(class, format!("lang-{}", language))}
-                node_ref={code_ref}
-                inner_html={highlighted}
-            ></code>
-        </pre>
-    }
+    view! { <code inner_html={highlighted} class={class}></code> }
 }

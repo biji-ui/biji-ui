@@ -7,6 +7,6 @@
     },
     "dependencies": {
         "esbuild": "^0.20.2",
-        "highlight.js": "^11.9.0"
+        "shiki": "^1.4.0"
     }
 }
