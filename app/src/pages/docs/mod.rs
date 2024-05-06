@@ -25,12 +25,12 @@ pub fn ThemeMode() -> impl IntoView {
 
     view! {
         <menu::Menu class="relative">
-            <menu::Trigger class="flex h-6 w-6 items-center cursor-pointer justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
+            <menu::Trigger class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <icons::Sun class="h-5 w-5 stroke-zinc-900 dark:hidden"></icons::Sun>
                 <icons::Moon class="hidden h-5 w-5 stroke-white dark:block"></icons::Moon>
             </menu::Trigger>
             <menu::Content
-                class="transition flex absolute right-0 flex-col p-1 w-40 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
+                class="absolute right-0 flex w-40 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition focus:outline-none"
                 show_class="z-10 translate-y-0 opacity-100 duration-150 ease-in"
                 hide_class="-z-10 translate-y-1 opacity-0 duration-200 ease-out"
                 hide_delay={Duration::from_millis(200)}
@@ -39,10 +39,10 @@ pub fn ThemeMode() -> impl IntoView {
                     .into_iter()
                     .map(|(title, m)| {
                         view! {
-                            <menu::Item class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
+                            <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
                                 <button
                                     on:click={move |_| { set_mode.set(m.clone()) }}
-                                    class="flex w-full justify-between align-center"
+                                    class="flex w-full justify-between px-2 py-1.5 align-center"
                                 >
                                     <div class="flex gap-2">
                                         {match m.clone() {
@@ -76,7 +76,7 @@ pub fn TopNav() -> impl IntoView {
             style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2; --scrollbar-width-nav: var(--scrollbar-width, 0px);"
             class="fixed inset-x-0 top-0 z-10 flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:z-30 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
         >
-            <div class="absolute inset-x-0 top-full h-px transition bg-zinc-900/10 dark:bg-white/10"></div>
+            <div class="absolute inset-x-0 top-full h-px bg-zinc-900/10 transition dark:bg-white/10"></div>
             <div class="hidden lg:block lg:max-w-md lg:flex-auto"></div>
             <div class="flex items-center gap-5 lg:hidden">
                 <Sidebar/>
@@ -89,7 +89,7 @@ pub fn TopNav() -> impl IntoView {
                     <ul role="list" class="flex items-center gap-8">
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                 href="https://docs.rs"
                             >
                                 "API"
@@ -97,7 +97,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                 href="/"
                             >
                                 "Documentation"
@@ -105,7 +105,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                 href="https://github.com"
                             >
                                 "Support"
@@ -113,7 +113,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                     </ul>
                 </nav>
-                <div class="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
+                <div class="hidden md:h-5 md:bg-zinc-900/10 md:block md:w-px md:dark:bg-white/15"></div>
                 <div class="flex gap-4">
                     <ThemeMode/>
                 </div>
@@ -156,12 +156,12 @@ pub fn Sidebar() -> impl IntoView {
             </dialogui::Trigger>
             <Portal>
                 <dialogui::Overlay
-                    class="transition-opacity ease-linear duration-300 fixed inset-0 top-14 bg-zinc-400/20 backdrop-blur-sm dark:bg-black/40"
+                    class="fixed inset-0 top-14 bg-zinc-400/20 backdrop-blur-sm transition-opacity duration-300 ease-linear dark:bg-black/40"
                     show_class="opacity-100"
                     hide_class="opacity-0"
                 ></dialogui::Overlay>
                 <dialogui::Content
-                    class="transition ease-in-out duration-300 fixed bottom-0 left-0 top-14 w-full overflow-y-auto bg-white px-4 pb-4 pt-6 shadow-lg shadow-zinc-900/10 ring-1 ring-zinc-900/10 min-[416px]:max-w-sm sm:px-6 sm:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
+                    class="fixed bottom-0 left-0 top-14 w-full overflow-y-auto bg-white px-4 pb-4 pt-6 shadow-lg shadow-zinc-900/10 ring-1 ring-zinc-900/10 transition duration-300 ease-in-out sm:pb-10 min-[416px]:max-w-sm sm:px-6 dark:bg-zinc-900 dark:ring-zinc-800"
                     show_class="translate-x-0"
                     hide_class="-translate-x-full"
                 >
@@ -204,7 +204,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -236,7 +236,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -265,8 +265,8 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
 pub fn DocsPage() -> impl IntoView {
     view! {
         <div class="h-full lg:ml-72 xl:ml-80">
-            <header class="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex">
-                <div class="contents lg:pointer-events-auto lg:block lg:w-72 lg:overflow-y-auto lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10 xl:w-80">
+            <header class="contents lg:fixed lg:inset-0 lg:flex lg:pointer-events-none lg:z-40">
+                <div class="contents lg:overflow-y-auto lg:pointer-events-auto lg:block lg:w-72 lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10 xl:w-80">
                     <div class="hidden lg:flex">
                         <a aria-label="Home" href="/">
                             "biji"
@@ -295,7 +295,7 @@ where
 {
     view! {
         <article class="flex h-full flex-col pb-10 pt-16">
-            <h1 class="font-bold text-2xl mb-2">{title}</h1>
+            <h1 class="mb-2 text-2xl font-bold">{title}</h1>
             <p class="mb-11 mt-3 text-balance text-base">{description}</p>
             <div class="relative rounded-2xl border-2 border-muted bg-zinc-50 !ring-transparent dark:bg-neutral-900/50">
                 <div class="flex min-h-[443px] w-full items-center justify-center p-12 preview">
