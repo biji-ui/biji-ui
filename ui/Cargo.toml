@@ -3,6 +3,8 @@
 name = "biji-ui"
 version = "0.1.0"
 edition = "2021"
+description = "Effortless headless UI components for your Leptos projects"
+license = "MIT"
 
 [dependencies]
 leptos = { version = "0.6", features = ["nightly"] }
