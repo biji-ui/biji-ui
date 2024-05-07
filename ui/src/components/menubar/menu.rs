@@ -77,18 +77,8 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
 
     create_effect(move |_| {
-        if menu_ctx.open.get() {
-            if let Some(first) = menu_ctx.navigate_first_item() {
-                first.focus();
-            }
-        }
-    });
-
-    create_effect(move |_| {
-        if let Some(item_focus) = root_ctx.item_focus.get() {
-            if item_focus != menu_ctx.index && menu_ctx.open.get() {
-                menu_ctx.close();
-            }
+        if menu_ctx.open.get() == false {
+            menu_ctx.set_focus(None);
         }
     });
 
@@ -101,17 +91,19 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
 
         if key == "ArrowRight" {
             if let Some(item) = root_ctx.navigate_next_item() {
-                item.focus();
                 if menu_ctx.open.get() {
                     item.open();
                 }
+                item.focus();
+                menu_ctx.close();
             }
         } else if key == "ArrowLeft" {
             if let Some(item) = root_ctx.navigate_previous_item() {
-                item.focus();
                 if menu_ctx.open.get() {
                     item.open();
                 }
+                item.focus();
+                menu_ctx.close();
             }
         } else if key == "ArrowDown" || key == "Enter" {
             if !menu_ctx.open.get() {
@@ -120,13 +112,8 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
             if let Some(item) = menu_ctx.navigate_first_item() {
                 item.focus();
             }
-        } else if key == "ArrowUp" {
-            if !menu_ctx.open.get() {
-                menu_ctx.open();
-            }
-            if let Some(item) = menu_ctx.navigate_previous_item() {
-                item.focus();
-            }
+        } else if key == "Escape" {
+            root_ctx.close_all();
         }
     });
 

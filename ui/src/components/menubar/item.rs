@@ -90,6 +90,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 match item_ctx {
                     ItemData::Item { .. } => {
                         if let Some(item) = root_ctx.navigate_next_item() {
+                            root_ctx.close_all();
                             item.focus();
                             item.open();
                         }
@@ -98,6 +99,8 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                         child_context.open();
                         if let Some(item) = child_context.navigate_first_item() {
                             item.focus();
+                        } else {
+                            menu_ctx.close();
                         }
                     }
                 };
