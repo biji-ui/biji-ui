@@ -53,13 +53,13 @@ pub fn Item(
 }
 
 #[component]
-pub fn ItemTrigger(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
+pub fn ItemToggle(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
     let root_ctx = expect_context::<RootContext>();
     let item_ctx = expect_context::<ItemContext>();
 
     let trigger_ref = item_ctx.trigger_ref;
     view! {
-        <ItemTriggerEvents>
+        <ItemToggleEvents>
             <button
                 node_ref={trigger_ref}
                 class={class}
@@ -70,12 +70,12 @@ pub fn ItemTrigger(#[prop(into, optional)] class: String, children: Children) ->
             >
                 {children()}
             </button>
-        </ItemTriggerEvents>
+        </ItemToggleEvents>
     }
 }
 
 #[component]
-pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
+pub fn ItemToggleEvents(children: Children) -> impl IntoView {
     let root_ctx = expect_context::<RootContext>();
     let item_ctx = expect_context::<ItemContext>();
 
