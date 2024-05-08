@@ -6,6 +6,7 @@ edition = "2021"
 description = "Effortless headless UI components for your Leptos projects"
 license = "MIT"
 readme = "../README.md"
+repository = "https://github.com/biji-ui/biji-ui"
 
 [dependencies]
 leptos = { version = "0.6", features = ["nightly"] }
