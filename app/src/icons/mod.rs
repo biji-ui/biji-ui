@@ -1,18 +1,24 @@
 pub mod align_justify;
+pub mod book_text;
+pub mod bug;
 pub mod caret;
 pub mod check;
 pub mod chevron_right;
 pub mod ellipsis;
+pub mod github;
 pub mod moon;
 pub mod sun;
 pub mod sun_moon;
 pub mod x;
 
 pub use align_justify::AlignJustify;
+pub use book_text::BookText;
+pub use bug::Bug;
 pub use caret::Caret;
 pub use check::Check;
 pub use chevron_right::ChevronRight;
 pub use ellipsis::Ellipsis;
+pub use github::Github;
 pub use moon::Moon;
 pub use sun::Sun;
 pub use sun_moon::SunMoon;

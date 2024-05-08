@@ -730,6 +730,18 @@ body {
   margin-top: 1.5rem;
 }
 
+.mr-5 {
+  margin-right: 1.25rem;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
 .flex {
   display: flex;
 }
@@ -935,6 +947,10 @@ body {
   gap: 2rem;
 }
 
+.gap-3 {
+  gap: 0.75rem;
+}
+
 .overflow-y-auto {
   overflow-y: auto;
 }
@@ -1062,6 +1078,10 @@ body {
 
 .stroke-zinc-900 {
   stroke: #18181b;
+}
+
+.stroke-zinc-600 {
+  stroke: #52525b;
 }
 
 .p-1 {
@@ -1497,6 +1517,10 @@ pre.shiki {
   stroke: #fff;
 }
 
+.dark\:stroke-zinc-400:is(.dark *) {
+  stroke: #a1a1aa;
+}
+
 .dark\:text-white:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -1592,6 +1616,10 @@ pre.shiki {
 
   .md\:block {
     display: block;
+  }
+
+  .md\:hidden {
+    display: none;
   }
 
   .md\:h-5 {

@@ -8,6 +8,8 @@ Seamlessly integrated with any CSS framework, Biji UI allows you to leverage the
 
 Biji UI is inspired by popular headless UI libraries like HeadlessUI for React and Melt UI for Svelte.
 
+[Read the docs](https://biji-ui.fly.dev/)
+
 ## Usage
 
 Installation

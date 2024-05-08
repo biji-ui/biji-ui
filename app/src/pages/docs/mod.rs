@@ -86,34 +86,37 @@ pub fn TopNav() -> impl IntoView {
             </div>
             <div class="flex items-center gap-5">
                 <nav class="hidden md:block">
-                    <ul role="list" class="flex items-center gap-8">
+                    <ul role="list" class="flex items-center gap-5">
                         <li>
                             <a
                                 class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                href="https://docs.rs"
+                                href="https://docs.rs/biji-ui/latest/biji_ui/"
+                                title="Documentation"
                             >
-                                "API"
+                                <icons::BookText class="h-5 w-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::BookText>
                             </a>
                         </li>
                         <li>
                             <a
                                 class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                href="/"
+                                href="https://github.com/biji-ui/biji-ui"
+                                title="Github"
                             >
-                                "Documentation"
+                                <icons::Github class="h-5 w-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::Github>
                             </a>
                         </li>
                         <li>
                             <a
                                 class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                                href="https://github.com"
+                                href="https://github.com/biji-ui/biji-ui/issues"
+                                title="Report an issue"
                             >
-                                "Support"
+                                <icons::Bug class="h-5 w-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::Bug>
                             </a>
                         </li>
                     </ul>
                 </nav>
-                <div class="hidden md:h-5 md:bg-zinc-900/10 md:block md:w-px md:dark:bg-white/15"></div>
+                <div class="hidden md:block md:h-5 md:bg-zinc-900/10 md:w-px md:dark:bg-white/15"></div>
                 <div class="flex gap-4">
                     <ThemeMode/>
                 </div>
@@ -192,6 +195,32 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
     view! {
         <nav class={class}>
             <ul role="list">
+                <li class="md:hidden">
+                    <a
+                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        href="https://docs.rs/biji-ui/latest/biji_ui/"
+                    >
+                        "Documentation"
+                    </a>
+                </li>
+                <li class="md:hidden">
+                    <a
+                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        href="https://github.com/biji-ui/biji-ui"
+                    >
+                        "Github"
+                    </a>
+                </li>
+                <li class="md:hidden">
+                    <a
+                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        href="https://github.com/biji-ui/biji-ui/issues"
+                    >
+                        "Report an issue"
+                    </a>
+                </li>
+            </ul>
+            <ul role="list">
                 <li class="relative mt-6 md:mt-0">
                     <h2 class="text-xs font-semibold text-zinc-900 dark:text-white">
                         "Introduction"
@@ -266,14 +295,14 @@ pub fn DocsPage() -> impl IntoView {
     view! {
         <div class="h-full lg:ml-72 xl:ml-80">
             <header class="contents lg:fixed lg:inset-0 lg:flex lg:pointer-events-none lg:z-40">
-                <div class="contents lg:overflow-y-auto lg:pointer-events-auto lg:block lg:w-72 lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10 xl:w-80">
+                <div class="contents lg:block lg:overflow-y-auto lg:pointer-events-auto lg:w-72 lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10 xl:w-80">
                     <div class="hidden lg:flex">
                         <a aria-label="Home" href="/">
                             "biji"
                         </a>
                     </div>
                     <TopNav/>
-                    <SidebarNav class="hidden lg:mt-10 lg:block"/>
+                    <SidebarNav class="hidden lg:block lg:mt-10"/>
                 </div>
             </header>
             <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
