@@ -42,9 +42,6 @@ pub fn AccordionExample() -> impl IntoView {
                         <accordion::Item>
                             <accordion::Toggle>
                                 {title}
-                                <span>
-                                    <icons::Caret>
-                                </span>
                             </accordion::Toggle>
                             <accordion::Content>
                                 {content}
