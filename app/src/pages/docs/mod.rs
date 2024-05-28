@@ -82,7 +82,7 @@ pub fn TopNav() -> impl IntoView {
             <div class="flex items-center gap-5 lg:hidden">
                 <Sidebar/>
                 <a aria-label="Home" href="/">
-                    "biji"
+                    <icons::BijiUI class="h-5 w-auto"></icons::BijiUI>
                 </a>
             </div>
             <div class="flex items-center gap-5">
@@ -300,7 +300,7 @@ pub fn DocsPage() -> impl IntoView {
                 <div class="contents lg:block lg:overflow-y-auto lg:pointer-events-auto lg:w-72 lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10 xl:w-80">
                     <div class="hidden lg:flex">
                         <a aria-label="Home" href="/">
-                            "biji"
+                            <icons::BijiUI class="h-5 w-auto"></icons::BijiUI>
                         </a>
                     </div>
                     <TopNav/>
@@ -309,6 +309,7 @@ pub fn DocsPage() -> impl IntoView {
             </header>
             <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
                 <Outlet/>
+                <icons::HeroPattern></icons::HeroPattern>
             </div>
         </div>
     }

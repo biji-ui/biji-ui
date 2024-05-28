@@ -10,7 +10,7 @@ pub fn Code(
 ) -> impl IntoView {
     let UseColorModeReturn { mode, .. } = use_color_mode();
 
-    let (highlighted, set_highlighted) = create_signal(String::new());
+    let (_highlighted, set_highlighted) = create_signal(String::new());
 
     create_effect(move |_| {
         let theme = match mode.get() {
@@ -23,5 +23,5 @@ pub fn Code(
         set_highlighted.set(code);
     });
 
-    view! { <code inner_html={highlighted} class={class}></code> }
+    view! { <code inner_html={_highlighted} class={class}></code> }
 }
