@@ -2,7 +2,8 @@ use crate::{
     error_template::{AppError, ErrorTemplate},
     pages::docs::{
         accordion::AccordionDocPage, dialog::DialogDocPage, dropdown_menu::DropdownMenuDocPage,
-        getting_started::GettingStartedPage, menubar::MenubarDocPage, DocsPage,
+        getting_started::GettingStartedPage, menubar::MenubarDocPage, tooltip::TooltipDocPage,
+        DocsPage,
     },
 };
 
@@ -41,6 +42,7 @@ pub fn App() -> impl IntoView {
                         <Route path="dialog" view={DialogDocPage}/>
                         <Route path="dropdown-menu" view={DropdownMenuDocPage}/>
                         <Route path="menubar" view={MenubarDocPage}/>
+                        <Route path="tooltip" view={TooltipDocPage}/>
                     </Route>
                 </Routes>
             </div>
