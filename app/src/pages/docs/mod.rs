@@ -8,6 +8,7 @@ pub mod dialog;
 pub mod dropdown_menu;
 pub mod getting_started;
 pub mod menubar;
+pub mod tooltip;
 
 use biji_ui::components::{
     dialog::{self as dialogui, context::DialogContext},
@@ -188,6 +189,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
         ("/docs/dialog", "Dialog"),
         ("/docs/dropdown-menu", "Dropdown Menu"),
         ("/docs/menubar", "Menubar"),
+        ("/docs/tooltip", "Tooltip"),
     ];
 
     let dialog_ctx = use_context::<DialogContext>();
