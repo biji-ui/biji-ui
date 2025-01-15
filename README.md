@@ -54,3 +54,10 @@ pub fn AccordionExample() -> impl IntoView {
     }
 }
 ```
+
+## Version Compatibility
+
+Biji UI | Leptos
+--------|-------
+0.1.x   | 0.6.x
+0.2.x   | 0.7.x
