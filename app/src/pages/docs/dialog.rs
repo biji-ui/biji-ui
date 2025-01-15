@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use leptos::*;
+use leptos::{portal::Portal, prelude::*};
 
 #[component]
 pub fn DialogDocPage() -> impl IntoView {

@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use ev::{blur, focus, mousemove, pointerenter, pointerleave};
-use leptos::*;
+use leptos::ev::{blur, focus, mousemove, pointerenter, pointerleave};
+use leptos::{context::Provider, leptos_dom, prelude::*};
 use leptos_dom::helpers::TimeoutHandle;
 use leptos_use::{
     use_document, use_element_bounding, use_event_listener, UseElementBoundingReturn,
@@ -358,14 +358,14 @@ pub fn Content(
     let hide_delay = tooltip_ctx.hide_delay;
     let when = tooltip_ctx.open;
 
-    let show_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
-    let hide_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
-    let cls = create_rw_signal(if when.get_untracked() {
+    let show_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
+    let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
+    let cls = RwSignal::new(if when.get_untracked() {
         show_class.clone()
     } else {
         hide_class.clone()
     });
-    let show = create_rw_signal(when.get_untracked());
+    let show = RwSignal::new(when.get_untracked());
 
     let UseElementBoundingReturn {
         width: content_width,
@@ -382,20 +382,20 @@ pub fn Content(
     } = use_element_bounding(tooltip_ctx.trigger_ref);
 
     let style = move || {
-        with!(|top, left, width, height, content_width, content_height| {
-            tooltip_ctx.positioning.calculate_position_style(
-                top.clone(),
-                left.clone(),
-                width.clone(),
-                height.clone(),
-                content_height.clone(),
-                content_width.clone(),
-                tooltip_ctx.arrow_size as f64,
-            )
-        })
+        // with!(|top, left, width, height, content_width, content_height| {
+        tooltip_ctx.positioning.calculate_position_style(
+            top.get().clone(),
+            left.get().clone(),
+            width.get().clone(),
+            height.get().clone(),
+            content_height.get().clone(),
+            content_width.get().clone(),
+            tooltip_ctx.arrow_size as f64,
+        )
+        // })
     };
 
-    create_render_effect(move |_| {
+    let _ = RenderEffect::new(move |_| {
         let show_class = show_class.clone();
         if when.get() {
             // clear any possibly active timer

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use leptos::{html::Div, *};
+use leptos::{html::Div, prelude::*};
 
 use crate::items::{
     filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
@@ -24,8 +24,8 @@ pub struct RootContext {
 impl Default for RootContext {
     fn default() -> Self {
         Self {
-            item_focus: create_rw_signal(None),
-            items: create_rw_signal(HashMap::new()),
+            item_focus: RwSignal::new(None),
+            items: RwSignal::new(HashMap::new()),
             allow_menu_loop: false,
             allow_item_loop: false,
         }
@@ -132,11 +132,11 @@ impl Default for MenuContext {
         Self {
             index: 0,
             disabled: false,
-            open: create_rw_signal(false),
+            open: RwSignal::new(false),
             menu_ref: NodeRef::default(),
             trigger_ref: NodeRef::default(),
-            item_focus: create_rw_signal(None),
-            items: create_rw_signal(HashMap::new()),
+            item_focus: RwSignal::new(None),
+            items: RwSignal::new(HashMap::new()),
             allow_loop: false,
         }
     }

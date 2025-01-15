@@ -1,10 +1,10 @@
-use leptos::*;
+use leptos::prelude::*;
 
 use crate::components::code::Code;
 
 #[component]
 pub fn GettingStartedPage() -> impl IntoView {
-    let code = r#"use leptos::*;
+    let code = r#"use leptos::prelude::*;
 use biji_ui::components::accordion;
 
 #[component]

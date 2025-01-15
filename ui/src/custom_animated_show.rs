@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use leptos::{leptos_dom::helpers::TimeoutHandle, *};
+use leptos::{
+    leptos_dom::{self, helpers::TimeoutHandle},
+    prelude::*,
+};
 
 #[component]
 pub fn CustomAnimatedShow(
@@ -8,7 +11,7 @@ pub fn CustomAnimatedShow(
     children: ChildrenFn,
     /// If the component should show or not
     #[prop(into)]
-    when: MaybeSignal<bool>,
+    when: Signal<bool>,
     /// Optional CSS class to apply if `when == true`
     #[prop(into, optional)]
     show_class: String,
@@ -18,16 +21,16 @@ pub fn CustomAnimatedShow(
     /// The timeout after which the component will be unmounted if `when == false`
     hide_delay: Duration,
 ) -> impl IntoView {
-    let show_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
-    let hide_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
-    let cls = create_rw_signal(if when.get_untracked() {
+    let show_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
+    let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
+    let cls = RwSignal::new(if when.get_untracked() {
         show_class.clone()
     } else {
         hide_class.clone()
     });
-    let show = create_rw_signal(when.get_untracked());
+    let show = RwSignal::new(when.get_untracked());
 
-    create_render_effect(move |_| {
+    let eff = RenderEffect::new(move |_| {
         let show_class = show_class.clone();
         if when.get() {
             // clear any possibly active timer
@@ -64,6 +67,7 @@ pub fn CustomAnimatedShow(
         if let Some(Some(h)) = hide_handle.try_get_value() {
             h.clear();
         }
+        drop(eff);
     });
 
     view! {

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use leptos::{
     html::{Button, Div},
-    *,
+    prelude::*,
 };
 
 use crate::items::{
@@ -26,8 +26,8 @@ pub struct RootContext {
 impl Default for RootContext {
     fn default() -> Self {
         Self {
-            item_focus: create_rw_signal(None),
-            items: create_rw_signal(HashMap::new()),
+            item_focus: RwSignal::new(None),
+            items: RwSignal::new(HashMap::new()),
             allow_loop: false,
         }
     }
@@ -122,7 +122,7 @@ impl Default for ItemContext {
     fn default() -> Self {
         Self {
             index: 0,
-            open: create_rw_signal(false),
+            open: RwSignal::new(false),
             disabled: false,
             trigger_ref: NodeRef::default(),
             allow_loop: false,

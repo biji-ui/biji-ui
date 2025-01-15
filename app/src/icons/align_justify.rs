@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 
 #[component]
 pub fn AlignJustify(#[prop(into, optional)] class: String) -> impl IntoView {
