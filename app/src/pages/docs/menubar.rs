@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use biji_ui::cn;
-use leptos::{logging::log, *};
+use leptos::{logging::log, prelude::*};
 
 use crate::icons;
 

@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use leptos::*;
+use leptos::prelude::*;
 
 use crate::icons;
 

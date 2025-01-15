@@ -9,7 +9,7 @@ readme = "../README.md"
 repository = "https://github.com/biji-ui/biji-ui"
 
 [dependencies]
-leptos = { version = "0.6", features = ["nightly"] }
-leptos-use = { version = "0.10" }
-wasm-bindgen = "0.2"
+leptos = { version = "0.7" }
+leptos-use = { version = "0.15.3" }
+wasm-bindgen = "=0.2.99"
 web-sys = "0.3.69"

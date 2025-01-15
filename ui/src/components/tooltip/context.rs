@@ -1,13 +1,16 @@
 use std::time::Duration;
 
-use leptos::*;
+use leptos::{
+    html::{Button, Div},
+    prelude::*,
+};
 
 use super::tooltip::Positioning;
 
 #[derive(Copy, Clone)]
 pub struct TooltipContext {
-    pub trigger_ref: NodeRef<html::Button>,
-    pub content_ref: NodeRef<html::Div>,
+    pub trigger_ref: NodeRef<Button>,
+    pub content_ref: NodeRef<Div>,
     pub open: RwSignal<bool>,
     pub pointer_inside_trigger: RwSignal<bool>,
     pub pointer_inside_content: RwSignal<bool>,
@@ -21,9 +24,9 @@ impl Default for TooltipContext {
         Self {
             trigger_ref: NodeRef::default(),
             content_ref: NodeRef::default(),
-            open: create_rw_signal(false),
-            pointer_inside_trigger: create_rw_signal(false),
-            pointer_inside_content: create_rw_signal(false),
+            open: RwSignal::new(false),
+            pointer_inside_trigger: RwSignal::new(false),
+            pointer_inside_content: RwSignal::new(false),
             hide_delay: Duration::from_millis(200),
             positioning: Positioning::default(),
             arrow_size: 8,

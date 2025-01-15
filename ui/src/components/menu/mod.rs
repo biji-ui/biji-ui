@@ -1,5 +1,5 @@
 use crate::components::menubar::{context::RootContext, menu::Menu as MenuComponent};
-use leptos::*;
+use leptos::prelude::*;
 
 pub use crate::components::menubar::item::Item;
 pub use crate::components::menubar::item::SubMenuItem as SubMenu;

@@ -1,4 +1,4 @@
-use leptos::{ev::click, *};
+use leptos::{ev::click, prelude::*};
 use leptos_use::use_event_listener;
 
 use crate::{
@@ -51,7 +51,7 @@ pub fn Content(
 ) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogContext>();
 
-    let children = store_value(children);
+    // let children = StoredValue::new(children);
 
     view! {
         <CustomAnimatedShow

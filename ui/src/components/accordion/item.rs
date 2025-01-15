@@ -1,8 +1,9 @@
 use std::time::Duration;
 
 use leptos::{
+    context::Provider,
     ev::{click, focus, keydown},
-    *,
+    prelude::*,
 };
 use leptos_use::use_event_listener;
 
@@ -127,7 +128,7 @@ pub fn ItemContent(
 ) -> impl IntoView {
     let ctx = expect_context::<ItemContext>();
 
-    let children = store_value(children);
+    // let children = store_value(children);
     view! {
         <CustomAnimatedShow
             when={ctx.open}

@@ -21,7 +21,7 @@ cargo add biji-ui
 Example
 
 ```rust
-use leptos::*;
+use leptos::prelude::*;
 use biji_ui::components::accordion;
 
 #[component]
@@ -54,4 +54,3 @@ pub fn AccordionExample() -> impl IntoView {
     }
 }
 ```
-

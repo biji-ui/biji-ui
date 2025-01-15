@@ -1,8 +1,9 @@
 use std::time::Duration;
 
 use leptos::{
+    context::Provider,
     ev::{click, focus, keydown},
-    *,
+    prelude::*,
 };
 use leptos_use::{on_click_outside, use_event_listener};
 
@@ -76,7 +77,7 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
     let root_ctx = expect_context::<RootContext>();
     let menu_ctx = expect_context::<MenuContext>();
 
-    create_effect(move |_| {
+    let eff = RenderEffect::new(move |_| {
         if menu_ctx.open.get() == false {
             menu_ctx.set_focus(None);
         }
@@ -127,6 +128,10 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
         }
     });
 
+    on_cleanup(move || {
+        drop(eff);
+    });
+
     children()
 }
 
@@ -148,7 +153,6 @@ pub fn MenuContent(
 ) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
 
-    let children = store_value(children);
     view! {
         <CustomAnimatedShow
             when={menu_ctx.open}

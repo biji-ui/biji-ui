@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use leptos::*;
-use leptos_router::*;
+use leptos::{portal::Portal, prelude::*};
+use leptos_router::{components::*, hooks::use_location};
 
 pub mod accordion;
 pub mod dialog;
@@ -48,12 +48,12 @@ pub fn ThemeMode() -> impl IntoView {
                                     <div class="flex gap-2">
                                         {match m.clone() {
                                             ColorMode::Light => {
-                                                view! { <icons::Sun class="w-4"></icons::Sun> }
+                                                view! { <icons::Sun class="w-4"></icons::Sun> }.into_any()
                                             }
                                             ColorMode::Dark => {
-                                                view! { <icons::Moon class="w-4"></icons::Moon> }
+                                                view! { <icons::Moon class="w-4"></icons::Moon> }.into_any()
                                             }
-                                            _ => view! { <icons::SunMoon class="w-4"></icons::SunMoon> },
+                                            _ => view! { <icons::SunMoon class="w-4"></icons::SunMoon> }.into_any(),
                                         }}
                                         {title}
                                     </div>
@@ -132,7 +132,7 @@ pub fn SidebarTrigger() -> impl IntoView {
 
     let is_large_screen = use_media_query("(min-width: 1024px)");
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if is_large_screen.get() {
             ctx.close();
         }

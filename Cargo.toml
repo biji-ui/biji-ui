@@ -13,10 +13,10 @@ lto = true
 opt-level = 'z'
 
 [workspace.dependencies]
-leptos = { version = "0.6", features = ["nightly"] }
-leptos_meta = { version = "0.6", features = ["nightly"] }
-leptos_router = { version = "0.6", features = ["nightly"] }
-leptos_axum = { version = "0.6" }
+leptos = { version = "0.7", features = ["nightly"] }
+leptos_meta = { version = "0.7" }
+leptos_router = { version = "0.7", features = ["nightly"] }
+leptos_axum = { version = "0.7" }
 
 axum = "0.7"
 cfg-if = "1"
@@ -29,7 +29,7 @@ thiserror = "1"
 tokio = { version = "1.37.0", features = ["full"] }
 tower = { version = "0.4.13", features = ["full"] }
 tower-http = { version = "0.5", features = ["full"] }
-wasm-bindgen = "0.2"
+wasm-bindgen = "=0.2.99"
 
 # See https://github.com/akesson/cargo-leptos for documentation of all the parameters.
 

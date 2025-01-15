@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use leptos::{
+    context::Provider,
     ev::{click, focus, keydown},
-    html::Div,
-    *,
+    prelude::*,
 };
 use leptos_use::use_event_listener;
 use wasm_bindgen::JsCast;
@@ -28,7 +28,7 @@ pub fn Item(
 
     let item_ctx = use_context::<ItemData>();
 
-    let trigger_ref = create_node_ref::<Div>();
+    let trigger_ref = NodeRef::new();
 
     let index = menu_ctx.next_index();
 
@@ -96,7 +96,6 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                         }
                     }
                     ItemData::SubMenuItem { child_context, .. } => {
-                        child_context.open();
                         if let Some(item) = child_context.navigate_first_item() {
                             item.focus();
                         } else {
@@ -280,7 +279,6 @@ pub fn SubMenuItemContent(
 ) -> impl IntoView {
     let item_ctx = expect_context::<MenuContext>();
 
-    let children = store_value(children);
     view! {
         <CustomAnimatedShow
             when={item_ctx.open}
