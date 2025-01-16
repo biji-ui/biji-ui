@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::{
     context::Provider,
-    ev::{click, focus, keydown},
+    ev::{blur, click, focus, keydown},
     prelude::*,
 };
 use leptos_use::use_event_listener;
@@ -69,8 +69,12 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
     let item_ctx = expect_context::<ItemData>();
 
+    let (key, set_key) = signal::<Option<String>>(None);
+
     let _ = use_event_listener(item_ctx.get_trigger_ref(), keydown, move |evt| {
         let key = evt.key();
+
+        set_key(Some(key.clone()));
 
         match key.as_str() {
             "ArrowDown" => {
@@ -96,10 +100,14 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                         }
                     }
                     ItemData::SubMenuItem { child_context, .. } => {
-                        if let Some(item) = child_context.navigate_first_item() {
-                            item.focus();
+                        if !child_context.open.get_untracked() {
+                            child_context.open();
                         } else {
-                            menu_ctx.close();
+                            if let Some(item) = child_context.navigate_first_item() {
+                                item.focus();
+                            } else {
+                                menu_ctx.close();
+                            }
                         }
                     }
                 };
@@ -109,6 +117,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 if item_ctx.is_submenu() {
                     menu_ctx.close();
                     menu_ctx.focus();
+                    menu_ctx.item_focus.set(None);
                 } else {
                     if let Some(item) = root_ctx.navigate_previous_item() {
                         item.focus();
@@ -155,6 +164,30 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
 
     let _ = use_event_listener(item_ctx.get_trigger_ref(), focus, move |_| {
         menu_ctx.set_focus(Some(item_ctx.get_index()));
+        match item_ctx {
+            ItemData::SubMenuItem { child_context, .. } => {
+                if !child_context.open.get_untracked() {
+                    child_context.open();
+                }
+            }
+            _ => {}
+        }
+    });
+
+    let _ = use_event_listener(item_ctx.get_trigger_ref(), blur, move |_| {
+        menu_ctx.set_focus(Some(item_ctx.get_index()));
+        match item_ctx {
+            ItemData::SubMenuItem { child_context, .. } => {
+                if child_context.open.get_untracked() {
+                    if let Some(key) = key.get() {
+                        if key == "ArrowDown" || key == "ArrowUp" || key == "ArrowLeft" {
+                            child_context.close();
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
     });
 
     children()
