@@ -45,7 +45,7 @@ pub fn RootEvents(children: Children) -> impl IntoView {
     let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
     let dialog_ctx = expect_context::<DialogContext>();
 
-    let _ = RenderEffect::new(move |_| {
+    let eff = RenderEffect::new(move |_| {
         if dialog_ctx.prevent_scroll {
             if dialog_ctx.open.get() {
                 if let Some(h) = hide_handle.get_value() {
@@ -83,6 +83,10 @@ pub fn RootEvents(children: Children) -> impl IntoView {
                 hide_handle.set_value(Some(h));
             }
         }
+    });
+
+    on_cleanup(move || {
+        drop(eff);
     });
 
     children()
