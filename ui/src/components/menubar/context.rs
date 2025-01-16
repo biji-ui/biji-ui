@@ -58,8 +58,8 @@ impl RootContext {
     }
 
     pub fn focus_active_item(&self) -> bool {
-        if let Some(Some(item_focus)) = self.item_focus.try_get() {
-            if let Some(item) = self.items.get().get(&item_focus) {
+        if let Some(Some(item_focus)) = self.item_focus.try_get_untracked() {
+            if let Some(item) = self.items.get_untracked().get(&item_focus) {
                 return item.focus();
             }
         }
