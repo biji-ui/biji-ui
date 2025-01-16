@@ -382,20 +382,18 @@ pub fn Content(
     } = use_element_bounding(tooltip_ctx.trigger_ref);
 
     let style = move || {
-        // with!(|top, left, width, height, content_width, content_height| {
         tooltip_ctx.positioning.calculate_position_style(
-            top.get().clone(),
-            left.get().clone(),
-            width.get().clone(),
-            height.get().clone(),
-            content_height.get().clone(),
-            content_width.get().clone(),
+            *top.read(),
+            *left.read(),
+            *width.read(),
+            *height.read(),
+            *content_height.read(),
+            *content_width.read(),
             tooltip_ctx.arrow_size as f64,
         )
-        // })
     };
 
-    let _ = RenderEffect::new(move |_| {
+    let eff = RenderEffect::new(move |_| {
         let show_class = show_class.clone();
         if when.get() {
             // clear any possibly active timer
@@ -432,6 +430,7 @@ pub fn Content(
         if let Some(Some(h)) = hide_handle.try_get_value() {
             h.clear();
         }
+        drop(eff);
     });
 
     view! {
