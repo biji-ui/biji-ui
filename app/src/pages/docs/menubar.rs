@@ -82,6 +82,44 @@ pub fn MenubarExample() -> impl IntoView {
                             </menubar::SubMenu>
                         </menubar::SubMenuContent>
                     </menubar::SubMenu>
+                    <hr class="h-px bg-gray-100"/>
+                    <menubar::SubMenu class="relative">
+                        <menubar::SubMenuTrigger class={cn!(
+                            "h-full w-full items-center justify-between", ITEM_STYLE
+                        )}>
+                            "Share" <icons::ChevronRight class="h-4"></icons::ChevronRight>
+                        </menubar::SubMenuTrigger>
+                        <menubar::SubMenuContent
+                            class="flex absolute top-0 left-full flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
+                            show_class="z-10 opacity-100 transition duration-150 ease-in"
+                            hide_class="opacity-0 transition duration-200 ease-out -z-10"
+                            hide_delay={Duration::from_millis(200)}
+                        >
+                            <menubar::Item class={ITEM_STYLE}>"Email"</menubar::Item>
+                            <menubar::Item class={ITEM_STYLE} disabled=true>
+                                "Message"
+                            </menubar::Item>
+                            <menubar::Item class={ITEM_STYLE}>"Copy link"</menubar::Item>
+                            <hr class="h-px bg-gray-100"/>
+                            <menubar::SubMenu class="relative">
+                                <menubar::SubMenuTrigger class={cn!(
+                                    "h-full w-full items-center justify-between", ITEM_STYLE
+                                )}>
+                                    "More" <icons::ChevronRight class="h-4"></icons::ChevronRight>
+                                </menubar::SubMenuTrigger>
+                                <menubar::SubMenuContent
+                                    class="flex absolute top-0 left-full flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
+                                    show_class="z-10 opacity-100 transition duration-150 ease-in"
+                                    hide_class="opacity-0 transition duration-200 ease-out -z-10"
+                                    hide_delay={Duration::from_millis(200)}
+                                >
+                                    <menubar::Item class={ITEM_STYLE}>"Facebook"</menubar::Item>
+                                    <menubar::Item class={ITEM_STYLE}>"LinkedIn"</menubar::Item>
+                                    <menubar::Item class={ITEM_STYLE}>"Instagram"</menubar::Item>
+                                </menubar::SubMenuContent>
+                            </menubar::SubMenu>
+                        </menubar::SubMenuContent>
+                    </menubar::SubMenu>
                 </menubar::Content>
             </menubar::Menu>
             <menubar::Menu class="relative">

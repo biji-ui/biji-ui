@@ -158,6 +158,16 @@ impl MenuContext {
     pub fn next_index(&self) -> usize {
         self.items.get_untracked().len()
     }
+
+    pub fn close_all(&self) {
+        self.items.try_update(|items| {
+            for item in items.values() {
+                if let ItemData::SubMenuItem { child_context, .. } = item {
+                    child_context.close();
+                }
+            }
+        });
+    }
 }
 
 impl IsActive for MenuContext {
