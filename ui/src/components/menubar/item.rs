@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::{
     context::Provider,
-    ev::{blur, click, focus, keydown},
+    ev::{click, focus, keydown},
     prelude::*,
 };
 use leptos_use::use_event_listener;
@@ -69,12 +69,8 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
     let item_ctx = expect_context::<ItemData>();
 
-    let (key, set_key) = signal::<Option<String>>(None);
-
     let _ = use_event_listener(item_ctx.get_trigger_ref(), keydown, move |evt| {
         let key = evt.key();
-
-        set_key(Some(key.clone()));
 
         match key.as_str() {
             "ArrowDown" => {
@@ -164,26 +160,11 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
 
     let _ = use_event_listener(item_ctx.get_trigger_ref(), focus, move |_| {
         menu_ctx.set_focus(Some(item_ctx.get_index()));
+        menu_ctx.close_all();
         match item_ctx {
             ItemData::SubMenuItem { child_context, .. } => {
                 if !child_context.open.get_untracked() {
                     child_context.open();
-                }
-            }
-            _ => {}
-        }
-    });
-
-    let _ = use_event_listener(item_ctx.get_trigger_ref(), blur, move |_| {
-        menu_ctx.set_focus(Some(item_ctx.get_index()));
-        match item_ctx {
-            ItemData::SubMenuItem { child_context, .. } => {
-                if child_context.open.get_untracked() {
-                    if let Some(key) = key.get() {
-                        if key == "ArrowDown" || key == "ArrowUp" || key == "ArrowLeft" {
-                            child_context.close();
-                        }
-                    }
                 }
             }
             _ => {}
@@ -273,10 +254,6 @@ pub fn SubMenuItemTrigger(
 pub fn SubMenuItemTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
     let item_ctx = expect_context::<ItemData>();
-
-    let _ = use_event_listener(menu_ctx.trigger_ref, click, move |_| {
-        menu_ctx.toggle();
-    });
 
     let _ = use_event_listener(menu_ctx.trigger_ref, keydown, move |evt| {
         if evt.key() == "Enter" {
