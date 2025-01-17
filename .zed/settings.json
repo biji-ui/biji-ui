@@ -1,0 +1,12 @@
+{
+  "languages": {
+    "Rust": {
+      "format_on_save": {
+        "external": {
+          "command": "bash",
+          "arguments": [".zed/format.sh"]
+        }
+      }
+    }
+  }
+}
