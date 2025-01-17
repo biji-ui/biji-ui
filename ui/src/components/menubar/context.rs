@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use leptos::{html::Div, *};
+use leptos::{html::Div, prelude::*};
 
 use crate::items::{
     filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
@@ -24,8 +24,8 @@ pub struct RootContext {
 impl Default for RootContext {
     fn default() -> Self {
         Self {
-            item_focus: create_rw_signal(None),
-            items: create_rw_signal(HashMap::new()),
+            item_focus: RwSignal::new(None),
+            items: RwSignal::new(HashMap::new()),
             allow_menu_loop: false,
             allow_item_loop: false,
         }
@@ -58,8 +58,8 @@ impl RootContext {
     }
 
     pub fn focus_active_item(&self) -> bool {
-        if let Some(Some(item_focus)) = self.item_focus.try_get() {
-            if let Some(item) = self.items.get().get(&item_focus) {
+        if let Some(Some(item_focus)) = self.item_focus.try_get_untracked() {
+            if let Some(item) = self.items.get_untracked().get(&item_focus) {
                 return item.focus();
             }
         }
@@ -132,11 +132,11 @@ impl Default for MenuContext {
         Self {
             index: 0,
             disabled: false,
-            open: create_rw_signal(false),
+            open: RwSignal::new(false),
             menu_ref: NodeRef::default(),
             trigger_ref: NodeRef::default(),
-            item_focus: create_rw_signal(None),
-            items: create_rw_signal(HashMap::new()),
+            item_focus: RwSignal::new(None),
+            items: RwSignal::new(HashMap::new()),
             allow_loop: false,
         }
     }
@@ -157,6 +157,16 @@ impl MenuContext {
 
     pub fn next_index(&self) -> usize {
         self.items.get_untracked().len()
+    }
+
+    pub fn close_all(&self) {
+        self.items.try_update(|items| {
+            for item in items.values() {
+                if let ItemData::SubMenuItem { child_context, .. } = item {
+                    child_context.close();
+                }
+            }
+        });
     }
 }
 

@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::{
     html::{Button, Div},
-    *,
+    prelude::*,
 };
 
 #[derive(Copy, Clone)]
@@ -18,8 +18,8 @@ impl Default for DialogContext {
     fn default() -> Self {
         Self {
             trigger_ref: NodeRef::default(),
-            open: create_rw_signal(false),
-            root: create_rw_signal(RootContext::default()),
+            open: RwSignal::new(false),
+            root: RwSignal::new(RootContext::default()),
             prevent_scroll: true,
             hide_delay: Duration::from_millis(200),
         }

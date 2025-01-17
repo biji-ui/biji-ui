@@ -1,4 +1,4 @@
-use leptos::{logging::log, *};
+use leptos::{logging::log, prelude::*};
 
 use crate::icons;
 

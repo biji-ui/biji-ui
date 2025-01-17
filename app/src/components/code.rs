@@ -1,5 +1,5 @@
 use jspackages::shiki::code_to_html;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_use::{use_color_mode, ColorMode, UseColorModeReturn};
 
 #[component]
@@ -10,9 +10,9 @@ pub fn Code(
 ) -> impl IntoView {
     let UseColorModeReturn { mode, .. } = use_color_mode();
 
-    let (_highlighted, set_highlighted) = create_signal(String::new());
+    let (_highlighted, set_highlighted) = signal(String::new());
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         let theme = match mode.get() {
             ColorMode::Dark => "vesper",
             ColorMode::Light => "solarized-light",

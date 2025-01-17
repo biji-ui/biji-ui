@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use leptos::{
+    context::Provider,
     ev::{click, focus, keydown},
-    html::Div,
-    *,
+    prelude::*,
 };
 use leptos_use::use_event_listener;
 use wasm_bindgen::JsCast;
@@ -28,7 +28,7 @@ pub fn Item(
 
     let item_ctx = use_context::<ItemData>();
 
-    let trigger_ref = create_node_ref::<Div>();
+    let trigger_ref = NodeRef::new();
 
     let index = menu_ctx.next_index();
 
@@ -96,11 +96,14 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                         }
                     }
                     ItemData::SubMenuItem { child_context, .. } => {
-                        child_context.open();
-                        if let Some(item) = child_context.navigate_first_item() {
-                            item.focus();
+                        if !child_context.open.get_untracked() {
+                            child_context.open();
                         } else {
-                            menu_ctx.close();
+                            if let Some(item) = child_context.navigate_first_item() {
+                                item.focus();
+                            } else {
+                                menu_ctx.close();
+                            }
                         }
                     }
                 };
@@ -110,6 +113,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 if item_ctx.is_submenu() {
                     menu_ctx.close();
                     menu_ctx.focus();
+                    menu_ctx.item_focus.set(None);
                 } else {
                     if let Some(item) = root_ctx.navigate_previous_item() {
                         item.focus();
@@ -156,6 +160,15 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
 
     let _ = use_event_listener(item_ctx.get_trigger_ref(), focus, move |_| {
         menu_ctx.set_focus(Some(item_ctx.get_index()));
+        menu_ctx.close_all();
+        match item_ctx {
+            ItemData::SubMenuItem { child_context, .. } => {
+                if !child_context.open.get_untracked() {
+                    child_context.open();
+                }
+            }
+            _ => {}
+        }
     });
 
     children()
@@ -242,10 +255,6 @@ pub fn SubMenuItemTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
     let item_ctx = expect_context::<ItemData>();
 
-    let _ = use_event_listener(menu_ctx.trigger_ref, click, move |_| {
-        menu_ctx.toggle();
-    });
-
     let _ = use_event_listener(menu_ctx.trigger_ref, keydown, move |evt| {
         if evt.key() == "Enter" {
             menu_ctx.toggle();
@@ -280,7 +289,6 @@ pub fn SubMenuItemContent(
 ) -> impl IntoView {
     let item_ctx = expect_context::<MenuContext>();
 
-    let children = store_value(children);
     view! {
         <CustomAnimatedShow
             when={item_ctx.open}
