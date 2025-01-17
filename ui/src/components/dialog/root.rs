@@ -1,6 +1,10 @@
 use std::time::Duration;
 
-use leptos::{leptos_dom::helpers::TimeoutHandle, *};
+use leptos::{
+    context::Provider,
+    leptos_dom::{self, helpers::TimeoutHandle},
+    prelude::*,
+};
 
 use crate::components::dialog::context::{DialogContext, RootContext};
 
@@ -19,7 +23,7 @@ pub fn Root(
         ..RootContext::default()
     };
     let ctx = DialogContext {
-        root: create_rw_signal(root_ctx),
+        root: RwSignal::new(root_ctx),
         prevent_scroll,
         hide_delay,
         ..Default::default()
@@ -38,10 +42,10 @@ pub fn Root(
 
 #[component]
 pub fn RootEvents(children: Children) -> impl IntoView {
-    let hide_handle: StoredValue<Option<TimeoutHandle>> = store_value(None);
+    let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
     let dialog_ctx = expect_context::<DialogContext>();
 
-    create_render_effect(move |_| {
+    let eff = RenderEffect::new(move |_| {
         if dialog_ctx.prevent_scroll {
             if dialog_ctx.open.get() {
                 if let Some(h) = hide_handle.get_value() {
@@ -79,6 +83,10 @@ pub fn RootEvents(children: Children) -> impl IntoView {
                 hide_handle.set_value(Some(h));
             }
         }
+    });
+
+    on_cleanup(move || {
+        drop(eff);
     });
 
     children()

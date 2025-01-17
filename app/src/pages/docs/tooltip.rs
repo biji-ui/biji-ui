@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::{portal::Portal, prelude::*};
 
 #[component]
 pub fn TooltipDocPage() -> impl IntoView {

@@ -1,4 +1,4 @@
-use leptos::{html::Div, *};
+use leptos::{context::Provider, prelude::*};
 
 use super::context::{AccordionContext, RootContext};
 
@@ -8,13 +8,13 @@ pub fn Root(
     #[prop(into, optional)] class: String,
     #[prop(default = false)] allow_loop: bool,
 ) -> impl IntoView {
-    let accordion_ref = create_node_ref::<Div>();
+    let accordion_ref = NodeRef::new();
     let root_ctx = RootContext {
         allow_loop,
         ..RootContext::default()
     };
     let ctx = AccordionContext {
-        root: create_rw_signal(root_ctx),
+        root: RwSignal::new(root_ctx),
         accordion_ref,
     };
 

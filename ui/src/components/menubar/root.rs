@@ -1,4 +1,4 @@
-use leptos::{html::Div, *};
+use leptos::{context::Provider, prelude::*};
 
 use crate::components::menubar::context::{MenubarContext, RootContext};
 
@@ -9,7 +9,7 @@ pub fn Root(
     #[prop(default = false)] allow_menu_loop: bool,
     #[prop(default = false)] allow_item_loop: bool,
 ) -> impl IntoView {
-    let menubar_ref = create_node_ref::<Div>();
+    let menubar_ref = NodeRef::new();
 
     let root_ctx = RootContext {
         allow_item_loop,
@@ -18,7 +18,7 @@ pub fn Root(
     };
     let ctx = MenubarContext {
         menubar_ref,
-        root: create_rw_signal(root_ctx),
+        root: RwSignal::new(root_ctx),
     };
 
     view! {

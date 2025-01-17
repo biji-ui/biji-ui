@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use leptos::Signal;
+use leptos::prelude::*;
 
 pub fn make_hull(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
     let mut points = points.to_vec();
@@ -26,10 +26,10 @@ pub type ElPoints = (Signal<f64>, Signal<f64>, Signal<f64>, Signal<f64>);
 
 pub fn get_points_from_el((top, right, bottom, left): &ElPoints) -> Vec<(f64, f64)> {
     vec![
-        (left(), top()),
-        (right(), top()),
-        (right(), bottom()),
-        (left(), bottom()),
+        (left.get(), top.get()),
+        (right.get(), top.get()),
+        (right.get(), bottom.get()),
+        (left.get(), bottom.get()),
     ]
 }
 
