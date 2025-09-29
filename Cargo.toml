@@ -3,7 +3,7 @@ resolver = "2"
 members = ["app", "frontend", "server", "ui", "jspackages"]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 # need to be applied only to wasm build
@@ -13,12 +13,12 @@ lto = true
 opt-level = 'z'
 
 [workspace.dependencies]
-leptos = { version = "0.7", features = ["nightly"] }
-leptos_meta = { version = "0.7" }
-leptos_router = { version = "0.7", features = ["nightly"] }
-leptos_axum = { version = "0.7" }
+leptos = { version = "0.8.9", features = ["nightly"] }
+leptos_meta = { version = "0.8.5" }
+leptos_router = { version = "0.8.7", features = ["nightly"] }
+leptos_axum = { version = "0.8.6" }
 
-axum = "0.7"
+axum = "0.8"
 cfg-if = "1"
 console_error_panic_hook = "0.1.7"
 console_log = "1"
@@ -27,8 +27,8 @@ log = "0.4.20"
 simple_logger = "5.0.0"
 thiserror = "1"
 tokio = { version = "1.37.0", features = ["full"] }
-tower = { version = "0.4.13", features = ["full"] }
-tower-http = { version = "0.5", features = ["full"] }
+tower = { version = "0.5", features = ["full"] }
+tower-http = { version = "0.6", features = ["full"] }
 wasm-bindgen = "=0.2.100"
 
 # See https://github.com/akesson/cargo-leptos for documentation of all the parameters.
