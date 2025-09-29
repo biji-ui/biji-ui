@@ -64,6 +64,7 @@ pub fn MenuTrigger(#[prop(into, optional)] class: String, children: Children) ->
                 data-state={menu_ctx.index}
                 data-disabled={menu_ctx.disabled}
                 data-highlighted={move || root_ctx.item_in_focus(menu_ctx.index)}
+                data-open={move || menu_ctx.open.get()}
                 tabindex=0
             >
                 {children()}
