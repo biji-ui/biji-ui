@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::{
     context::Provider,
-    ev::{click, focus, keydown},
+    ev::{focus, keydown},
     prelude::*,
 };
 use leptos_use::use_event_listener;
@@ -69,6 +69,18 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
     let item_ctx = expect_context::<ItemData>();
 
+    let handle_on_click = move || {
+        if let Some(trigger_ref) = item_ctx.get_trigger_ref().get() {
+            if let Some(child) = trigger_ref.children().get_with_index(0) {
+                if let Ok(child) = child.clone().dyn_into::<HtmlButtonElement>() {
+                    let _ = child.click();
+                } else if let Ok(child) = child.dyn_into::<HtmlAnchorElement>() {
+                    let _ = child.click();
+                }
+            }
+        }
+    };
+
     let _ = use_event_listener(item_ctx.get_trigger_ref(), keydown, move |evt| {
         let key = evt.key();
 
@@ -123,22 +135,14 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 }
             }
             "Enter" => {
-                if let Some(trigger_ref) = item_ctx.get_trigger_ref().get() {
-                    if let Some(child) = trigger_ref.children().get_with_index(0) {
-                        if let Ok(child) = child.clone().dyn_into::<HtmlButtonElement>() {
-                            let _ = child.click();
-                        } else if let Ok(child) = child.dyn_into::<HtmlAnchorElement>() {
-                            let _ = child.click();
-                        }
+                handle_on_click();
+                match item_ctx {
+                    ItemData::Item { .. } => {
+                        root_ctx.close_all();
+                        root_ctx.focus_active_item();
                     }
-                    match item_ctx {
-                        ItemData::Item { .. } => {
-                            root_ctx.close_all();
-                            root_ctx.focus_active_item();
-                        }
-                        _ => {}
-                    };
-                }
+                    _ => {}
+                };
             }
             "Escape" => {
                 menu_ctx.close();
@@ -147,16 +151,6 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
             _ => {}
         };
     });
-
-    match item_ctx {
-        ItemData::Item { trigger_ref, .. } => {
-            let _ = use_event_listener(trigger_ref, click, move |_| {
-                root_ctx.close_all();
-                root_ctx.focus_active_item();
-            });
-        }
-        _ => {}
-    }
 
     let _ = use_event_listener(item_ctx.get_trigger_ref(), focus, move |_| {
         menu_ctx.set_focus(Some(item_ctx.get_index()));
