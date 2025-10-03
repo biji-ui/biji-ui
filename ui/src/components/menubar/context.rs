@@ -2,9 +2,12 @@ use std::collections::HashMap;
 
 use leptos::{html::Div, prelude::*};
 
-use crate::items::{
-    filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
-    ManageFocus, NavigateItems, Toggle,
+use crate::{
+    items::{
+        filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
+        ManageFocus, NavigateItems, Toggle,
+    },
+    utils::positioning::Positioning,
 };
 
 #[derive(Copy, Clone)]
@@ -125,6 +128,7 @@ pub struct MenuContext {
     pub item_focus: RwSignal<Option<usize>>,
     pub items: RwSignal<HashMap<usize, ItemData>>,
     pub allow_loop: bool,
+    pub positioning: Positioning,
 }
 
 impl Default for MenuContext {
@@ -138,6 +142,7 @@ impl Default for MenuContext {
             item_focus: RwSignal::new(None),
             items: RwSignal::new(HashMap::new()),
             allow_loop: false,
+            positioning: Positioning::BottomStart,
         }
     }
 }
