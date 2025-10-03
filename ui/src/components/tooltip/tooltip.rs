@@ -10,200 +10,11 @@ use leptos_use::{
 use crate::{
     cn,
     components::tooltip::context::TooltipContext,
-    utils::polygon::{get_points_from_el, make_hull, point_in_polygon},
+    utils::{
+        polygon::{get_points_from_el, make_hull, point_in_polygon},
+        positioning::Positioning,
+    },
 };
-
-#[derive(Copy, Clone)]
-pub enum Positioning {
-    Top,
-    TopStart,
-    TopEnd,
-    Right,
-    RightStart,
-    RightEnd,
-    Bottom,
-    BottomStart,
-    BottomEnd,
-    Left,
-    LeftStart,
-    LeftEnd,
-}
-
-impl Default for Positioning {
-    fn default() -> Self {
-        Positioning::Top
-    }
-}
-
-impl Positioning {
-    pub fn calculate_position_style(
-        self,
-        top: f64,
-        left: f64,
-        width: f64,
-        height: f64,
-        content_height: f64,
-        content_width: f64,
-        arrow_size: f64,
-    ) -> String {
-        let position = self.calculate_position(
-            top,
-            left,
-            width,
-            height,
-            content_height,
-            content_width,
-            arrow_size,
-        );
-        let arrow_position = self.calculate_arrow_position(top, left, width, height, arrow_size);
-        format!(
-            "position: fixed; top: {}px; left: {}px; --biji-tooltip-arrow-top: {}px; --biji-tooltip-arrow-left: {}px; --biji-tooltip-arrow-rotation: {}deg;",
-            position.0, position.1, arrow_position.0, arrow_position.1, arrow_position.2
-        )
-    }
-
-    pub fn calculate_position(
-        self,
-        top: f64,
-        left: f64,
-        width: f64,
-        height: f64,
-        content_height: f64,
-        content_width: f64,
-        arrow_size: f64,
-    ) -> (f64, f64) {
-        match self {
-            Positioning::Top => {
-                let top = top - content_height - arrow_size;
-                let left = left + (width / 2.0) - (content_width / 2.0);
-                (top, left)
-            }
-            Positioning::TopStart => {
-                let top = top - content_height - arrow_size;
-                (top, left)
-            }
-            Positioning::TopEnd => {
-                let top = top - content_height - arrow_size;
-                let left = left + width - content_width;
-                (top, left)
-            }
-            Positioning::Right => {
-                let top = top + (height / 2.0) - (content_height / 2.0);
-                let left = left + width + arrow_size;
-                (top, left)
-            }
-            Positioning::RightStart => {
-                let left = left + width + arrow_size;
-                (top, left)
-            }
-            Positioning::RightEnd => {
-                let top = top + height - content_height;
-                let left = left + width + arrow_size;
-                (top, left)
-            }
-            Positioning::Bottom => {
-                let top = top + height + arrow_size;
-                let left = left + (width / 2.0) - (content_width / 2.0);
-                (top, left)
-            }
-            Positioning::BottomStart => {
-                let top = top + height + arrow_size;
-                (top, left)
-            }
-            Positioning::BottomEnd => {
-                let top = top + height + arrow_size;
-                let left = left + width - content_width;
-                (top, left)
-            }
-            Positioning::Left => {
-                let top = top + (height / 2.0) - (content_height / 2.0);
-                let left = left - content_width - arrow_size;
-                (top, left)
-            }
-            Positioning::LeftStart => {
-                let left = left - content_width - arrow_size;
-                (top, left)
-            }
-            Positioning::LeftEnd => {
-                let left = left - content_width - arrow_size;
-                let top = top + height - content_height;
-                (top, left)
-            }
-        }
-    }
-
-    pub fn calculate_arrow_position(
-        self,
-        top: f64,
-        left: f64,
-        width: f64,
-        height: f64,
-        arrow_size: f64,
-    ) -> (f64, f64, i32) {
-        match self {
-            Positioning::Top => {
-                let top = top - arrow_size - (arrow_size / 2.0);
-                let left = left + (width / 2.0) - (arrow_size / 2.0);
-                (top, left, 225)
-            }
-            Positioning::TopStart => {
-                let top = top - arrow_size - (arrow_size / 2.0);
-                let left = left + (width / 2.0) - (arrow_size / 2.0);
-                (top, left, 225)
-            }
-            Positioning::TopEnd => {
-                let top = top - arrow_size - (arrow_size / 2.0);
-                let left = left + (width / 2.0) - (arrow_size / 2.0);
-                (top, left, 225)
-            }
-            Positioning::Right => {
-                let top = top + (height / 2.0) - (arrow_size / 2.0);
-                let left = left + width + (arrow_size / 2.0);
-                (top, left, 315)
-            }
-            Positioning::RightStart => {
-                let top = top + (height / 2.0) - (arrow_size / 2.0);
-                let left = left + width + (arrow_size / 2.0);
-                (top, left, 315)
-            }
-            Positioning::RightEnd => {
-                let top = top + (height / 2.0) - (arrow_size / 2.0);
-                let left = left + width + (arrow_size / 2.0);
-                (top, left, 315)
-            }
-            Positioning::Bottom => {
-                let top = top + height + arrow_size - (arrow_size / 2.0);
-                let left = left + (width / 2.0) - (arrow_size / 2.0);
-                (top, left, 45)
-            }
-            Positioning::BottomStart => {
-                let top = top + height + arrow_size - (arrow_size / 2.0);
-                let left = left + (width / 2.0) - (arrow_size / 2.0);
-                (top, left, 45)
-            }
-            Positioning::BottomEnd => {
-                let top = top + height + arrow_size - (arrow_size / 2.0);
-                let left = left + (width / 2.0) - (arrow_size / 2.0);
-                (top, left, 45)
-            }
-            Positioning::Left => {
-                let top = top + (height / 2.0) - (arrow_size / 2.0);
-                let left = left - arrow_size - (arrow_size / 2.0);
-                (top, left, 135)
-            }
-            Positioning::LeftStart => {
-                let top = top + (height / 2.0) - (arrow_size / 2.0);
-                let left = left - arrow_size - (arrow_size / 2.0);
-                (top, left, 135)
-            }
-            Positioning::LeftEnd => {
-                let top = top + (height / 2.0) - (arrow_size / 2.0);
-                let left = left - arrow_size - (arrow_size / 2.0);
-                (top, left, 135)
-            }
-        }
-    }
-}
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
@@ -390,6 +201,7 @@ pub fn Content(
             *content_height.read(),
             *content_width.read(),
             tooltip_ctx.arrow_size as f64,
+            tooltip_ctx.arrow_size as f64,
         )
     };
 
@@ -455,7 +267,6 @@ pub fn Arrow(#[prop(into, optional)] class: String) -> impl IntoView {
                     tooltip_ctx.arrow_size,
                 )
             }}
-        >
-        </div>
+        ></div>
     }
 }
