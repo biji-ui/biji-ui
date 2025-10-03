@@ -20,6 +20,9 @@ pub fn CustomAnimatedShow(
     hide_class: String,
     /// The timeout after which the component will be unmounted if `when == false`
     hide_delay: Duration,
+    /// Optional CSS style to apply if `when == true`
+    #[prop(into, optional)]
+    style: String,
 ) -> impl IntoView {
     let show_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
     let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
@@ -72,7 +75,9 @@ pub fn CustomAnimatedShow(
 
     view! {
         <Show when={move || show.get()} fallback={|| ()}>
-            <div class={move || cls.get()}>{children()}</div>
+            <div class={move || cls.get()} style={style.clone()}>
+                {children()}
+            </div>
         </Show>
     }
 }
