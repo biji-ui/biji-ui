@@ -5,12 +5,15 @@ use leptos::{
     ev::{click, focus, keydown},
     prelude::*,
 };
-use leptos_use::{on_click_outside, use_event_listener};
+use leptos_use::{
+    on_click_outside, use_element_bounding, use_event_listener, UseElementBoundingReturn,
+};
+use wasm_bindgen::JsCast;
 
 use crate::{
-    cn,
     custom_animated_show::CustomAnimatedShow,
     items::{Focus, ManageFocus, NavigateItems, Toggle},
+    utils::positioning::Positioning,
 };
 
 use super::context::{MenuContext, RootContext};
@@ -19,6 +22,7 @@ use super::context::{MenuContext, RootContext};
 pub fn Menu(
     #[prop(default = false)] disabled: bool,
     #[prop(into, optional)] class: String,
+    #[prop(default = Positioning::BottomStart)] positioning: Positioning,
     children: Children,
 ) -> impl IntoView {
     let ctx = expect_context::<RootContext>();
@@ -29,6 +33,7 @@ pub fn Menu(
         index,
         disabled,
         allow_loop: ctx.allow_item_loop,
+        positioning,
         ..Default::default()
     };
 
@@ -123,9 +128,52 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
         root_ctx.set_focus(Some(menu_ctx.index));
     });
 
-    let _ = on_click_outside(menu_ctx.menu_ref, move |_| {
+    let _ = on_click_outside(menu_ctx.menu_ref, move |evt| {
         if menu_ctx.open.get() {
-            menu_ctx.close();
+            // Recursive function to check if click is within any submenu or nested submenu
+            fn is_click_in_submenu_tree(
+                menu_context: &super::context::MenuContext,
+                target: &web_sys::Element,
+            ) -> bool {
+                menu_context.items.with(|items| {
+                    items.values().any(|item| {
+                        if let super::context::ItemData::SubMenuItem { child_context, .. } = item {
+                            // Check if click is on the submenu trigger
+                            if let Some(trigger_el) = child_context.trigger_ref.get() {
+                                if trigger_el.contains(Some(target)) {
+                                    return true;
+                                }
+                            }
+                            // Check if click is within the submenu content
+                            if let Some(menu_el) = child_context.menu_ref.get() {
+                                if menu_el.contains(Some(target)) {
+                                    return true;
+                                }
+                            }
+                            // Recursively check nested submenus
+                            if is_click_in_submenu_tree(child_context, target) {
+                                return true;
+                            }
+                        }
+                        false
+                    })
+                })
+            }
+
+            // Check if the click target is within any submenu (recursively)
+            let is_submenu_click = if let Some(target) = evt.target() {
+                if let Ok(target_el) = target.dyn_into::<web_sys::Element>() {
+                    is_click_in_submenu_tree(&menu_ctx, &target_el)
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+
+            if !is_submenu_click {
+                menu_ctx.close();
+            }
         }
     });
 
@@ -154,14 +202,44 @@ pub fn MenuContent(
 ) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
 
+    let content_ref = NodeRef::<leptos::html::Div>::new();
+
+    let UseElementBoundingReturn {
+        width: content_width,
+        height: content_height,
+        ..
+    } = use_element_bounding(content_ref);
+
+    let UseElementBoundingReturn {
+        top: trigger_top,
+        left: trigger_left,
+        width: trigger_width,
+        height: trigger_height,
+        ..
+    } = use_element_bounding(menu_ctx.trigger_ref);
+
+    let style = move || {
+        menu_ctx.positioning.calculate_position_style_simple(
+            *trigger_top.read(),
+            *trigger_left.read(),
+            *trigger_width.read(),
+            *trigger_height.read(),
+            *content_height.read(),
+            *content_width.read(),
+            0.0,
+        )
+    };
+
     view! {
         <CustomAnimatedShow
             when={menu_ctx.open}
-            show_class={cn!(class, show_class)}
-            hide_class={cn!(class, hide_class)}
+            show_class={show_class.clone()}
+            hide_class={hide_class.clone()}
             hide_delay={hide_delay}
         >
-            {children()}
+            <div node_ref={content_ref} class={class.clone()} style={style}>
+                {children()}
+            </div>
         </CustomAnimatedShow>
     }
 }

@@ -5,15 +5,15 @@ use leptos::{
     ev::{focus, keydown},
     prelude::*,
 };
-use leptos_use::use_event_listener;
+use leptos_use::{use_element_bounding, use_event_listener, UseElementBoundingReturn};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlAnchorElement, HtmlButtonElement};
 
 use crate::{
-    cn,
     components::menubar::context::ItemData,
     custom_animated_show::CustomAnimatedShow,
     items::{Focus, GetIndex, ManageFocus, NavigateItems, Toggle},
+    utils::positioning::Positioning,
 };
 
 use super::context::{MenuContext, RootContext};
@@ -135,13 +135,16 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 }
             }
             "Enter" => {
-                handle_on_click();
                 match item_ctx {
                     ItemData::Item { .. } => {
+                        handle_on_click();
                         root_ctx.close_all();
                         root_ctx.focus_active_item();
                     }
-                    _ => {}
+                    ItemData::SubMenuItem { .. } => {
+                        // Don't handle Enter for SubMenuItem here - it's handled by SubMenuItemTriggerEvents
+                        // to avoid conflicts between the two event handlers
+                    }
                 };
             }
             "Escape" => {
@@ -172,6 +175,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
 pub fn SubMenuItem(
     #[prop(default = false)] disabled: bool,
     #[prop(into, optional)] class: String,
+    #[prop(default = Positioning::RightStart)] positioning: Positioning,
     children: Children,
 ) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
@@ -184,6 +188,7 @@ pub fn SubMenuItem(
         index,
         disabled,
         allow_loop: menu_ctx.allow_loop,
+        positioning,
         ..Default::default()
     };
 
@@ -251,11 +256,15 @@ pub fn SubMenuItemTriggerEvents(children: Children) -> impl IntoView {
 
     let _ = use_event_listener(menu_ctx.trigger_ref, keydown, move |evt| {
         if evt.key() == "Enter" {
+            evt.prevent_default();
+            evt.stop_propagation();
             menu_ctx.toggle();
             match item_ctx {
                 ItemData::SubMenuItem { child_context, .. } => {
-                    if let Some(item) = child_context.navigate_first_item() {
-                        item.focus();
+                    if menu_ctx.open.get_untracked() {
+                        if let Some(item) = child_context.navigate_first_item() {
+                            item.focus();
+                        }
                     }
                 }
                 _ => {}
@@ -281,16 +290,46 @@ pub fn SubMenuItemContent(
     /// The timeout after which the component will be unmounted if `when == false`
     hide_delay: Duration,
 ) -> impl IntoView {
-    let item_ctx = expect_context::<MenuContext>();
+    let menu_ctx = expect_context::<MenuContext>();
+
+    let content_ref = NodeRef::<leptos::html::Div>::new();
+
+    let UseElementBoundingReturn {
+        width: content_width,
+        height: content_height,
+        ..
+    } = use_element_bounding(content_ref);
+
+    let UseElementBoundingReturn {
+        top: trigger_top,
+        left: trigger_left,
+        width: trigger_width,
+        height: trigger_height,
+        ..
+    } = use_element_bounding(menu_ctx.trigger_ref);
+
+    let style = move || {
+        menu_ctx.positioning.calculate_position_style_simple(
+            *trigger_top.read(),
+            *trigger_left.read(),
+            *trigger_width.read(),
+            *trigger_height.read(),
+            *content_height.read(),
+            *content_width.read(),
+            0.0,
+        )
+    };
 
     view! {
         <CustomAnimatedShow
-            when={item_ctx.open}
-            show_class={cn!(class, show_class)}
-            hide_class={cn!(class, hide_class)}
+            when={menu_ctx.open}
+            show_class={show_class}
+            hide_class={hide_class}
             hide_delay={hide_delay}
         >
-            {children()}
+            <div node_ref={content_ref} class={class.clone()} style={style}>
+                {children()}
+            </div>
         </CustomAnimatedShow>
     }
 }
