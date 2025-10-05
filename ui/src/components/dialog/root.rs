@@ -1,12 +1,9 @@
 use std::time::Duration;
 
-use leptos::{
-    context::Provider,
-    leptos_dom::{self, helpers::TimeoutHandle},
-    prelude::*,
-};
+use leptos::{context::Provider, prelude::*};
 
 use crate::components::dialog::context::{DialogContext, RootContext};
+use crate::utils::prevent_scroll::use_prevent_scroll;
 
 #[component]
 pub fn Root(
@@ -42,48 +39,12 @@ pub fn Root(
 
 #[component]
 pub fn RootEvents(children: Children) -> impl IntoView {
-    let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
     let dialog_ctx = expect_context::<DialogContext>();
 
-    let eff = RenderEffect::new(move |_| {
-        if dialog_ctx.prevent_scroll {
-            if dialog_ctx.open.get() {
-                if let Some(h) = hide_handle.get_value() {
-                    h.clear();
-                }
-                if let Some(doc) = document().body() {
-                    let client_width = f64::from(doc.client_width());
-                    let inner_width = window()
-                        .inner_width()
-                        .unwrap()
-                        .as_f64()
-                        .unwrap_or(client_width);
-                    let scrollbar_width = inner_width - client_width;
-
-                    let _ = doc.style().set_property("overflow", "hidden");
-                    let _ = doc
-                        .style()
-                        .set_property("--scrollbar-width", &format!("{}px", scrollbar_width));
-                    let _ = doc
-                        .style()
-                        .set_property("padding-right", &format!("calc({}px)", scrollbar_width));
-                }
-            } else {
-                let h = leptos_dom::helpers::set_timeout_with_handle(
-                    move || {
-                        if let Some(doc) = document().body() {
-                            let _ = doc.style().remove_property("overflow");
-                            let _ = doc.style().remove_property("--scrollbar-width");
-                            let _ = doc.style().remove_property("padding-right");
-                        }
-                    },
-                    dialog_ctx.hide_delay,
-                )
-                .expect("set timeout in AnimatedShow");
-                hide_handle.set_value(Some(h));
-            }
-        }
-    });
+    let eff = use_prevent_scroll(
+        move || dialog_ctx.prevent_scroll && dialog_ctx.open.get(),
+        dialog_ctx.hide_delay,
+    );
 
     on_cleanup(move || {
         drop(eff);
