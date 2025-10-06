@@ -26,7 +26,11 @@ pub fn MenubarExample() -> impl IntoView {
 
     view! {
         <menubar::Root class="flex" allow_item_loop=true allow_menu_loop=true>
-            <menubar::Menu class="relative" positioning={menubar::Positioning::BottomStart}>
+            <menubar::Menu
+                class="relative"
+                positioning={menubar::Positioning::BottomStart}
+                hide_delay={Duration::from_millis(200)}
+            >
                 <menubar::Trigger class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
                     "File"
                 </menubar::Trigger>
@@ -35,7 +39,6 @@ pub fn MenubarExample() -> impl IntoView {
                         class="flex flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
                         show_class="z-10 opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                        hide_delay={Duration::from_millis(200)}
                     >
                         <menubar::Item class={ITEM_STYLE}>
                             <button
@@ -49,7 +52,7 @@ pub fn MenubarExample() -> impl IntoView {
                             "New window"
                         </menubar::Item>
                         <hr class="h-px bg-gray-100" />
-                        <menubar::SubMenu>
+                        <menubar::SubMenu hide_delay={Duration::from_millis(200)}>
                             <menubar::SubMenuTrigger class={cn!(
                                 "h-full w-full items-center justify-between", ITEM_STYLE
                             )}>
@@ -60,7 +63,6 @@ pub fn MenubarExample() -> impl IntoView {
                                     class="inline-block flex flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
                                     show_class="z-10 opacity-100 transition duration-150 ease-in"
                                     hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                                    hide_delay={Duration::from_millis(200)}
                                 >
                                     <menubar::Item class={ITEM_STYLE}>"Email"</menubar::Item>
                                     <menubar::Item class={ITEM_STYLE} disabled=true>
@@ -68,7 +70,7 @@ pub fn MenubarExample() -> impl IntoView {
                                     </menubar::Item>
                                     <menubar::Item class={ITEM_STYLE}>"Copy link"</menubar::Item>
                                     <hr class="h-px bg-gray-100" />
-                                    <menubar::SubMenu>
+                                    <menubar::SubMenu hide_delay={Duration::from_millis(200)}>
                                         <menubar::SubMenuTrigger class={cn!(
                                             "h-full w-full items-center justify-between", ITEM_STYLE
                                         )}>
@@ -80,7 +82,6 @@ pub fn MenubarExample() -> impl IntoView {
                                                 class="flex flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
                                                 show_class="z-10 opacity-100 transition duration-150 ease-in"
                                                 hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                                                hide_delay={Duration::from_millis(200)}
                                             >
                                                 <menubar::Item class={ITEM_STYLE}>"Facebook"</menubar::Item>
                                                 <menubar::Item class={ITEM_STYLE}>"LinkedIn"</menubar::Item>
@@ -97,6 +98,7 @@ pub fn MenubarExample() -> impl IntoView {
                         <menubar::SubMenu
                             class="relative"
                             positioning={menubar::Positioning::RightStart}
+                            hide_delay={Duration::from_millis(200)}
                         >
                             <menubar::SubMenuTrigger class={cn!(
                                 "h-full w-full items-center justify-between", ITEM_STYLE
@@ -108,7 +110,6 @@ pub fn MenubarExample() -> impl IntoView {
                                     class="flex flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
                                     show_class="z-10 opacity-100 transition duration-150 ease-in"
                                     hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                                    hide_delay={Duration::from_millis(200)}
                                 >
                                     <menubar::Item class={ITEM_STYLE}>"Email"</menubar::Item>
                                     <menubar::Item class={ITEM_STYLE} disabled=true>
@@ -119,6 +120,7 @@ pub fn MenubarExample() -> impl IntoView {
                                     <menubar::SubMenu
                                         class="relative"
                                         positioning={menubar::Positioning::RightStart}
+                                        hide_delay={Duration::from_millis(200)}
                                     >
                                         <menubar::SubMenuTrigger class={cn!(
                                             "h-full w-full items-center justify-between", ITEM_STYLE
@@ -131,7 +133,6 @@ pub fn MenubarExample() -> impl IntoView {
                                                 class="flex flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
                                                 show_class="z-10 opacity-100 transition duration-150 ease-in"
                                                 hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                                                hide_delay={Duration::from_millis(200)}
                                             >
                                                 <menubar::Item class={ITEM_STYLE}>"Facebook"</menubar::Item>
                                                 <menubar::Item class={ITEM_STYLE}>"LinkedIn"</menubar::Item>
@@ -147,7 +148,11 @@ pub fn MenubarExample() -> impl IntoView {
                     </menubar::Content>
                 </Portal>
             </menubar::Menu>
-            <menubar::Menu class="relative" positioning={menubar::Positioning::BottomStart}>
+            <menubar::Menu
+                class="relative"
+                positioning={menubar::Positioning::BottomStart}
+                hide_delay={Duration::from_millis(200)}
+            >
                 <menubar::Trigger class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted">
                     "Edit"
                 </menubar::Trigger>
@@ -156,14 +161,17 @@ pub fn MenubarExample() -> impl IntoView {
                         class="flex flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
                         show_class="z-10 opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                        hide_delay={Duration::from_millis(200)}
                     >
                         <menubar::Item class={ITEM_STYLE}>"Undo"</menubar::Item>
                         <menubar::Item class={ITEM_STYLE}>"Redo"</menubar::Item>
                     </menubar::Content>
                 </Portal>
             </menubar::Menu>
-            <menubar::Menu class="relative" positioning={menubar::Positioning::BottomStart}>
+            <menubar::Menu
+                class="relative"
+                positioning={menubar::Positioning::BottomStart}
+                hide_delay={Duration::from_millis(200)}
+            >
                 <menubar::Trigger class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted">
                     "Components"
                 </menubar::Trigger>
@@ -172,7 +180,6 @@ pub fn MenubarExample() -> impl IntoView {
                         class="flex flex-col p-1 w-56 rounded-md border shadow-md min-w-[8rem] bg-popover text-popover-foreground focus:outline-none"
                         show_class="z-10 opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                        hide_delay={Duration::from_millis(200)}
                     >
                         <menubar::Item class={ITEM_STYLE}>
                             <a href="/docs/accordion">"Accordion"</a>

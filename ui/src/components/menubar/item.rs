@@ -176,6 +176,9 @@ pub fn SubMenuItem(
     #[prop(default = false)] disabled: bool,
     #[prop(into, optional)] class: String,
     #[prop(default = Positioning::RightStart)] positioning: Positioning,
+    /// The timeout after which the component will be unmounted if `when == false`
+    #[prop(default = Duration::from_millis(200))]
+    hide_delay: Duration,
     children: Children,
 ) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
@@ -189,6 +192,7 @@ pub fn SubMenuItem(
         disabled,
         allow_loop: menu_ctx.allow_loop,
         positioning,
+        hide_delay,
         ..Default::default()
     };
 
@@ -287,8 +291,6 @@ pub fn SubMenuItemContent(
     /// Optional CSS class to apply if `when == false`
     #[prop(into, optional)]
     hide_class: String,
-    /// The timeout after which the component will be unmounted if `when == false`
-    hide_delay: Duration,
 ) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
 
@@ -325,7 +327,7 @@ pub fn SubMenuItemContent(
             when={menu_ctx.open}
             show_class={show_class}
             hide_class={hide_class}
-            hide_delay={hide_delay}
+            hide_delay={menu_ctx.hide_delay}
         >
             <div node_ref={content_ref} class={class.clone()} style={style}>
                 {children()}
