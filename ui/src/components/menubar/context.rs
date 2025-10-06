@@ -1,10 +1,13 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use leptos::{html::Div, prelude::*};
 
-use crate::items::{
-    filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
-    ManageFocus, NavigateItems, Toggle,
+use crate::{
+    items::{
+        filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
+        ManageFocus, NavigateItems, Toggle,
+    },
+    utils::positioning::Positioning,
 };
 
 #[derive(Copy, Clone)]
@@ -19,6 +22,7 @@ pub struct RootContext {
     pub items: RwSignal<HashMap<usize, MenuContext>>,
     pub allow_menu_loop: bool,
     pub allow_item_loop: bool,
+    pub prevent_scroll: bool,
 }
 
 impl Default for RootContext {
@@ -28,6 +32,7 @@ impl Default for RootContext {
             items: RwSignal::new(HashMap::new()),
             allow_menu_loop: false,
             allow_item_loop: false,
+            prevent_scroll: false,
         }
     }
 }
@@ -125,6 +130,8 @@ pub struct MenuContext {
     pub item_focus: RwSignal<Option<usize>>,
     pub items: RwSignal<HashMap<usize, ItemData>>,
     pub allow_loop: bool,
+    pub positioning: Positioning,
+    pub hide_delay: Duration,
 }
 
 impl Default for MenuContext {
@@ -138,6 +145,8 @@ impl Default for MenuContext {
             item_focus: RwSignal::new(None),
             items: RwSignal::new(HashMap::new()),
             allow_loop: false,
+            positioning: Positioning::BottomStart,
+            hide_delay: Duration::from_millis(200),
         }
     }
 }
