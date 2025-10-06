@@ -25,7 +25,10 @@ pub fn ThemeMode() -> impl IntoView {
     let modes = [("Light", &ColorMode::Light), ("Dark", &ColorMode::Dark)];
 
     view! {
-        <menu::Menu positioning={menu::Positioning::BottomEnd}>
+        <menu::Menu
+            positioning={menu::Positioning::BottomEnd}
+            hide_delay={Duration::from_millis(200)}
+        >
             <menu::Trigger class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <icons::Sun class="h-5 w-5 stroke-zinc-900 dark:hidden"></icons::Sun>
                 <icons::Moon class="hidden h-5 w-5 stroke-white dark:block"></icons::Moon>
@@ -35,7 +38,6 @@ pub fn ThemeMode() -> impl IntoView {
                     class="flex z-40 w-40 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition focus:outline-none"
                     show_class="opacity-100 duration-150 ease-in"
                     hide_class="opacity-0 duration-200 ease-out"
-                    hide_delay={Duration::from_millis(200)}
                 >
                     {modes
                         .into_iter()

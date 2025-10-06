@@ -13,7 +13,7 @@ use wasm_bindgen::JsCast;
 use crate::{
     custom_animated_show::CustomAnimatedShow,
     items::{Focus, ManageFocus, NavigateItems, Toggle},
-    utils::positioning::Positioning,
+    utils::{positioning::Positioning, prevent_scroll::use_prevent_scroll},
 };
 
 use super::context::{MenuContext, RootContext};
@@ -23,6 +23,9 @@ pub fn Menu(
     #[prop(default = false)] disabled: bool,
     #[prop(into, optional)] class: String,
     #[prop(default = Positioning::BottomStart)] positioning: Positioning,
+    /// The timeout after which the component will be unmounted if `when == false`
+    #[prop(default = Duration::from_millis(200))]
+    hide_delay: Duration,
     children: Children,
 ) -> impl IntoView {
     let ctx = expect_context::<RootContext>();
@@ -34,6 +37,7 @@ pub fn Menu(
         disabled,
         allow_loop: ctx.allow_item_loop,
         positioning,
+        hide_delay,
         ..Default::default()
     };
 
@@ -177,8 +181,14 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
         }
     });
 
+    let ps_eff = use_prevent_scroll(
+        move || root_ctx.prevent_scroll && menu_ctx.open.get(),
+        menu_ctx.hide_delay,
+    );
+
     on_cleanup(move || {
         drop(eff);
+        drop(ps_eff);
     });
 
     children()
@@ -196,9 +206,6 @@ pub fn MenuContent(
     /// Optional CSS class to apply if `when == false`
     #[prop(into, optional)]
     hide_class: String,
-    /// The timeout after which the component will be unmounted if `when == false`
-    #[prop(default = Duration::from_millis(200))]
-    hide_delay: Duration,
 ) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
 
@@ -235,7 +242,7 @@ pub fn MenuContent(
             when={menu_ctx.open}
             show_class={show_class.clone()}
             hide_class={hide_class.clone()}
-            hide_delay={hide_delay}
+            hide_delay={menu_ctx.hide_delay}
         >
             <div node_ref={content_ref} class={class.clone()} style={style}>
                 {children()}
