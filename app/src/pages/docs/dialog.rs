@@ -54,7 +54,7 @@ pub fn DialogExample() -> impl IntoView {
                         </div>
                         <div class="mt-3 text-center sm:mt-5">
                             <h3
-                                class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100"
+                                class="text-base leading-6 font-semibold text-gray-900 dark:text-gray-100"
                                 id="modal-title"
                             >
                                 "Payment successful"

@@ -35,7 +35,7 @@ pub fn ThemeMode() -> impl IntoView {
             </menu::Trigger>
             <Portal>
                 <menu::Content
-                    class="flex z-40 w-40 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition focus:outline-none"
+                    class="z-40 flex w-40 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition focus:outline-none"
                     show_class="opacity-100 duration-150 ease-in"
                     hide_class="opacity-0 duration-200 ease-out"
                 >
@@ -96,7 +96,7 @@ pub fn TopNav() -> impl IntoView {
                     <ul role="list" class="flex items-center gap-5">
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                 href="https://docs.rs/biji-ui/latest/biji_ui/"
                                 title="Documentation"
                             >
@@ -105,7 +105,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                 href="https://github.com/biji-ui/biji-ui"
                                 title="Github"
                             >
@@ -114,7 +114,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                 href="https://github.com/biji-ui/biji-ui/issues"
                                 title="Report an issue"
                             >
@@ -123,7 +123,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                     </ul>
                 </nav>
-                <div class="hidden md:block md:h-5 md:bg-zinc-900/10 md:w-px md:dark:bg-white/15"></div>
+                <div class="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
                 <div class="flex gap-4">
                     <ThemeMode />
                 </div>
@@ -171,7 +171,7 @@ pub fn Sidebar() -> impl IntoView {
                     hide_class="opacity-0"
                 ></dialogui::Overlay>
                 <dialogui::Content
-                    class="fixed bottom-0 left-0 top-14 w-full overflow-y-auto bg-white px-4 pb-4 pt-6 shadow-lg shadow-zinc-900/10 ring-1 ring-zinc-900/10 transition duration-300 ease-in-out min-[416px]:max-w-sm sm:pb-10 sm:px-6 dark:bg-zinc-900 dark:ring-zinc-800"
+                    class="fixed top-14 bottom-0 left-0 w-full overflow-y-auto bg-white px-4 pt-6 pb-4 shadow-lg ring-1 shadow-zinc-900/10 ring-zinc-900/10 transition duration-300 ease-in-out min-[416px]:max-w-sm sm:px-6 sm:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
                     show_class="translate-x-0"
                     hide_class="-translate-x-full"
                 >
@@ -205,7 +205,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
             <ul role="list">
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                         href="https://docs.rs/biji-ui/latest/biji_ui/"
                     >
                         "Documentation"
@@ -213,7 +213,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                 </li>
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                         href="https://github.com/biji-ui/biji-ui"
                     >
                         "Github"
@@ -221,7 +221,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                 </li>
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                         href="https://github.com/biji-ui/biji-ui/issues"
                     >
                         "Report an issue"
@@ -241,7 +241,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                            class="flex justify-between gap-2 py-1 pr-3 pl-4 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -273,7 +273,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
+                                            class="flex justify-between gap-2 py-1 pr-3 pl-4 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -302,15 +302,15 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
 pub fn DocsPage() -> impl IntoView {
     view! {
         <div class="h-full lg:ml-72 xl:ml-80">
-            <header class="contents lg:fixed lg:inset-0 lg:flex lg:pointer-events-none lg:z-40">
-                <div class="contents lg:block lg:overflow-y-auto lg:pointer-events-auto lg:w-72 lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pb-8 lg:pt-4 lg:dark:border-white/10 xl:w-80">
+            <header class="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex">
+                <div class="contents lg:pointer-events-auto lg:block lg:w-72 lg:overflow-y-auto lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pt-4 lg:pb-8 xl:w-80 lg:dark:border-white/10">
                     <div class="hidden lg:flex">
                         <a aria-label="Home" href="/">
                             <icons::BijiUI class="h-5 w-auto"></icons::BijiUI>
                         </a>
                     </div>
                     <TopNav />
-                    <SidebarNav class="hidden lg:block lg:mt-10" />
+                    <SidebarNav class="hidden lg:mt-10 lg:block" />
                 </div>
             </header>
             <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
@@ -332,9 +332,9 @@ where
     IV: IntoView,
 {
     view! {
-        <article class="flex h-full flex-col pb-10 pt-16">
+        <article class="flex h-full flex-col pt-16 pb-10">
             <h1 class="mb-2 text-2xl font-bold">{title}</h1>
-            <p class="mb-11 mt-3 text-balance text-base">{description}</p>
+            <p class="mt-3 mb-11 text-base text-balance">{description}</p>
             <div class="relative rounded-2xl border-2 border-muted bg-zinc-50 !ring-transparent dark:bg-neutral-900/50">
                 <div class="flex min-h-[443px] w-full items-center justify-center p-12 preview">
                     {example()}
