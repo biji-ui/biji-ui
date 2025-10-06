@@ -5,7 +5,7 @@ use leptos::{
     prelude::*,
 };
 
-use super::tooltip::Positioning;
+use crate::utils::positioning::Positioning;
 
 #[derive(Copy, Clone)]
 pub struct TooltipContext {

@@ -25,47 +25,53 @@ pub fn ThemeMode() -> impl IntoView {
     let modes = [("Light", &ColorMode::Light), ("Dark", &ColorMode::Dark)];
 
     view! {
-        <menu::Menu class="relative">
+        <menu::Menu
+            positioning={menu::Positioning::BottomEnd}
+            hide_delay={Duration::from_millis(200)}
+        >
             <menu::Trigger class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <icons::Sun class="h-5 w-5 stroke-zinc-900 dark:hidden"></icons::Sun>
                 <icons::Moon class="hidden h-5 w-5 stroke-white dark:block"></icons::Moon>
             </menu::Trigger>
-            <menu::Content
-                class="absolute right-0 flex w-40 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition focus:outline-none"
-                show_class="z-10 translate-y-0 opacity-100 duration-150 ease-in"
-                hide_class="-z-10 translate-y-1 opacity-0 duration-200 ease-out"
-                hide_delay={Duration::from_millis(200)}
-            >
-                {modes
-                    .into_iter()
-                    .map(|(title, m)| {
-                        view! {
-                            <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
-                                <button
-                                    on:click={move |_| { set_mode.set(m.clone()) }}
-                                    class="flex w-full justify-between px-2 py-1.5 align-center"
-                                >
-                                    <div class="flex gap-2">
-                                        {match m.clone() {
-                                            ColorMode::Light => {
-                                                view! { <icons::Sun class="w-4"></icons::Sun> }.into_any()
-                                            }
-                                            ColorMode::Dark => {
-                                                view! { <icons::Moon class="w-4"></icons::Moon> }.into_any()
-                                            }
-                                            _ => view! { <icons::SunMoon class="w-4"></icons::SunMoon> }.into_any(),
-                                        }}
-                                        {title}
-                                    </div>
-                                    <Show when={move || m.clone() == mode.get()}>
-                                        <icons::Check class="w-4"></icons::Check>
-                                    </Show>
-                                </button>
-                            </menu::Item>
-                        }
-                    })
-                    .collect_view()}
-            </menu::Content>
+            <Portal>
+                <menu::Content
+                    class="flex z-40 w-40 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition focus:outline-none"
+                    show_class="opacity-100 duration-150 ease-in"
+                    hide_class="opacity-0 duration-200 ease-out"
+                >
+                    {modes
+                        .into_iter()
+                        .map(|(title, m)| {
+                            view! {
+                                <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
+                                    <button
+                                        on:click={move |_| { set_mode.set(m.clone()) }}
+                                        class="flex w-full justify-between px-2 py-1.5 align-center"
+                                    >
+                                        <div class="flex gap-2">
+                                            {match m.clone() {
+                                                ColorMode::Light => {
+                                                    view! { <icons::Sun class="w-4"></icons::Sun> }.into_any()
+                                                }
+                                                ColorMode::Dark => {
+                                                    view! { <icons::Moon class="w-4"></icons::Moon> }.into_any()
+                                                }
+                                                _ => {
+                                                    view! { <icons::SunMoon class="w-4"></icons::SunMoon> }
+                                                        .into_any()
+                                                }
+                                            }} {title}
+                                        </div>
+                                        <Show when={move || m.clone() == mode.get()}>
+                                            <icons::Check class="w-4"></icons::Check>
+                                        </Show>
+                                    </button>
+                                </menu::Item>
+                            }
+                        })
+                        .collect_view()}
+                </menu::Content>
+            </Portal>
         </menu::Menu>
     }
 }
@@ -80,7 +86,7 @@ pub fn TopNav() -> impl IntoView {
             <div class="absolute inset-x-0 top-full h-px bg-zinc-900/10 transition dark:bg-white/10"></div>
             <div class="hidden lg:block lg:max-w-md lg:flex-auto"></div>
             <div class="flex items-center gap-5 lg:hidden">
-                <Sidebar/>
+                <Sidebar />
                 <a aria-label="Home" href="/">
                     <icons::BijiUI class="h-5 w-auto"></icons::BijiUI>
                 </a>
@@ -90,7 +96,7 @@ pub fn TopNav() -> impl IntoView {
                     <ul role="list" class="flex items-center gap-5">
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                 href="https://docs.rs/biji-ui/latest/biji_ui/"
                                 title="Documentation"
                             >
@@ -99,7 +105,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                 href="https://github.com/biji-ui/biji-ui"
                                 title="Github"
                             >
@@ -108,7 +114,7 @@ pub fn TopNav() -> impl IntoView {
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                class="text-sm leading-5 text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                 href="https://github.com/biji-ui/biji-ui/issues"
                                 title="Report an issue"
                             >
@@ -119,7 +125,7 @@ pub fn TopNav() -> impl IntoView {
                 </nav>
                 <div class="hidden md:block md:h-5 md:bg-zinc-900/10 md:w-px md:dark:bg-white/15"></div>
                 <div class="flex gap-4">
-                    <ThemeMode/>
+                    <ThemeMode />
                 </div>
             </div>
         </div>
@@ -156,7 +162,7 @@ pub fn Sidebar() -> impl IntoView {
     view! {
         <dialogui::Root hide_delay={Duration::from_millis(300)}>
             <dialogui::Trigger class="flex h-6 w-6 items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
-                <SidebarTrigger/>
+                <SidebarTrigger />
             </dialogui::Trigger>
             <Portal>
                 <dialogui::Overlay
@@ -165,12 +171,12 @@ pub fn Sidebar() -> impl IntoView {
                     hide_class="opacity-0"
                 ></dialogui::Overlay>
                 <dialogui::Content
-                    class="fixed bottom-0 left-0 top-14 w-full overflow-y-auto bg-white px-4 pb-4 pt-6 shadow-lg shadow-zinc-900/10 ring-1 ring-zinc-900/10 transition duration-300 ease-in-out sm:pb-10 min-[416px]:max-w-sm sm:px-6 dark:bg-zinc-900 dark:ring-zinc-800"
+                    class="fixed bottom-0 left-0 top-14 w-full overflow-y-auto bg-white px-4 pb-4 pt-6 shadow-lg shadow-zinc-900/10 ring-1 ring-zinc-900/10 transition duration-300 ease-in-out min-[416px]:max-w-sm sm:pb-10 sm:px-6 dark:bg-zinc-900 dark:ring-zinc-800"
                     show_class="translate-x-0"
                     hide_class="-translate-x-full"
                 >
                     <div>
-                        <SidebarNav/>
+                        <SidebarNav />
                     </div>
                 </dialogui::Content>
             </Portal>
@@ -199,7 +205,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
             <ul role="list">
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        class="block flex py-1 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                         href="https://docs.rs/biji-ui/latest/biji_ui/"
                     >
                         "Documentation"
@@ -207,7 +213,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                 </li>
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        class="block flex py-1 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                         href="https://github.com/biji-ui/biji-ui"
                     >
                         "Github"
@@ -215,7 +221,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                 </li>
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        class="block flex py-1 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                         href="https://github.com/biji-ui/biji-ui/issues"
                     >
                         "Report an issue"
@@ -235,7 +241,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -267,7 +273,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                            class="flex justify-between gap-2 py-1 pl-4 pr-3 text-sm text-zinc-600 transition dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -303,12 +309,12 @@ pub fn DocsPage() -> impl IntoView {
                             <icons::BijiUI class="h-5 w-auto"></icons::BijiUI>
                         </a>
                     </div>
-                    <TopNav/>
-                    <SidebarNav class="hidden lg:block lg:mt-10"/>
+                    <TopNav />
+                    <SidebarNav class="hidden lg:block lg:mt-10" />
                 </div>
             </header>
             <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
-                <Outlet/>
+                <Outlet />
                 <icons::HeroPattern></icons::HeroPattern>
             </div>
         </div>
