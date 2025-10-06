@@ -33,7 +33,7 @@ pub fn AccordionExample() -> impl IntoView {
                 .into_iter()
                 .map(|(title, content)| {
                     view! {
-                        <accordion::Item class="border-b group border-dark-10">
+                        <accordion::Item class="border-b border-border group">
                             <accordion::Toggle class="flex w-full px-1.5 flex-1 items-center justify-between py-5 text-[15px] font-medium outline-none transition-all focus:rounded-xl focus:outline-none [&[data-state=open]>span>svg]:rotate-180 data-[highlighted]:bg-muted !ring-0 !ring-transparent">
                                 {title}
                                 <span class="inline-flex size-8 items-center justify-center rounded-[7px] bg-transparent transition-all hover:bg-dark-10">
@@ -41,7 +41,7 @@ pub fn AccordionExample() -> impl IntoView {
                                 </span>
                             </accordion::Toggle>
                             <accordion::Content
-                                class="px-1.5 pb-[25px] pt-1.5 text-sm tracking-[-0.01em]"
+                                class="px-1.5 pt-1.5 pb-[25px] text-sm tracking-[-0.01em]"
                                 show_class="opacity-100 transition duration-150 ease-in"
                                 hide_class="opacity-0 transition duration-200 ease-out"
                                 hide_delay={Duration::from_millis(200)}
