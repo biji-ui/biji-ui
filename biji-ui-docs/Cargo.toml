@@ -1,0 +1,15 @@
+[package]
+name = "biji-ui-docs"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+leptos = { version = "0.8", features = ["csr"] }
+leptos_meta = { version = "0.8" }
+leptos_router = { version = "0.8" }
+leptos-use = { version = "0.16" }
+console_error_panic_hook = "0.1.7"
+uuid = { version = "1.8", features = ["serde", "v4", "js"] }
+
+biji-ui = { path = "../biji-ui" }
+jspackages = { path = "../jspackages" }

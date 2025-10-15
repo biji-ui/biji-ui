@@ -1,10 +1,13 @@
 default: dev
 
-dev:
-	cargo leptos watch
+dev: jspackages-build
+	trunk serve
 
 install:
 	pnpm install
+
+dev-install:
+	cargo install rustywind
 
 jspackages-install:
 	pnpm install --prefix ./jspackages

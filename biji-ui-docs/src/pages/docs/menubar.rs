@@ -36,13 +36,13 @@ pub fn MenubarExample() -> impl IntoView {
                 </menubar::Trigger>
                 <Portal>
                     <menubar::Content
-                        class="flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                        class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                         show_class="z-10 opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out -z-10"
                     >
                         <menubar::Item class={ITEM_STYLE}>
                             <button
-                                class="flex h-full w-full"
+                                class="flex w-full h-full"
                                 on:click={|_| log!("New file clicked")}
                             >
                                 "New file..."
@@ -51,7 +51,7 @@ pub fn MenubarExample() -> impl IntoView {
                         <menubar::Item class={ITEM_STYLE} disabled=true>
                             "New window"
                         </menubar::Item>
-                        <hr class="h-px bg-gray-100" />
+                        <hr class="h-px border-border" />
                         <menubar::SubMenu hide_delay={Duration::from_millis(200)}>
                             <menubar::SubMenuTrigger class={cn!(
                                 "h-full w-full items-center justify-between", ITEM_STYLE
@@ -60,7 +60,7 @@ pub fn MenubarExample() -> impl IntoView {
                             </menubar::SubMenuTrigger>
                             <Portal>
                                 <menubar::SubMenuContent
-                                    class="flex inline-block w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                                    class="inline-block flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                                     show_class="z-10 opacity-100 transition duration-150 ease-in"
                                     hide_class="opacity-0 transition duration-200 ease-out -z-10"
                                 >
@@ -69,7 +69,7 @@ pub fn MenubarExample() -> impl IntoView {
                                         "Message"
                                     </menubar::Item>
                                     <menubar::Item class={ITEM_STYLE}>"Copy link"</menubar::Item>
-                                    <hr class="h-px bg-gray-100" />
+                                    <hr class="h-px border-border" />
                                     <menubar::SubMenu hide_delay={Duration::from_millis(200)}>
                                         <menubar::SubMenuTrigger class={cn!(
                                             "h-full w-full items-center justify-between", ITEM_STYLE
@@ -79,7 +79,7 @@ pub fn MenubarExample() -> impl IntoView {
                                         </menubar::SubMenuTrigger>
                                         <Portal>
                                             <menubar::SubMenuContent
-                                                class="flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                                                class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                                                 show_class="z-10 opacity-100 transition duration-150 ease-in"
                                                 hide_class="opacity-0 transition duration-200 ease-out -z-10"
                                             >
@@ -94,7 +94,7 @@ pub fn MenubarExample() -> impl IntoView {
                                 </menubar::SubMenuContent>
                             </Portal>
                         </menubar::SubMenu>
-                        <hr class="h-px bg-gray-100" />
+                        <hr class="h-px border-border" />
                         <menubar::SubMenu
                             class="relative"
                             positioning={menubar::Positioning::RightStart}
@@ -107,7 +107,7 @@ pub fn MenubarExample() -> impl IntoView {
                             </menubar::SubMenuTrigger>
                             <Portal>
                                 <menubar::SubMenuContent
-                                    class="flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                                    class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                                     show_class="z-10 opacity-100 transition duration-150 ease-in"
                                     hide_class="opacity-0 transition duration-200 ease-out -z-10"
                                 >
@@ -116,7 +116,7 @@ pub fn MenubarExample() -> impl IntoView {
                                         "Message"
                                     </menubar::Item>
                                     <menubar::Item class={ITEM_STYLE}>"Copy link"</menubar::Item>
-                                    <hr class="h-px bg-gray-100" />
+                                    <hr class="h-px border-border" />
                                     <menubar::SubMenu
                                         class="relative"
                                         positioning={menubar::Positioning::RightStart}
@@ -130,7 +130,7 @@ pub fn MenubarExample() -> impl IntoView {
                                         </menubar::SubMenuTrigger>
                                         <Portal>
                                             <menubar::SubMenuContent
-                                                class="flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                                                class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                                                 show_class="z-10 opacity-100 transition duration-150 ease-in"
                                                 hide_class="opacity-0 transition duration-200 ease-out -z-10"
                                             >
@@ -158,7 +158,7 @@ pub fn MenubarExample() -> impl IntoView {
                 </menubar::Trigger>
                 <Portal>
                     <menubar::Content
-                        class="flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                        class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                         show_class="z-10 opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out -z-10"
                     >
@@ -177,7 +177,7 @@ pub fn MenubarExample() -> impl IntoView {
                 </menubar::Trigger>
                 <Portal>
                     <menubar::Content
-                        class="flex w-56 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none"
+                        class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                         show_class="z-10 opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out -z-10"
                     >

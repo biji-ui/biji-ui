@@ -1,12 +1,22 @@
 {
-    "name": "jspackages",
-    "version": "1.0.0",
-    "main": "build.js",
-    "scripts": {
-        "build": "node build.js"
-    },
-    "dependencies": {
-        "esbuild": "^0.20.2",
-        "shiki": "^1.4.0"
-    }
+  "name": "jspackages",
+  "version": "1.0.0",
+  "main": "build.js",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "dependencies": {
+    "@shikijs/langs": "^3.13.0",
+    "@shikijs/themes": "^3.13.0",
+    "shiki": "^3.13.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.31.0"
+  }
 }
