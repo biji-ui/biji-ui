@@ -1,6 +1,6 @@
 default: dev
 
-dev:
+dev: jspackages-build
 	trunk serve
 
 install:
