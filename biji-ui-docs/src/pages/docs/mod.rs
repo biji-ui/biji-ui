@@ -14,7 +14,7 @@ use biji_ui::components::{
     dialog::{self as dialogui, context::DialogContext},
     menu,
 };
-use leptos_use::{use_color_mode, use_media_query, ColorMode, UseColorModeReturn};
+use leptos_use::{ColorMode, UseColorModeReturn, use_color_mode, use_media_query};
 
 use crate::icons;
 
@@ -29,13 +29,13 @@ pub fn ThemeMode() -> impl IntoView {
             positioning={menu::Positioning::BottomEnd}
             hide_delay={Duration::from_millis(200)}
         >
-            <menu::Trigger class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
-                <icons::Sun class="h-5 w-5 stroke-zinc-900 dark:hidden"></icons::Sun>
-                <icons::Moon class="hidden h-5 w-5 stroke-white dark:block"></icons::Moon>
+            <menu::Trigger class="flex justify-center items-center w-6 h-6 rounded-md transition cursor-pointer dark:hover:bg-white/5 hover:bg-zinc-900/5">
+                <icons::Sun class="w-5 h-5 dark:hidden stroke-zinc-900"></icons::Sun>
+                <icons::Moon class="hidden w-5 h-5 dark:block stroke-white"></icons::Moon>
             </menu::Trigger>
             <Portal>
                 <menu::Content
-                    class="z-40 flex w-40 min-w-[8rem] flex-col rounded-md border bg-popover p-1 text-popover-foreground shadow-md transition focus:outline-none"
+                    class="flex z-40 flex-col p-1 w-40 rounded-md border shadow-md transition focus:outline-none min-w-[8rem] border-border bg-background text-background-foreground"
                     show_class="opacity-100 duration-150 ease-in"
                     hide_class="opacity-0 duration-200 ease-out"
                 >
@@ -46,7 +46,7 @@ pub fn ThemeMode() -> impl IntoView {
                                 <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
                                     <button
                                         on:click={move |_| { set_mode.set(m.clone()) }}
-                                        class="flex w-full justify-between px-2 py-1.5 align-center"
+                                        class="flex justify-between py-1.5 px-2 w-full align-center"
                                     >
                                         <div class="flex gap-2">
                                             {match m.clone() {
@@ -83,47 +83,47 @@ pub fn TopNav() -> impl IntoView {
             style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2; --scrollbar-width-nav: var(--scrollbar-width, 0px);"
             class="fixed inset-x-0 top-0 z-10 flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:z-30 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
         >
-            <div class="absolute inset-x-0 top-full h-px bg-zinc-900/10 transition dark:bg-white/10"></div>
-            <div class="hidden lg:block lg:max-w-md lg:flex-auto"></div>
-            <div class="flex items-center gap-5 lg:hidden">
+            <div class="absolute inset-x-0 top-full h-px transition bg-zinc-900/10 dark:bg-white/10"></div>
+            <div class="hidden lg:block lg:flex-auto lg:max-w-md"></div>
+            <div class="flex gap-5 items-center lg:hidden">
                 <Sidebar />
                 <a aria-label="Home" href="/">
-                    <icons::BijiUI class="h-5 w-auto"></icons::BijiUI>
+                    <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
                 </a>
             </div>
-            <div class="flex items-center gap-5">
+            <div class="flex gap-5 items-center">
                 <nav class="hidden md:block">
-                    <ul role="list" class="flex items-center gap-5">
+                    <ul role="list" class="flex gap-5 items-center">
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                class="text-sm leading-5 transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                 href="https://docs.rs/biji-ui/latest/biji_ui/"
                                 title="Documentation"
                             >
-                                <icons::BookText class="h-5 w-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::BookText>
+                                <icons::BookText class="w-5 h-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::BookText>
                             </a>
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                class="text-sm leading-5 transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                 href="https://github.com/biji-ui/biji-ui"
                                 title="Github"
                             >
-                                <icons::Github class="h-5 w-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::Github>
+                                <icons::Github class="w-5 h-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::Github>
                             </a>
                         </li>
                         <li>
                             <a
-                                class="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                class="text-sm leading-5 transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                 href="https://github.com/biji-ui/biji-ui/issues"
                                 title="Report an issue"
                             >
-                                <icons::Bug class="h-5 w-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::Bug>
+                                <icons::Bug class="w-5 h-5 stroke-zinc-600 dark:stroke-zinc-400"></icons::Bug>
                             </a>
                         </li>
                     </ul>
                 </nav>
-                <div class="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
+                <div class="hidden md:block md:w-px md:h-5 md:bg-zinc-900/10 md:dark:bg-white/15"></div>
                 <div class="flex gap-4">
                     <ThemeMode />
                 </div>
@@ -161,17 +161,17 @@ pub fn SidebarTrigger() -> impl IntoView {
 pub fn Sidebar() -> impl IntoView {
     view! {
         <dialogui::Root hide_delay={Duration::from_millis(300)}>
-            <dialogui::Trigger class="flex h-6 w-6 items-center justify-center rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
+            <dialogui::Trigger class="flex justify-center items-center w-6 h-6 rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <SidebarTrigger />
             </dialogui::Trigger>
             <Portal>
                 <dialogui::Overlay
-                    class="fixed inset-0 top-14 bg-zinc-400/20 backdrop-blur-sm transition-opacity duration-300 ease-linear dark:bg-black/40"
+                    class="fixed inset-0 top-14 transition-opacity duration-300 ease-linear bg-zinc-400/20 backdrop-blur-sm dark:bg-black/40"
                     show_class="opacity-100"
                     hide_class="opacity-0"
                 ></dialogui::Overlay>
                 <dialogui::Content
-                    class="fixed top-14 bottom-0 left-0 w-full overflow-y-auto bg-white px-4 pt-6 pb-4 shadow-lg ring-1 shadow-zinc-900/10 ring-zinc-900/10 transition duration-300 ease-in-out min-[416px]:max-w-sm sm:px-6 sm:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
+                    class="overflow-y-auto fixed bottom-0 left-0 top-14 px-4 pt-6 pb-4 w-full bg-white ring-1 shadow-lg transition duration-300 ease-in-out sm:px-6 sm:pb-10 shadow-zinc-900/10 ring-zinc-900/10 min-[416px]:max-w-sm dark:bg-zinc-900 dark:ring-zinc-800"
                     show_class="translate-x-0"
                     hide_class="-translate-x-full"
                 >
@@ -205,7 +205,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
             <ul role="list">
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        class="block flex py-1 text-sm transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                         href="https://docs.rs/biji-ui/latest/biji_ui/"
                     >
                         "Documentation"
@@ -213,7 +213,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                 </li>
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        class="block flex py-1 text-sm transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                         href="https://github.com/biji-ui/biji-ui"
                     >
                         "Github"
@@ -221,7 +221,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                 </li>
                 <li class="md:hidden">
                     <a
-                        class="block flex py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        class="block flex py-1 text-sm transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                         href="https://github.com/biji-ui/biji-ui/issues"
                     >
                         "Report an issue"
@@ -230,7 +230,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
             </ul>
             <ul role="list">
                 <li class="relative mt-6 md:mt-0">
-                    <h2 class="text-xs font-semibold text-zinc-900 dark:text-white">
+                    <h2 class="text-xs font-semibold dark:text-white text-zinc-900">
                         "Introduction"
                     </h2>
                     <ul class="border-l border-transparent">
@@ -241,7 +241,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pr-3 pl-4 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                            class="flex gap-2 justify-between py-1 pr-3 pl-4 text-sm transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -262,7 +262,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                     </ul>
                 </li>
                 <li class="relative mt-6">
-                    <h2 class="text-xs font-semibold text-zinc-900 dark:text-white">
+                    <h2 class="text-xs font-semibold dark:text-white text-zinc-900">
                         "Components"
                     </h2>
                     <ul class="border-l border-transparent">
@@ -273,7 +273,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
                                     <li class="relative">
                                         <a
                                             href={path}
-                                            class="flex justify-between gap-2 py-1 pr-3 pl-4 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                                            class="flex gap-2 justify-between py-1 pr-3 pl-4 text-sm transition text-zinc-600 dark:text-zinc-400 dark:hover:text-white hover:text-zinc-900"
                                             class:font-medium={move || {
                                                 location.pathname.get() == path
                                             }}
@@ -302,18 +302,18 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
 pub fn DocsPage() -> impl IntoView {
     view! {
         <div class="h-full lg:ml-72 xl:ml-80">
-            <header class="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex">
-                <div class="contents lg:pointer-events-auto lg:block lg:w-72 lg:overflow-y-auto lg:border-r lg:border-zinc-900/10 lg:px-6 lg:pt-4 lg:pb-8 xl:w-80 lg:dark:border-white/10">
+            <header class="contents lg:flex lg:fixed lg:inset-0 lg:z-40 lg:pointer-events-none">
+                <div class="contents lg:block lg:overflow-y-auto lg:px-6 lg:pt-4 lg:pb-8 lg:w-72 lg:border-r lg:pointer-events-auto xl:w-80 lg:border-zinc-900/10 lg:dark:border-white/10">
                     <div class="hidden lg:flex">
                         <a aria-label="Home" href="/">
-                            <icons::BijiUI class="h-5 w-auto"></icons::BijiUI>
+                            <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
                         </a>
                     </div>
                     <TopNav />
-                    <SidebarNav class="hidden lg:mt-10 lg:block" />
+                    <SidebarNav class="hidden lg:block lg:mt-10" />
                 </div>
             </header>
-            <div class="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
+            <div class="flex relative flex-col px-4 pt-14 h-full sm:px-6 lg:px-8">
                 <Outlet />
                 <icons::HeroPattern></icons::HeroPattern>
             </div>
@@ -332,11 +332,11 @@ where
     IV: IntoView,
 {
     view! {
-        <article class="flex h-full flex-col pt-16 pb-10">
+        <article class="flex flex-col pt-16 pb-10 h-full">
             <h1 class="mb-2 text-2xl font-bold">{title}</h1>
             <p class="mt-3 mb-11 text-base text-balance">{description}</p>
             <div class="relative rounded-2xl border-2 border-muted bg-zinc-50 !ring-transparent dark:bg-neutral-900/50">
-                <div class="flex min-h-[443px] w-full items-center justify-center p-12 preview">
+                <div class="flex justify-center items-center p-12 w-full min-h-[443px] preview">
                     {example()}
                 </div>
             </div>
