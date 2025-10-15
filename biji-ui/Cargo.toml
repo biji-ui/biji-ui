@@ -2,7 +2,7 @@
 [package]
 name = "biji-ui"
 version = { workspace = true }
-edition = "2021"
+edition = { workspace = true }
 description = "Effortless headless UI components for your Leptos projects"
 license = "MIT"
 readme = "../README.md"
