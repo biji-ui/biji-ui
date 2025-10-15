@@ -32,7 +32,7 @@ pub fn DropdownMenuExample() -> impl IntoView {
                 <icons::Ellipsis class="w-6 h-6 text-foreground"></icons::Ellipsis>
             </menu::Trigger>
             <menu::Content
-                class="flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-background-foreground"
+                class="flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                 show_class="z-10 opacity-100 transition duration-150 ease-in"
                 hide_class="-z-10 opacity-0 transition duration-200 ease-out"
             >
@@ -61,7 +61,7 @@ pub fn DropdownMenuExample() -> impl IntoView {
                         "Sub menu" <icons::ChevronRight class="w-4"></icons::ChevronRight>
                     </menu::SubMenuTrigger>
                     <menu::Content
-                        class="flex absolute flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-background-foreground"
+                        class="flex absolute flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
                         show_class="z-10 top-0 left-[105%] opacity-100 transition duration-150 ease-in"
                         hide_class="-z-10 top-0 left-[105%] opacity-0 transition duration-200 ease-out"
                     >
