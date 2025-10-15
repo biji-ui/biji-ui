@@ -35,7 +35,7 @@ pub fn ThemeMode() -> impl IntoView {
             </menu::Trigger>
             <Portal>
                 <menu::Content
-                    class="flex z-40 flex-col p-1 w-40 rounded-md border shadow-md transition focus:outline-none min-w-[8rem] border-border bg-background text-background-foreground"
+                    class="flex z-40 flex-col p-1 w-40 rounded-md border shadow-md transition focus:outline-none min-w-[8rem] border-border bg-background text-foreground"
                     show_class="opacity-100 duration-150 ease-in"
                     hide_class="opacity-0 duration-200 ease-out"
                 >
