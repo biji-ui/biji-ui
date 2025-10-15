@@ -5,3 +5,8 @@ members = ["biji-ui", "biji-ui-docs", "jspackages"]
 [workspace.package]
 version = "0.3.1"
 edition = "2021"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "z"
