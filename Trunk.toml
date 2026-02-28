@@ -8,4 +8,4 @@ addresses = ["127.0.0.1"]
 port = 8080
 
 [tools]
-tailwindcss = "4.1.13"
+tailwindcss = "4.2.1"
