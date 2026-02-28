@@ -1,6 +1,8 @@
 use std::time::Duration;
 
 use leptos::{
+    attribute_interceptor::AttributeInterceptor,
+    html::Div,
     leptos_dom::{self, helpers::TimeoutHandle},
     prelude::*,
 };
@@ -20,9 +22,15 @@ pub fn CustomAnimatedShow(
     hide_class: String,
     /// The timeout after which the component will be unmounted if `when == false`
     hide_delay: Duration,
-    /// Optional CSS style to apply if `when == true`
+    /// Optional CSS style to apply (static string)
     #[prop(into, optional)]
     style: String,
+    /// Optional reactive CSS style signal (takes precedence over `style` when provided)
+    #[prop(into, optional)]
+    style_signal: Option<Signal<String>>,
+    /// Optional node ref for the wrapper div
+    #[prop(optional)]
+    node_ref: Option<NodeRef<Div>>,
 ) -> impl IntoView {
     let show_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
     let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
@@ -73,11 +81,30 @@ pub fn CustomAnimatedShow(
         drop(eff);
     });
 
+    let stored_style = StoredValue::new(style);
+    let children = StoredValue::new(children);
+
+    // Build the computed style: prefer reactive signal, fall back to static string
+    let computed_style = move || match style_signal {
+        Some(sig) => sig.get(),
+        None => stored_style.get_value(),
+    };
+
+    // Use the provided node_ref or create a default one
+    let div_ref = node_ref.unwrap_or_default();
+
     view! {
         <Show when={move || show.get()} fallback={|| ()}>
-            <div class={move || cls.get()} style={style.clone()}>
-                {children()}
-            </div>
+            <AttributeInterceptor let:attrs>
+                <div
+                    {..attrs}
+                    node_ref={div_ref}
+                    class={move || cls.get()}
+                    style={computed_style}
+                >
+                    {children.with_value(|c| c())}
+                </div>
+            </AttributeInterceptor>
         </Show>
     }
 }
