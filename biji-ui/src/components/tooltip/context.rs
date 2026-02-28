@@ -17,6 +17,7 @@ pub struct TooltipContext {
     pub hide_delay: Duration,
     pub positioning: Positioning,
     pub arrow_size: i32,
+    pub tooltip_id: StoredValue<String>,
 }
 
 impl Default for TooltipContext {
@@ -30,6 +31,7 @@ impl Default for TooltipContext {
             hide_delay: Duration::from_millis(200),
             positioning: Positioning::default(),
             arrow_size: 8,
+            tooltip_id: StoredValue::new(String::new()),
         }
     }
 }
