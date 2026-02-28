@@ -1,7 +1,6 @@
 use std::time::Duration;
 
 use leptos::{
-    attribute_interceptor::AttributeInterceptor,
     html::Div,
     leptos_dom::{self, helpers::TimeoutHandle},
     prelude::*,
@@ -82,8 +81,6 @@ pub fn CustomAnimatedShow(
     });
 
     let stored_style = StoredValue::new(style);
-    let children = StoredValue::new(children);
-
     // Build the computed style: prefer reactive signal, fall back to static string
     let computed_style = move || match style_signal {
         Some(sig) => sig.get(),
@@ -95,16 +92,9 @@ pub fn CustomAnimatedShow(
 
     view! {
         <Show when={move || show.get()} fallback={|| ()}>
-            <AttributeInterceptor let:attrs>
-                <div
-                    {..attrs}
-                    node_ref={div_ref}
-                    class={move || cls.get()}
-                    style={computed_style}
-                >
-                    {children.with_value(|c| c())}
-                </div>
-            </AttributeInterceptor>
+            <div node_ref={div_ref} class={move || cls.get()} style={computed_style}>
+                {children()}
+            </div>
         </Show>
     }
 }
