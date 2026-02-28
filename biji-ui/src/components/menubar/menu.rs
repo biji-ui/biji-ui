@@ -6,7 +6,7 @@ use leptos::{
     prelude::*,
 };
 use leptos_use::{
-    on_click_outside, use_element_bounding, use_event_listener, UseElementBoundingReturn,
+    UseElementBoundingReturn, on_click_outside, use_element_bounding, use_event_listener,
 };
 use wasm_bindgen::JsCast;
 
@@ -70,6 +70,10 @@ pub fn MenuTrigger(#[prop(into, optional)] class: String, children: Children) ->
             <div
                 node_ref={trigger_ref}
                 class={class}
+                role="menuitem"
+                aria-haspopup="menu"
+                aria-expanded={move || if menu_ctx.open.get() { "true" } else { "false" }}
+                aria-disabled={if menu_ctx.disabled { Some("true") } else { None }}
                 data-state={menu_ctx.index}
                 data-disabled={menu_ctx.disabled}
                 data-highlighted={move || root_ctx.item_in_focus(menu_ctx.index)}
@@ -88,7 +92,7 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
 
     let eff = RenderEffect::new(move |_| {
-        if menu_ctx.open.get() == false {
+        if !menu_ctx.open.get() {
             menu_ctx.set_focus(None);
         }
     });
@@ -244,7 +248,7 @@ pub fn MenuContent(
             hide_class={hide_class.clone()}
             hide_delay={menu_ctx.hide_delay}
         >
-            <div node_ref={content_ref} class={class.clone()} style={style}>
+            <div node_ref={content_ref} class={class.clone()} style={style} role="menu">
                 {children()}
             </div>
         </CustomAnimatedShow>

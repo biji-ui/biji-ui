@@ -5,7 +5,7 @@ use leptos::{
     ev::{focus, keydown},
     prelude::*,
 };
-use leptos_use::{use_element_bounding, use_event_listener, UseElementBoundingReturn};
+use leptos_use::{UseElementBoundingReturn, use_element_bounding, use_event_listener};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlAnchorElement, HtmlButtonElement};
 
@@ -52,6 +52,8 @@ pub fn Item(
                     node_ref={trigger_ref}
                     class={class}
                     tabindex=0
+                    role="menuitem"
+                    aria-disabled={if item_ctx.get_disabled() { Some("true") } else { None }}
                     data-state={item_ctx.get_index()}
                     data-disabled={item_ctx.get_disabled()}
                     data-highlighted={move || menu_ctx.item_in_focus(item_ctx.get_index())}
@@ -99,26 +101,19 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
             }
             "ArrowRight" => {
                 evt.prevent_default();
-                match item_ctx {
-                    ItemData::Item { .. } => {
-                        if let Some(item) = root_ctx.navigate_next_item() {
-                            root_ctx.close_all();
-                            item.focus();
-                            item.open();
-                        }
+                if let ItemData::SubMenuItem { child_context, .. } = item_ctx {
+                    if !child_context.open.get_untracked() {
+                        child_context.open();
+                    } else if let Some(item) = child_context.navigate_first_item() {
+                        item.focus();
+                    } else {
+                        menu_ctx.close();
                     }
-                    ItemData::SubMenuItem { child_context, .. } => {
-                        if !child_context.open.get_untracked() {
-                            child_context.open();
-                        } else {
-                            if let Some(item) = child_context.navigate_first_item() {
-                                item.focus();
-                            } else {
-                                menu_ctx.close();
-                            }
-                        }
-                    }
-                };
+                } else if let Some(item) = root_ctx.navigate_next_item() {
+                    root_ctx.close_all();
+                    item.focus();
+                    item.open();
+                }
             }
             "ArrowLeft" => {
                 evt.prevent_default();
@@ -126,26 +121,19 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                     menu_ctx.close();
                     menu_ctx.focus();
                     menu_ctx.item_focus.set(None);
-                } else {
-                    if let Some(item) = root_ctx.navigate_previous_item() {
-                        item.focus();
-                        item.open();
-                        menu_ctx.close();
-                    }
+                } else if let Some(item) = root_ctx.navigate_previous_item() {
+                    item.focus();
+                    item.open();
+                    menu_ctx.close();
                 }
             }
             "Enter" => {
-                match item_ctx {
-                    ItemData::Item { .. } => {
-                        handle_on_click();
-                        root_ctx.close_all();
-                        root_ctx.focus_active_item();
-                    }
-                    ItemData::SubMenuItem { .. } => {
-                        // Don't handle Enter for SubMenuItem here - it's handled by SubMenuItemTriggerEvents
-                        // to avoid conflicts between the two event handlers
-                    }
-                };
+                if let ItemData::Item { .. } = item_ctx {
+                    handle_on_click();
+                    root_ctx.close_all();
+                    root_ctx.focus_active_item();
+                }
+                // SubMenuItem Enter is handled by SubMenuItemTriggerEvents
             }
             "Escape" => {
                 menu_ctx.close();
@@ -158,13 +146,10 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
     let _ = use_event_listener(item_ctx.get_trigger_ref(), focus, move |_| {
         menu_ctx.set_focus(Some(item_ctx.get_index()));
         menu_ctx.close_all();
-        match item_ctx {
-            ItemData::SubMenuItem { child_context, .. } => {
-                if !child_context.open.get_untracked() {
-                    child_context.open();
-                }
+        if let ItemData::SubMenuItem { child_context, .. } = item_ctx {
+            if !child_context.open.get_untracked() {
+                child_context.open();
             }
-            _ => {}
         }
     });
 
@@ -237,13 +222,18 @@ pub fn SubMenuItemTrigger(
                 node_ref={trigger_ref}
                 class={class}
                 tabindex=0
+                role="menuitem"
+                aria-haspopup="menu"
+                aria-expanded={move || if item_ctx.open.get() { "true" } else { "false" }}
+                aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
                 data-state={item_ctx.index}
                 data-disabled={item_ctx.disabled}
-                data-highlighted={move || match sub_menu_ctx {
-                    ItemData::SubMenuItem { parent_context, .. } => {
+                data-highlighted={move || {
+                    if let ItemData::SubMenuItem { parent_context, .. } = sub_menu_ctx {
                         parent_context.item_in_focus(item_ctx.index)
+                    } else {
+                        false
                     }
-                    _ => false,
                 }}
             >
 
@@ -263,16 +253,13 @@ pub fn SubMenuItemTriggerEvents(children: Children) -> impl IntoView {
             evt.prevent_default();
             evt.stop_propagation();
             menu_ctx.toggle();
-            match item_ctx {
-                ItemData::SubMenuItem { child_context, .. } => {
-                    if menu_ctx.open.get_untracked() {
-                        if let Some(item) = child_context.navigate_first_item() {
-                            item.focus();
-                        }
+            if let ItemData::SubMenuItem { child_context, .. } = item_ctx {
+                if menu_ctx.open.get_untracked() {
+                    if let Some(item) = child_context.navigate_first_item() {
+                        item.focus();
                     }
                 }
-                _ => {}
-            };
+            }
         }
     });
 
@@ -329,7 +316,7 @@ pub fn SubMenuItemContent(
             hide_class={hide_class}
             hide_delay={menu_ctx.hide_delay}
         >
-            <div node_ref={content_ref} class={class.clone()} style={style}>
+            <div node_ref={content_ref} class={class.clone()} style={style} role="menu">
                 {children()}
             </div>
         </CustomAnimatedShow>

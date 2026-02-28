@@ -1,11 +1,15 @@
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::HashMap,
+    sync::atomic::{AtomicUsize, Ordering},
+    time::Duration,
+};
 
 use leptos::{html::Div, prelude::*};
 
 use crate::{
     items::{
-        filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
-        ManageFocus, NavigateItems, Toggle,
+        FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, Toggle,
+        filter_active, next_item, previous_item,
     },
     utils::positioning::Positioning,
 };
@@ -23,6 +27,7 @@ pub struct RootContext {
     pub allow_menu_loop: bool,
     pub allow_item_loop: bool,
     pub prevent_scroll: bool,
+    pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
 impl Default for RootContext {
@@ -33,6 +38,7 @@ impl Default for RootContext {
             allow_menu_loop: false,
             allow_item_loop: false,
             prevent_scroll: false,
+            next_id: StoredValue::new(AtomicUsize::new(0)),
         }
     }
 }
@@ -59,7 +65,8 @@ impl RootContext {
     }
 
     pub fn next_index(&self) -> usize {
-        self.items.get_untracked().len()
+        self.next_id
+            .with_value(|counter| counter.fetch_add(1, Ordering::Relaxed))
     }
 
     pub fn focus_active_item(&self) -> bool {
@@ -81,31 +88,21 @@ impl FilterActiveItems<MenuContext> for RootContext {
 impl NavigateItems<MenuContext> for RootContext {
     fn navigate_first_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
-        if let Some(first) = active_items.get(0) {
-            return Some(first.clone());
-        }
-        None
+        active_items.first().copied()
     }
 
     fn navigate_last_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
-        if let Some(last) = active_items.last() {
-            return Some(last.clone());
-        }
-        None
+        active_items.last().copied()
     }
 
     fn navigate_next_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
         next_item(active_items, self.item_focus.get(), self.allow_menu_loop)
     }
 
     fn navigate_previous_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
         previous_item(active_items, self.item_focus.get(), self.allow_menu_loop)
     }
 }
@@ -132,6 +129,7 @@ pub struct MenuContext {
     pub allow_loop: bool,
     pub positioning: Positioning,
     pub hide_delay: Duration,
+    pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
 impl Default for MenuContext {
@@ -147,6 +145,7 @@ impl Default for MenuContext {
             allow_loop: false,
             positioning: Positioning::BottomStart,
             hide_delay: Duration::from_millis(200),
+            next_id: StoredValue::new(AtomicUsize::new(0)),
         }
     }
 }
@@ -165,7 +164,8 @@ impl MenuContext {
     }
 
     pub fn next_index(&self) -> usize {
-        self.items.get_untracked().len()
+        self.next_id
+            .with_value(|counter| counter.fetch_add(1, Ordering::Relaxed))
     }
 
     pub fn close_all(&self) {
@@ -221,31 +221,21 @@ impl FilterActiveItems<ItemData> for MenuContext {
 impl NavigateItems<ItemData> for MenuContext {
     fn navigate_first_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
-        if let Some(first) = active_items.get(0) {
-            return Some(first.clone());
-        }
-        None
+        active_items.first().copied()
     }
 
     fn navigate_last_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
-        if let Some(last) = active_items.last() {
-            return Some(last.clone());
-        }
-        None
+        active_items.last().copied()
     }
 
     fn navigate_next_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
         next_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 
     fn navigate_previous_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
         previous_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 }
@@ -294,33 +284,29 @@ impl ItemData {
 
     pub fn is_submenu(&self) -> bool {
         match self {
-            ItemData::Item { is_submenu, .. } => *is_submenu,
-            ItemData::SubMenuItem { is_submenu, .. } => *is_submenu,
+            ItemData::Item { is_submenu, .. } | ItemData::SubMenuItem { is_submenu, .. } => {
+                *is_submenu
+            }
         }
     }
 
     pub fn get_disabled(&self) -> bool {
         match self {
-            ItemData::Item { disabled, .. } => *disabled,
-            ItemData::SubMenuItem { disabled, .. } => *disabled,
+            ItemData::Item { disabled, .. } | ItemData::SubMenuItem { disabled, .. } => *disabled,
         }
     }
 }
 
 impl IsActive for ItemData {
     fn is_active(&self) -> bool {
-        match self {
-            ItemData::Item { disabled, .. } => !disabled,
-            ItemData::SubMenuItem { disabled, .. } => !disabled,
-        }
+        !self.get_disabled()
     }
 }
 
 impl GetIndex<usize> for ItemData {
     fn get_index(&self) -> usize {
         match self {
-            ItemData::Item { index, .. } => *index,
-            ItemData::SubMenuItem { index, .. } => *index,
+            ItemData::Item { index, .. } | ItemData::SubMenuItem { index, .. } => *index,
         }
     }
 }
