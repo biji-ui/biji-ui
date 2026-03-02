@@ -322,24 +322,25 @@ pub fn DocsPage() -> impl IntoView {
 }
 
 #[component]
-pub fn DocPage<F, IV>(
+pub fn DocPage(
     #[prop(into)] title: String,
-    #[prop(into)] description: String,
-    example: F,
-) -> impl IntoView
-where
-    F: Fn() -> IV,
-    IV: IntoView,
-{
+    children: Children,
+) -> impl IntoView {
     view! {
         <article class="flex flex-col pt-16 pb-10 h-full">
             <h1 class="mb-2 text-2xl font-bold">{title}</h1>
-            <p class="mt-3 mb-11 text-base text-balance">{description}</p>
-            <div class="relative rounded-2xl border-2 border-muted bg-zinc-50 !ring-transparent dark:bg-neutral-900/50">
-                <div class="flex justify-center items-center p-12 w-full min-h-[443px] preview">
-                    {example()}
-                </div>
-            </div>
+            {children()}
         </article>
+    }
+}
+
+#[component]
+pub fn DocPreview(children: Children) -> impl IntoView {
+    view! {
+        <div class="relative rounded-2xl border-2 border-muted bg-zinc-50 !ring-transparent dark:bg-neutral-900/50">
+            <div class="flex justify-center items-center p-12 w-full min-h-[443px] preview">
+                {children()}
+            </div>
+        </div>
     }
 }
