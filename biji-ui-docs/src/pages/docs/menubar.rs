@@ -177,6 +177,12 @@ const SUBMENU_PROPS: &[PropRow] = &[
         description: "CSS class applied to the submenu wrapper element.",
     },
     PropRow {
+        name: "disabled",
+        prop_type: "bool",
+        default: "false",
+        description: "Disables the submenu trigger and prevents it from opening.",
+    },
+    PropRow {
         name: "positioning",
         prop_type: "Positioning",
         default: "RightStart",
