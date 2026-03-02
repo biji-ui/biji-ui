@@ -46,7 +46,7 @@ impl Default for RootContext {
 impl RootContext {
     pub fn upsert_item(&self, index: usize, item: MenuContext) {
         self.items.update(|items| {
-            *items.entry(index).or_insert(item) = item;
+            items.insert(index, item);
         });
     }
 
@@ -57,9 +57,10 @@ impl RootContext {
     }
 
     pub fn close_all(&self) {
-        self.items.try_update(|items| {
+        self.items.with_untracked(|items| {
             for item in items.values() {
-                item.open.set(false);
+                item.close_all(); // cascade into submenus before hiding the menu
+                item.close();
             }
         });
     }
@@ -67,6 +68,12 @@ impl RootContext {
     pub fn next_index(&self) -> usize {
         self.next_id
             .with_value(|counter| counter.fetch_add(1, Ordering::Relaxed))
+    }
+
+    pub fn any_open(&self) -> bool {
+        self.items.with_untracked(|items| {
+            items.values().any(|m| m.open.get_untracked())
+        })
     }
 
     pub fn focus_active_item(&self) -> bool {
@@ -129,6 +136,10 @@ pub struct MenuContext {
     pub allow_loop: bool,
     pub positioning: Positioning,
     pub hide_delay: Duration,
+    /// When `true`, the next `focus` event on this menu's trigger will not
+    /// auto-open the submenu. Used by the ArrowLeft handler to return focus to
+    /// a SubMenuItem trigger without the focus listener re-opening it.
+    pub skip_open_on_focus: RwSignal<bool>,
     pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
@@ -145,6 +156,7 @@ impl Default for MenuContext {
             allow_loop: false,
             positioning: Positioning::BottomStart,
             hide_delay: Duration::from_millis(200),
+            skip_open_on_focus: RwSignal::new(false),
             next_id: StoredValue::new(AtomicUsize::new(0)),
         }
     }
@@ -153,7 +165,7 @@ impl Default for MenuContext {
 impl MenuContext {
     pub fn upsert_item(&self, index: usize, item: ItemData) {
         self.items.update(|items| {
-            *items.entry(index).or_insert(item) = item;
+            items.insert(index, item);
         });
     }
 
@@ -169,13 +181,32 @@ impl MenuContext {
     }
 
     pub fn close_all(&self) {
-        self.items.try_update(|items| {
+        self.close_all_except(usize::MAX);
+    }
+
+    /// Closes every sibling submenu except the one with `except_index`.
+    /// Use this instead of `close_all` when you are about to open `except_index`
+    /// so that you never close-then-reopen the same submenu in the same event.
+    pub fn close_all_except(&self, except_index: usize) {
+        self.items.with_untracked(|items| {
             for item in items.values() {
-                if let ItemData::SubMenuItem { child_context, .. } = item {
-                    child_context.close();
+                if let ItemData::SubMenuItem { child_context, index, .. } = item {
+                    if *index != except_index {
+                        child_context.close_all(); // recursively close nested submenus
+                        child_context.close();
+                    }
                 }
             }
         });
+    }
+
+    /// Closes all nested submenus and then closes this menu.
+    /// Use instead of `close()` whenever leaving a menu that may have open
+    /// submenus, so their `open` signals are reset and hover works correctly
+    /// the next time the menu is opened.
+    pub fn close_with_submenus(&self) {
+        self.close_all();
+        self.close();
     }
 }
 
@@ -242,14 +273,23 @@ impl NavigateItems<ItemData> for MenuContext {
 
 impl Toggle for MenuContext {
     fn toggle(&self) {
-        self.open.set(!self.open.get());
+        let next = !self.open.get_untracked();
+        self.open.set(next);
     }
 
     fn open(&self) {
+        // Guard: skip set (and the resulting reactive notification) if already open.
+        if self.open.get_untracked() {
+            return;
+        }
         self.open.set(true);
     }
 
     fn close(&self) {
+        // Guard: skip set (and the resulting reactive notification) if already closed.
+        if !self.open.get_untracked() {
+            return;
+        }
         self.open.set(false);
     }
 }
