@@ -1,3 +1,4 @@
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use leptos::{
@@ -31,8 +32,12 @@ pub fn CustomAnimatedShow(
     #[prop(optional)]
     node_ref: Option<NodeRef<Div>>,
 ) -> impl IntoView {
-    let show_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
-    let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
+    // Use Arc<Mutex<>> instead of StoredValue so that Leptos arena slot reuse
+    // can never cause a stale effect from an old mount to corrupt a new mount's
+    // timer handles.
+    let show_handle: Arc<Mutex<Option<TimeoutHandle>>> = Arc::new(Mutex::new(None));
+    let hide_handle: Arc<Mutex<Option<TimeoutHandle>>> = Arc::new(Mutex::new(None));
+
     let cls = RwSignal::new(if when.get_untracked() {
         show_class.clone()
     } else {
@@ -40,41 +45,71 @@ pub fn CustomAnimatedShow(
     });
     let show = RwSignal::new(when.get_untracked());
 
+    let show_handle_eff = Arc::clone(&show_handle);
+    let hide_handle_eff = Arc::clone(&hide_handle);
+
     let eff = RenderEffect::new(move |_| {
         let show_class = show_class.clone();
+
         if when.get() {
-            // clear any possibly active timer
-            if let Some(h) = show_handle.get_value() {
+            // Cancel any in-flight timers from a previous transition.
+            if let Some(h) = show_handle_eff.lock().unwrap().take() {
                 h.clear();
             }
-            if let Some(h) = hide_handle.get_value() {
+            if let Some(h) = hide_handle_eff.lock().unwrap().take() {
                 h.clear();
             }
 
+            // After 1 ms, swap from hide_class → show_class so CSS transitions
+            // start from the hidden state.
+            let sh = Arc::clone(&show_handle_eff);
             let h = leptos_dom::helpers::set_timeout_with_handle(
-                move || cls.set(show_class.clone()),
+                move || {
+                    cls.set(show_class.clone());
+                    *sh.lock().unwrap() = None;
+                },
                 Duration::from_millis(1),
             )
             .expect("set timeout in AnimatedShow");
-            show_handle.set_value(Some(h));
+            *show_handle_eff.lock().unwrap() = Some(h);
 
             cls.set(hide_class.clone());
             show.set(true);
         } else {
             cls.set(hide_class.clone());
 
-            let h =
-                leptos_dom::helpers::set_timeout_with_handle(move || show.set(false), hide_delay)
-                    .expect("set timeout in AnimatedShow");
-            hide_handle.set_value(Some(h));
+            // Cancel the pending show-class timer so a rapid true→false flip
+            // doesn't cause a flash (the 1 ms timer would apply show_class even
+            // though we're already hiding again).
+            if let Some(h) = show_handle_eff.lock().unwrap().take() {
+                h.clear();
+            }
+
+            // Cancel any previous hide timer before scheduling a new one,
+            // otherwise duplicate timers from repeated same-value sets will pile up.
+            if let Some(h) = hide_handle_eff.lock().unwrap().take() {
+                h.clear();
+            }
+
+            // Unmount after hide_delay so the hide animation can play out.
+            let hh = Arc::clone(&hide_handle_eff);
+            let h = leptos_dom::helpers::set_timeout_with_handle(
+                move || {
+                    show.set(false);
+                    *hh.lock().unwrap() = None;
+                },
+                hide_delay,
+            )
+            .expect("set timeout in AnimatedShow");
+            *hide_handle_eff.lock().unwrap() = Some(h);
         }
     });
 
     on_cleanup(move || {
-        if let Some(Some(h)) = show_handle.try_get_value() {
+        if let Some(h) = show_handle.lock().unwrap().take() {
             h.clear();
         }
-        if let Some(Some(h)) = hide_handle.try_get_value() {
+        if let Some(h) = hide_handle.lock().unwrap().take() {
             h.clear();
         }
         drop(eff);
