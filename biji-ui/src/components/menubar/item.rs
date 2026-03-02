@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::{
     context::Provider,
-    ev::{focus, keydown},
+    ev::{focus, keydown, mouseover},
     prelude::*,
 };
 use leptos_use::{UseElementBoundingReturn, use_element_bounding, use_event_listener};
@@ -102,29 +102,56 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
             "ArrowRight" => {
                 evt.prevent_default();
                 if let ItemData::SubMenuItem { child_context, .. } = item_ctx {
+                    // Keyboard-focused item is a SubMenuItem → enter it.
                     if !child_context.open.get_untracked() {
                         child_context.open();
-                    } else if let Some(item) = child_context.navigate_first_item() {
-                        item.focus();
-                    } else {
-                        menu_ctx.close();
                     }
-                } else if let Some(item) = root_ctx.navigate_next_item() {
-                    root_ctx.close_all();
-                    item.focus();
-                    item.open();
+                    if let Some(item) = child_context.navigate_first_item() {
+                        item.focus();
+                    }
+                } else {
+                    // Keyboard-focused item is a regular Item.
+                    // If hover has highlighted a SubMenuItem, enter that instead.
+                    let hovered_sub = menu_ctx
+                        .item_focus
+                        .get_untracked()
+                        .and_then(|idx| {
+                            menu_ctx
+                                .items
+                                .with_untracked(|items| items.get(&idx).copied())
+                        })
+                        .and_then(|item| {
+                            if let ItemData::SubMenuItem { child_context, .. } = item {
+                                Some(child_context)
+                            } else {
+                                None
+                            }
+                        });
+                    if let Some(child_ctx) = hovered_sub {
+                        if !child_ctx.open.get_untracked() {
+                            child_ctx.open();
+                        }
+                        if let Some(first) = child_ctx.navigate_first_item() {
+                            first.focus();
+                        }
+                    } else if let Some(item) = root_ctx.navigate_next_item() {
+                        root_ctx.close_all();
+                        item.focus();
+                        item.open();
+                    }
                 }
             }
             "ArrowLeft" => {
                 evt.prevent_default();
                 if item_ctx.is_submenu() {
-                    menu_ctx.close();
+                    menu_ctx.skip_open_on_focus.set(true);
+                    menu_ctx.close_with_submenus();
                     menu_ctx.focus();
                     menu_ctx.item_focus.set(None);
                 } else if let Some(item) = root_ctx.navigate_previous_item() {
                     item.focus();
                     item.open();
-                    menu_ctx.close();
+                    menu_ctx.close_with_submenus();
                 }
             }
             "Enter" => {
@@ -136,7 +163,7 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
                 // SubMenuItem Enter is handled by SubMenuItemTriggerEvents
             }
             "Escape" => {
-                menu_ctx.close();
+                menu_ctx.close_with_submenus();
                 menu_ctx.focus();
             }
             _ => {}
@@ -145,12 +172,37 @@ pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
 
     let _ = use_event_listener(item_ctx.get_trigger_ref(), focus, move |_| {
         menu_ctx.set_focus(Some(item_ctx.get_index()));
-        menu_ctx.close_all();
         if let ItemData::SubMenuItem { child_context, .. } = item_ctx {
+            menu_ctx.close_all_except(child_context.index);
+            if child_context.skip_open_on_focus.get_untracked() {
+                child_context.skip_open_on_focus.set(false);
+            } else if !child_context.open.get_untracked() {
+                child_context.open();
+            }
+        } else {
+            menu_ctx.close_all();
+        }
+    });
+
+    let _ = use_event_listener(item_ctx.get_trigger_ref(), mouseover, move |evt| {
+        evt.stop_propagation();
+        menu_ctx.set_focus(Some(item_ctx.get_index()));
+        if let ItemData::SubMenuItem { child_context, .. } = item_ctx {
+            // close_all_except avoids a flash: mouseover re-fires each time the
+            // mouse crosses a child element (text → icon, etc.), so we must not
+            // close our own submenu only to immediately reopen it.
+            menu_ctx.close_all_except(child_context.index);
             if !child_context.open.get_untracked() {
                 child_context.open();
             }
+        } else {
+            menu_ctx.close_all();
         }
+        // Move DOM focus to this item on hover so that if the user switches to
+        // keyboard navigation, focus is not stranded inside a just-closed submenu.
+        // If the element already has focus the browser does not fire a second
+        // `focus` event, so the focus handler is only re-invoked on an actual change.
+        item_ctx.focus();
     });
 
     children()
@@ -211,10 +263,12 @@ pub fn SubMenuItemTrigger(
     #[prop(into, optional)] class: String,
     children: Children,
 ) -> impl IntoView {
-    let item_ctx = expect_context::<MenuContext>();
-    let sub_menu_ctx = expect_context::<ItemData>();
+    // `child_menu_ctx` is the MenuContext for this submenu (its open state, items, etc.).
+    // `item_data`      is the ItemData::SubMenuItem registered in the parent menu.
+    let child_menu_ctx = expect_context::<MenuContext>();
+    let item_data = expect_context::<ItemData>();
 
-    let trigger_ref = item_ctx.trigger_ref;
+    let trigger_ref = child_menu_ctx.trigger_ref;
 
     view! {
         <SubMenuItemTriggerEvents>
@@ -224,19 +278,18 @@ pub fn SubMenuItemTrigger(
                 tabindex=0
                 role="menuitem"
                 aria-haspopup="menu"
-                aria-expanded={move || if item_ctx.open.get() { "true" } else { "false" }}
-                aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
-                data-state={item_ctx.index}
-                data-disabled={item_ctx.disabled}
+                aria-expanded={move || if child_menu_ctx.open.get() { "true" } else { "false" }}
+                aria-disabled={if child_menu_ctx.disabled { Some("true") } else { None }}
+                data-state={child_menu_ctx.index}
+                data-disabled={child_menu_ctx.disabled}
                 data-highlighted={move || {
-                    if let ItemData::SubMenuItem { parent_context, .. } = sub_menu_ctx {
-                        parent_context.item_in_focus(item_ctx.index)
+                    if let ItemData::SubMenuItem { parent_context, .. } = item_data {
+                        parent_context.item_in_focus(child_menu_ctx.index)
                     } else {
                         false
                     }
                 }}
             >
-
                 {children()}
             </div>
         </SubMenuItemTriggerEvents>
@@ -245,19 +298,21 @@ pub fn SubMenuItemTrigger(
 
 #[component]
 pub fn SubMenuItemTriggerEvents(children: Children) -> impl IntoView {
+    // `menu_ctx` is the child MenuContext for this submenu — the same context
+    // that `SubMenuItemTrigger` exposes as `child_menu_ctx`.
     let menu_ctx = expect_context::<MenuContext>();
-    let item_ctx = expect_context::<ItemData>();
 
     let _ = use_event_listener(menu_ctx.trigger_ref, keydown, move |evt| {
         if evt.key() == "Enter" {
             evt.prevent_default();
+            // stop_propagation prevents this from also bubbling to the
+            // ItemTriggerEvents keydown handler on the same element.
             evt.stop_propagation();
             menu_ctx.toggle();
-            if let ItemData::SubMenuItem { child_context, .. } = item_ctx {
-                if menu_ctx.open.get_untracked() {
-                    if let Some(item) = child_context.navigate_first_item() {
-                        item.focus();
-                    }
+            // If we just opened it, move focus to the first item.
+            if menu_ctx.open.get_untracked() {
+                if let Some(item) = menu_ctx.navigate_first_item() {
+                    item.focus();
                 }
             }
         }
