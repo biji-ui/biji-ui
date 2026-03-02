@@ -179,7 +179,7 @@ const SUBMENU_PROPS: &[PropRow] = &[
     PropRow {
         name: "positioning",
         prop_type: "Positioning",
-        default: "BottomStart",
+        default: "RightStart",
         description: "Where to position the submenu content.",
     },
     PropRow {
@@ -200,11 +200,11 @@ const SUBMENU_TRIGGER_PROPS: &[PropRow] = &[PropRow {
 const DATA_ATTRS: &[DataAttrRow] = &[
     DataAttrRow {
         name: "data-highlighted",
-        description: "Present on Trigger and Item when they have keyboard focus or are hovered.",
+        description: "Present on Trigger, Item, and SubMenuTrigger when they have keyboard focus or are hovered.",
     },
     DataAttrRow {
         name: "data-disabled",
-        description: "Present on Trigger and Item when disabled is true.",
+        description: "Present on Trigger, Item, and SubMenuTrigger when disabled is true.",
     },
     DataAttrRow {
         name: "data-open",

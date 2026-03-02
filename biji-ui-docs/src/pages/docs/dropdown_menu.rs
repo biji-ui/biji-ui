@@ -136,9 +136,15 @@ const SUBMENU_PROPS: &[PropRow] = &[
         description: "CSS class applied to the submenu wrapper element.",
     },
     PropRow {
+        name: "disabled",
+        prop_type: "bool",
+        default: "false",
+        description: "Disables the submenu trigger and prevents it from opening.",
+    },
+    PropRow {
         name: "positioning",
         prop_type: "Positioning",
-        default: "BottomStart",
+        default: "RightStart",
         description: "Where to position the submenu content.",
     },
     PropRow {
@@ -159,11 +165,15 @@ const SUBMENU_TRIGGER_PROPS: &[PropRow] = &[PropRow {
 const DATA_ATTRS: &[DataAttrRow] = &[
     DataAttrRow {
         name: "data-highlighted",
-        description: "Present on Item and SubMenuTrigger when they have keyboard focus or are hovered.",
+        description: "Present on Trigger, Item, and SubMenuTrigger when they have keyboard focus or are hovered.",
     },
     DataAttrRow {
         name: "data-disabled",
-        description: "Present on Item and SubMenuTrigger when disabled is true.",
+        description: "Present on Trigger, Item, and SubMenuTrigger when disabled is true.",
+    },
+    DataAttrRow {
+        name: "data-open",
+        description: "Present on Trigger with the value true when the menu is open.",
     },
 ];
 
