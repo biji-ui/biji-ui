@@ -109,11 +109,11 @@ const CONTENT_PROPS: &[PropRow] = &[
 const DATA_ATTRS: &[DataAttrRow] = &[
     DataAttrRow {
         name: "data-state",
-        description: "\"open\" when the item is expanded; \"closed\" when collapsed. Present on Item, Toggle, and Content.",
+        description: "\"open\" when the item is expanded; \"closed\" when collapsed. Present on Item and Toggle.",
     },
     DataAttrRow {
         name: "data-highlighted",
-        description: "Present on the Toggle when it has keyboard focus.",
+        description: "Present on Item and Toggle when the item has keyboard focus.",
     },
     DataAttrRow {
         name: "data-disabled",
