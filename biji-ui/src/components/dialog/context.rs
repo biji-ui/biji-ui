@@ -49,6 +49,7 @@ impl DialogContext {
 pub struct RootContext {
     pub close_ref: NodeRef<Button>,
     pub overlay_ref: NodeRef<Div>,
+    pub content_ref: NodeRef<Div>,
 }
 
 impl Default for RootContext {
@@ -56,6 +57,7 @@ impl Default for RootContext {
         Self {
             overlay_ref: NodeRef::default(),
             close_ref: NodeRef::default(),
+            content_ref: NodeRef::default(),
         }
     }
 }

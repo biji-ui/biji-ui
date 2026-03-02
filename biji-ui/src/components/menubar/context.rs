@@ -1,11 +1,15 @@
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::HashMap,
+    sync::atomic::{AtomicUsize, Ordering},
+    time::Duration,
+};
 
 use leptos::{html::Div, prelude::*};
 
 use crate::{
     items::{
-        filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
-        ManageFocus, NavigateItems, Toggle,
+        FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, Toggle,
+        filter_active, next_item, previous_item,
     },
     utils::positioning::Positioning,
 };
@@ -23,6 +27,7 @@ pub struct RootContext {
     pub allow_menu_loop: bool,
     pub allow_item_loop: bool,
     pub prevent_scroll: bool,
+    pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
 impl Default for RootContext {
@@ -33,6 +38,7 @@ impl Default for RootContext {
             allow_menu_loop: false,
             allow_item_loop: false,
             prevent_scroll: false,
+            next_id: StoredValue::new(AtomicUsize::new(0)),
         }
     }
 }
@@ -40,7 +46,7 @@ impl Default for RootContext {
 impl RootContext {
     pub fn upsert_item(&self, index: usize, item: MenuContext) {
         self.items.update(|items| {
-            *items.entry(index).or_insert(item) = item;
+            items.insert(index, item);
         });
     }
 
@@ -51,15 +57,23 @@ impl RootContext {
     }
 
     pub fn close_all(&self) {
-        self.items.try_update(|items| {
+        self.items.with_untracked(|items| {
             for item in items.values() {
-                item.open.set(false);
+                item.close_all(); // cascade into submenus before hiding the menu
+                item.close();
             }
         });
     }
 
     pub fn next_index(&self) -> usize {
-        self.items.get_untracked().len()
+        self.next_id
+            .with_value(|counter| counter.fetch_add(1, Ordering::Relaxed))
+    }
+
+    pub fn any_open(&self) -> bool {
+        self.items.with_untracked(|items| {
+            items.values().any(|m| m.open.get_untracked())
+        })
     }
 
     pub fn focus_active_item(&self) -> bool {
@@ -81,31 +95,21 @@ impl FilterActiveItems<MenuContext> for RootContext {
 impl NavigateItems<MenuContext> for RootContext {
     fn navigate_first_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
-        if let Some(first) = active_items.get(0) {
-            return Some(first.clone());
-        }
-        None
+        active_items.first().copied()
     }
 
     fn navigate_last_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
-        if let Some(last) = active_items.last() {
-            return Some(last.clone());
-        }
-        None
+        active_items.last().copied()
     }
 
     fn navigate_next_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
         next_item(active_items, self.item_focus.get(), self.allow_menu_loop)
     }
 
     fn navigate_previous_item(&self) -> Option<MenuContext> {
         let active_items = self.filter_active_items();
-
         previous_item(active_items, self.item_focus.get(), self.allow_menu_loop)
     }
 }
@@ -132,6 +136,11 @@ pub struct MenuContext {
     pub allow_loop: bool,
     pub positioning: Positioning,
     pub hide_delay: Duration,
+    /// When `true`, the next `focus` event on this menu's trigger will not
+    /// auto-open the submenu. Used by the ArrowLeft handler to return focus to
+    /// a SubMenuItem trigger without the focus listener re-opening it.
+    pub skip_open_on_focus: RwSignal<bool>,
+    pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
 impl Default for MenuContext {
@@ -147,6 +156,8 @@ impl Default for MenuContext {
             allow_loop: false,
             positioning: Positioning::BottomStart,
             hide_delay: Duration::from_millis(200),
+            skip_open_on_focus: RwSignal::new(false),
+            next_id: StoredValue::new(AtomicUsize::new(0)),
         }
     }
 }
@@ -154,7 +165,7 @@ impl Default for MenuContext {
 impl MenuContext {
     pub fn upsert_item(&self, index: usize, item: ItemData) {
         self.items.update(|items| {
-            *items.entry(index).or_insert(item) = item;
+            items.insert(index, item);
         });
     }
 
@@ -165,17 +176,37 @@ impl MenuContext {
     }
 
     pub fn next_index(&self) -> usize {
-        self.items.get_untracked().len()
+        self.next_id
+            .with_value(|counter| counter.fetch_add(1, Ordering::Relaxed))
     }
 
     pub fn close_all(&self) {
-        self.items.try_update(|items| {
+        self.close_all_except(usize::MAX);
+    }
+
+    /// Closes every sibling submenu except the one with `except_index`.
+    /// Use this instead of `close_all` when you are about to open `except_index`
+    /// so that you never close-then-reopen the same submenu in the same event.
+    pub fn close_all_except(&self, except_index: usize) {
+        self.items.with_untracked(|items| {
             for item in items.values() {
-                if let ItemData::SubMenuItem { child_context, .. } = item {
-                    child_context.close();
+                if let ItemData::SubMenuItem { child_context, index, .. } = item {
+                    if *index != except_index {
+                        child_context.close_all(); // recursively close nested submenus
+                        child_context.close();
+                    }
                 }
             }
         });
+    }
+
+    /// Closes all nested submenus and then closes this menu.
+    /// Use instead of `close()` whenever leaving a menu that may have open
+    /// submenus, so their `open` signals are reset and hover works correctly
+    /// the next time the menu is opened.
+    pub fn close_with_submenus(&self) {
+        self.close_all();
+        self.close();
     }
 }
 
@@ -221,45 +252,44 @@ impl FilterActiveItems<ItemData> for MenuContext {
 impl NavigateItems<ItemData> for MenuContext {
     fn navigate_first_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
-        if let Some(first) = active_items.get(0) {
-            return Some(first.clone());
-        }
-        None
+        active_items.first().copied()
     }
 
     fn navigate_last_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
-        if let Some(last) = active_items.last() {
-            return Some(last.clone());
-        }
-        None
+        active_items.last().copied()
     }
 
     fn navigate_next_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
         next_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 
     fn navigate_previous_item(&self) -> Option<ItemData> {
         let active_items = self.filter_active_items();
-
         previous_item(active_items, self.item_focus.get(), self.allow_loop)
     }
 }
 
 impl Toggle for MenuContext {
     fn toggle(&self) {
-        self.open.set(!self.open.get());
+        let next = !self.open.get_untracked();
+        self.open.set(next);
     }
 
     fn open(&self) {
+        // Guard: skip set (and the resulting reactive notification) if already open.
+        if self.open.get_untracked() {
+            return;
+        }
         self.open.set(true);
     }
 
     fn close(&self) {
+        // Guard: skip set (and the resulting reactive notification) if already closed.
+        if !self.open.get_untracked() {
+            return;
+        }
         self.open.set(false);
     }
 }
@@ -294,33 +324,29 @@ impl ItemData {
 
     pub fn is_submenu(&self) -> bool {
         match self {
-            ItemData::Item { is_submenu, .. } => *is_submenu,
-            ItemData::SubMenuItem { is_submenu, .. } => *is_submenu,
+            ItemData::Item { is_submenu, .. } | ItemData::SubMenuItem { is_submenu, .. } => {
+                *is_submenu
+            }
         }
     }
 
     pub fn get_disabled(&self) -> bool {
         match self {
-            ItemData::Item { disabled, .. } => *disabled,
-            ItemData::SubMenuItem { disabled, .. } => *disabled,
+            ItemData::Item { disabled, .. } | ItemData::SubMenuItem { disabled, .. } => *disabled,
         }
     }
 }
 
 impl IsActive for ItemData {
     fn is_active(&self) -> bool {
-        match self {
-            ItemData::Item { disabled, .. } => !disabled,
-            ItemData::SubMenuItem { disabled, .. } => !disabled,
-        }
+        !self.get_disabled()
     }
 }
 
 impl GetIndex<usize> for ItemData {
     fn get_index(&self) -> usize {
         match self {
-            ItemData::Item { index, .. } => *index,
-            ItemData::SubMenuItem { index, .. } => *index,
+            ItemData::Item { index, .. } | ItemData::SubMenuItem { index, .. } => *index,
         }
     }
 }

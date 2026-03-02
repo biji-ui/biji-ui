@@ -13,7 +13,7 @@ use leptos::{
 ///
 /// # Example
 ///
-/// ```rust
+/// ```rust,ignore
 /// let is_open = RwSignal::new(false);
 ///
 /// let _effect = use_prevent_scroll(

@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 use leptos::{
     html::{Button, Div},
@@ -6,8 +9,8 @@ use leptos::{
 };
 
 use crate::items::{
-    filter_active, next_item, previous_item, FilterActiveItems, Focus, GetIndex, IsActive,
-    ManageFocus, NavigateItems, Toggle,
+    FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, Toggle,
+    filter_active, next_item, previous_item,
 };
 
 #[derive(Copy, Clone)]
@@ -21,6 +24,7 @@ pub struct RootContext {
     pub item_focus: RwSignal<Option<usize>>,
     pub items: RwSignal<HashMap<usize, ItemContext>>,
     pub allow_loop: bool,
+    pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
 impl Default for RootContext {
@@ -29,6 +33,7 @@ impl Default for RootContext {
             item_focus: RwSignal::new(None),
             items: RwSignal::new(HashMap::new()),
             allow_loop: false,
+            next_id: StoredValue::new(AtomicUsize::new(0)),
         }
     }
 }
@@ -51,7 +56,8 @@ impl ManageFocus for RootContext {
 
 impl RootContext {
     pub fn next_index(&self) -> usize {
-        self.items.get_untracked().len()
+        self.next_id
+            .with_value(|counter| counter.fetch_add(1, Ordering::Relaxed))
     }
 
     pub fn upsert_item(&self, index: usize, item: ItemContext) {
@@ -70,20 +76,12 @@ impl RootContext {
 impl NavigateItems<ItemContext> for RootContext {
     fn navigate_first_item(&self) -> Option<ItemContext> {
         let active_items = self.filter_active_items();
-
-        if let Some(first) = active_items.get(0) {
-            return Some(first.clone());
-        }
-        None
+        active_items.first().copied()
     }
 
     fn navigate_last_item(&self) -> Option<ItemContext> {
         let active_items = self.filter_active_items();
-
-        if let Some(last) = active_items.last() {
-            return Some(last.clone());
-        }
-        None
+        active_items.last().copied()
     }
 
     fn navigate_next_item(&self) -> Option<ItemContext> {
