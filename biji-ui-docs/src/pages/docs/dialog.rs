@@ -2,16 +2,162 @@ use std::time::Duration;
 
 use leptos::{portal::Portal, prelude::*};
 
+use crate::components::{
+    api_table::{KeyboardRow, KeyboardTable, PropRow, PropsTable, SectionHeading},
+    code::Code,
+};
+
+const USAGE_CODE: &str = r#"use std::time::Duration;
+use leptos::{portal::Portal, prelude::*};
+use biji_ui::components::dialog;
+
+#[component]
+pub fn MyDialog() -> impl IntoView {
+    view! {
+        <dialog::Root hide_delay={Duration::from_millis(200)}>
+            <dialog::Trigger class="rounded bg-indigo-600 px-4 py-2 text-white">
+                "Open dialog"
+            </dialog::Trigger>
+            <Portal>
+                <dialog::Overlay
+                    class="fixed inset-0 z-50 bg-black/40"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <dialog::Content
+                    class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-background p-6 shadow-xl"
+                    show_class="opacity-100 scale-100 duration-300 ease-out"
+                    hide_class="opacity-0 scale-95 duration-200 ease-in"
+                >
+                    <h2 class="text-lg font-semibold">"Payment successful"</h2>
+                    <p class="mt-2 text-sm">"Your payment has been processed."</p>
+                    <dialog::Close class="mt-4 inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
+                        "Go back to dashboard"
+                    </dialog::Close>
+                </dialog::Content>
+            </Portal>
+        </dialog::Root>
+    }
+}"#;
+
+const ROOT_PROPS: &[PropRow] = &[
+    PropRow {
+        name: "class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied to the root wrapper element.",
+    },
+    PropRow {
+        name: "hide_delay",
+        prop_type: "Duration",
+        default: "200ms",
+        description: "How long to wait before unmounting content and overlay after closing begins. Should match your CSS transition duration.",
+    },
+    PropRow {
+        name: "prevent_scroll",
+        prop_type: "bool",
+        default: "true",
+        description: "When true, prevents the page from scrolling while the dialog is open.",
+    },
+];
+
+const TRIGGER_PROPS: &[PropRow] = &[PropRow {
+    name: "class",
+    prop_type: "String",
+    default: "\"\"",
+    description: "CSS class applied to the trigger button.",
+}];
+
+const CONTENT_PROPS: &[PropRow] = &[
+    PropRow {
+        name: "class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied in both open and closed states.",
+    },
+    PropRow {
+        name: "show_class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied when the dialog is open.",
+    },
+    PropRow {
+        name: "hide_class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied while the dialog is closing.",
+    },
+];
+
+const OVERLAY_PROPS: &[PropRow] = &[
+    PropRow {
+        name: "class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied in both open and closed states.",
+    },
+    PropRow {
+        name: "show_class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied when the overlay is visible.",
+    },
+    PropRow {
+        name: "hide_class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied while the overlay is hiding.",
+    },
+];
+
+const CLOSE_PROPS: &[PropRow] = &[PropRow {
+    name: "class",
+    prop_type: "String",
+    default: "\"\"",
+    description: "CSS class applied to the close button.",
+}];
+
+const KEYBOARD: &[KeyboardRow] = &[
+    KeyboardRow {
+        key: "Tab",
+        description: "Moves focus to the next focusable element inside the dialog. Focus is trapped within the dialog.",
+    },
+    KeyboardRow {
+        key: "Shift + Tab",
+        description: "Moves focus to the previous focusable element inside the dialog.",
+    },
+    KeyboardRow {
+        key: "Escape",
+        description: "Closes the dialog and returns focus to the trigger.",
+    },
+];
+
 #[component]
 pub fn DialogDocPage() -> impl IntoView {
-    use crate::pages::docs::DocPage;
+    use crate::pages::docs::{DocPage, DocPreview};
 
     view! {
-        <DocPage
-            title="Dialog"
-            description="A window overlaid on either the primary window or another dialog window, rendering the content underneath inert."
-            example={DialogExample}
-        />
+        <DocPage title="Dialog">
+            <p class="mt-3 mb-11 text-base text-balance">
+                "A window overlaid on either the primary window or another dialog window, rendering the content underneath inert."
+            </p>
+            <DocPreview>
+                <DialogExample />
+            </DocPreview>
+            <SectionHeading title="Usage" />
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={USAGE_CODE}
+                language="rust"
+            />
+            <SectionHeading title="API Reference" />
+            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
+            <PropsTable title="Content" rows={CONTENT_PROPS} />
+            <PropsTable title="Overlay" rows={OVERLAY_PROPS} />
+            <PropsTable title="Close" rows={CLOSE_PROPS} />
+            <KeyboardTable rows={KEYBOARD} />
+        </DocPage>
     }
 }
 
