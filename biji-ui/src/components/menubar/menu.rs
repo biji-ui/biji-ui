@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use leptos::{
     context::Provider,
-    ev::{click, focus, keydown},
+    ev::{click, focus, keydown, mouseover},
     prelude::*,
 };
 use leptos_use::{
-    on_click_outside, use_element_bounding, use_event_listener, UseElementBoundingReturn,
+    UseElementBoundingReturn, on_click_outside, use_element_bounding, use_event_listener,
 };
 use wasm_bindgen::JsCast;
 
@@ -16,7 +16,32 @@ use crate::{
     utils::{positioning::Positioning, prevent_scroll::use_prevent_scroll},
 };
 
-use super::context::{MenuContext, RootContext};
+use super::context::{ItemData, MenuContext, RootContext};
+
+/// Walks the submenu tree rooted at `menu_context` and returns `true` if
+/// `target` is contained within any submenu trigger or content element.
+/// Used by the click-outside handler to avoid closing a menu when the user
+/// clicks inside one of its (possibly deeply-nested) submenus.
+fn is_click_in_submenu_tree(menu_context: &MenuContext, target: &web_sys::Element) -> bool {
+    menu_context.items.with(|items| {
+        items.values().any(|item| {
+            let ItemData::SubMenuItem { child_context, .. } = item else {
+                return false;
+            };
+            if let Some(el) = child_context.trigger_ref.get() {
+                if el.contains(Some(target)) {
+                    return true;
+                }
+            }
+            if let Some(el) = child_context.menu_ref.get() {
+                if el.contains(Some(target)) {
+                    return true;
+                }
+            }
+            is_click_in_submenu_tree(child_context, target)
+        })
+    })
+}
 
 #[component]
 pub fn Menu(
@@ -70,6 +95,10 @@ pub fn MenuTrigger(#[prop(into, optional)] class: String, children: Children) ->
             <div
                 node_ref={trigger_ref}
                 class={class}
+                role="menuitem"
+                aria-haspopup="menu"
+                aria-expanded={move || if menu_ctx.open.get() { "true" } else { "false" }}
+                aria-disabled={if menu_ctx.disabled { Some("true") } else { None }}
                 data-state={menu_ctx.index}
                 data-disabled={menu_ctx.disabled}
                 data-highlighted={move || root_ctx.item_in_focus(menu_ctx.index)}
@@ -88,7 +117,7 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
     let menu_ctx = expect_context::<MenuContext>();
 
     let eff = RenderEffect::new(move |_| {
-        if menu_ctx.open.get() == false {
+        if !menu_ctx.open.get() {
             menu_ctx.set_focus(None);
         }
     });
@@ -97,16 +126,54 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
         menu_ctx.toggle();
     });
 
+    let _ = use_event_listener(menu_ctx.trigger_ref, mouseover, move |_| {
+        if menu_ctx.disabled {
+            return;
+        }
+        root_ctx.set_focus(Some(menu_ctx.index));
+        if root_ctx.any_open() && !menu_ctx.open.get_untracked() {
+            root_ctx.close_all();
+            menu_ctx.open();
+        }
+        // Keep DOM focus on the trigger so keyboard events land here, not on a
+        // stale element inside a submenu that is animating closed.
+        menu_ctx.focus();
+    });
+
     let _ = use_event_listener(menu_ctx.trigger_ref, keydown, move |evt| {
         let key = evt.key();
 
         if key == "ArrowRight" {
-            if let Some(item) = root_ctx.navigate_next_item() {
+            // If a SubMenuItem is highlighted via hover, enter it (macOS behavior).
+            // Otherwise navigate to the next top-level menu.
+            let hovered_sub = menu_ctx
+                .item_focus
+                .get_untracked()
+                .and_then(|idx| {
+                    menu_ctx
+                        .items
+                        .with_untracked(|items| items.get(&idx).copied())
+                })
+                .and_then(|item| {
+                    if let ItemData::SubMenuItem { child_context, .. } = item {
+                        Some(child_context)
+                    } else {
+                        None
+                    }
+                });
+            if let Some(child_ctx) = hovered_sub {
+                if !child_ctx.open.get_untracked() {
+                    child_ctx.open();
+                }
+                if let Some(first) = child_ctx.navigate_first_item() {
+                    first.focus();
+                }
+            } else if let Some(item) = root_ctx.navigate_next_item() {
                 if menu_ctx.open.get() {
                     item.open();
                 }
                 item.focus();
-                menu_ctx.close();
+                menu_ctx.close_with_submenus();
             }
         } else if key == "ArrowLeft" {
             if let Some(item) = root_ctx.navigate_previous_item() {
@@ -114,9 +181,36 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
                     item.open();
                 }
                 item.focus();
-                menu_ctx.close();
+                menu_ctx.close_with_submenus();
             }
-        } else if key == "ArrowDown" || key == "Enter" {
+        } else if key == "ArrowDown" {
+            if !menu_ctx.open.get() {
+                menu_ctx.open();
+            }
+            // If an item is highlighted via hover, continue from that position.
+            // Otherwise start at the first item.
+            let item = if menu_ctx.item_focus.get_untracked().is_some() {
+                menu_ctx.navigate_next_item()
+            } else {
+                menu_ctx.navigate_first_item()
+            };
+            if let Some(item) = item {
+                item.focus();
+            }
+        } else if key == "ArrowUp" {
+            if menu_ctx.open.get() {
+                // If an item is highlighted via hover, continue from that position.
+                // Otherwise start at the last item.
+                let item = if menu_ctx.item_focus.get_untracked().is_some() {
+                    menu_ctx.navigate_previous_item()
+                } else {
+                    menu_ctx.navigate_last_item()
+                };
+                if let Some(item) = item {
+                    item.focus();
+                }
+            }
+        } else if key == "Enter" {
             if !menu_ctx.open.get() {
                 menu_ctx.open();
             }
@@ -133,51 +227,15 @@ pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
     });
 
     let _ = on_click_outside(menu_ctx.menu_ref, move |evt| {
-        if menu_ctx.open.get() {
-            // Recursive function to check if click is within any submenu or nested submenu
-            fn is_click_in_submenu_tree(
-                menu_context: &super::context::MenuContext,
-                target: &web_sys::Element,
-            ) -> bool {
-                menu_context.items.with(|items| {
-                    items.values().any(|item| {
-                        if let super::context::ItemData::SubMenuItem { child_context, .. } = item {
-                            // Check if click is on the submenu trigger
-                            if let Some(trigger_el) = child_context.trigger_ref.get() {
-                                if trigger_el.contains(Some(target)) {
-                                    return true;
-                                }
-                            }
-                            // Check if click is within the submenu content
-                            if let Some(menu_el) = child_context.menu_ref.get() {
-                                if menu_el.contains(Some(target)) {
-                                    return true;
-                                }
-                            }
-                            // Recursively check nested submenus
-                            if is_click_in_submenu_tree(child_context, target) {
-                                return true;
-                            }
-                        }
-                        false
-                    })
-                })
-            }
-
-            // Check if the click target is within any submenu (recursively)
-            let is_submenu_click = if let Some(target) = evt.target() {
-                if let Ok(target_el) = target.dyn_into::<web_sys::Element>() {
-                    is_click_in_submenu_tree(&menu_ctx, &target_el)
-                } else {
-                    false
-                }
-            } else {
-                false
-            };
-
-            if !is_submenu_click {
-                menu_ctx.close();
-            }
+        if !menu_ctx.open.get() {
+            return;
+        }
+        let in_submenu = evt
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+            .is_some_and(|el| is_click_in_submenu_tree(&menu_ctx, &el));
+        if !in_submenu {
+            menu_ctx.close();
         }
     });
 
@@ -244,7 +302,7 @@ pub fn MenuContent(
             hide_class={hide_class.clone()}
             hide_delay={menu_ctx.hide_delay}
         >
-            <div node_ref={content_ref} class={class.clone()} style={style}>
+            <div node_ref={content_ref} class={class.clone()} style={style} role="menu">
                 {children()}
             </div>
         </CustomAnimatedShow>

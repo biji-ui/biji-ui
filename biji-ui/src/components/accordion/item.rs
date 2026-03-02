@@ -38,32 +38,51 @@ pub fn Item(
         root_ctx.remove_item(index);
     });
 
+    let trigger_id = format!("biji-accordion-trigger-{}", index);
+    let content_id = format!("biji-accordion-content-{}", index);
+
     view! {
         <Provider value={item_ctx}>
-            <div
-                class={class}
-                data-index={item_ctx.index}
-                data-state={move || item_ctx.data_state()}
-                data-disabled={item_ctx.disabled}
-                data-highlighted={move || root_ctx.item_in_focus(item_ctx.index)}
-            >
-                {children()}
-            </div>
+            <Provider value={AccordionItemIds {
+                trigger_id,
+                content_id,
+            }}>
+                <div
+                    class={class}
+                    data-index={item_ctx.index}
+                    data-state={move || item_ctx.data_state()}
+                    data-disabled={item_ctx.disabled}
+                    data-highlighted={move || root_ctx.item_in_focus(item_ctx.index)}
+                >
+                    {children()}
+                </div>
+            </Provider>
         </Provider>
     }
+}
+
+#[derive(Clone)]
+pub struct AccordionItemIds {
+    pub trigger_id: String,
+    pub content_id: String,
 }
 
 #[component]
 pub fn ItemToggle(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
     let root_ctx = expect_context::<RootContext>();
     let item_ctx = expect_context::<ItemContext>();
+    let ids = expect_context::<AccordionItemIds>();
 
     let trigger_ref = item_ctx.trigger_ref;
     view! {
         <ItemToggleEvents>
             <button
                 node_ref={trigger_ref}
+                id={ids.trigger_id.clone()}
                 class={class}
+                aria-expanded={move || if item_ctx.open.get() { "true" } else { "false" }}
+                aria-controls={ids.content_id.clone()}
+                aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
                 data-index={item_ctx.index}
                 data-state={move || item_ctx.data_state()}
                 data-disabled={item_ctx.disabled}
@@ -99,6 +118,18 @@ pub fn ItemToggleEvents(children: Children) -> impl IntoView {
                     item.focus();
                 }
             }
+            "Home" => {
+                if let Some(item) = root_ctx.navigate_first_item() {
+                    evt.prevent_default();
+                    item.focus();
+                }
+            }
+            "End" => {
+                if let Some(item) = root_ctx.navigate_last_item() {
+                    evt.prevent_default();
+                    item.focus();
+                }
+            }
             _ => {}
         };
     });
@@ -127,14 +158,17 @@ pub fn ItemContent(
     hide_delay: Duration,
 ) -> impl IntoView {
     let ctx = expect_context::<ItemContext>();
+    let ids = expect_context::<AccordionItemIds>();
 
-    // let children = store_value(children);
     view! {
         <CustomAnimatedShow
             when={ctx.open}
             show_class={cn!(class, show_class)}
             hide_class={cn!(class, hide_class)}
             hide_delay={hide_delay}
+            attr:id={ids.content_id.clone()}
+            attr:role="region"
+            attr:aria-labelledby={ids.trigger_id.clone()}
         >
             {children()}
         </CustomAnimatedShow>

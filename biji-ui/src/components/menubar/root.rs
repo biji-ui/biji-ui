@@ -25,7 +25,7 @@ pub fn Root(
 
     view! {
         <Provider value={ctx}>
-            <div node_ref={menubar_ref} class={class}>
+            <div node_ref={menubar_ref} class={class} role="menubar">
                 <Provider value={root_ctx}>{children()}</Provider>
             </div>
         </Provider>

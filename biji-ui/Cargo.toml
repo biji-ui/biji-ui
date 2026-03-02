@@ -1,4 +1,3 @@
-
 [package]
 name = "biji-ui"
 version = { workspace = true }
@@ -12,4 +11,23 @@ repository = "https://github.com/biji-ui/biji-ui"
 leptos = { version = "0.8" }
 leptos-use = { version = "0.16" }
 wasm-bindgen = "0.2.100"
-web-sys = "0.3.69"
+
+[dependencies.web-sys]
+version = "0.3.69"
+features = [
+    "CssStyleDeclaration",
+    "DomRect",
+    "Element",
+    "Event",
+    "EventTarget",
+    "HtmlAnchorElement",
+    "HtmlButtonElement",
+    "HtmlCollection",
+    "HtmlElement",
+    "KeyboardEvent",
+    "MouseEvent",
+    "Node",
+    "NodeList",
+    "PointerEvent",
+    "Window",
+]

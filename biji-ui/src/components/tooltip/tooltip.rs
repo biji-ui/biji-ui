@@ -1,20 +1,27 @@
 use std::time::Duration;
 
 use leptos::ev::{blur, focus, mousemove, pointerenter, pointerleave};
-use leptos::{context::Provider, leptos_dom, prelude::*};
-use leptos_dom::helpers::TimeoutHandle;
+use leptos::{context::Provider, prelude::*};
 use leptos_use::{
-    use_document, use_element_bounding, use_event_listener, UseElementBoundingReturn,
+    UseElementBoundingReturn, use_document, use_element_bounding, use_event_listener,
 };
 
 use crate::{
     cn,
     components::tooltip::context::TooltipContext,
+    custom_animated_show::CustomAnimatedShow,
     utils::{
         polygon::{get_points_from_el, make_hull, point_in_polygon},
         positioning::Positioning,
     },
 };
+
+static TOOLTIP_ID_COUNTER: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+
+fn next_tooltip_id() -> String {
+    let id = TOOLTIP_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    format!("biji-tooltip-{}", id)
+}
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
@@ -24,7 +31,17 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 
     view! {
         <TriggerEvents>
-            <button node_ref={trigger_ref} class={class}>
+            <button
+                node_ref={trigger_ref}
+                class={class}
+                aria-describedby={move || {
+                    if tooltip_ctx.open.get() {
+                        Some(tooltip_ctx.tooltip_id.get_value())
+                    } else {
+                        None
+                    }
+                }}
+            >
                 {children()}
             </button>
         </TriggerEvents>
@@ -136,6 +153,7 @@ pub fn Root(
     let ctx = TooltipContext {
         hide_delay,
         positioning,
+        tooltip_id: StoredValue::new(next_tooltip_id()),
         ..TooltipContext::default()
     };
 
@@ -159,24 +177,9 @@ pub fn Content(
     #[prop(into, optional)]
     hide_class: String,
 ) -> impl IntoView {
-    let show_class = cn!(class, show_class);
-    let hide_class = cn!(class, hide_class);
-
     let tooltip_ctx = expect_context::<TooltipContext>();
 
     let content_ref = tooltip_ctx.content_ref;
-
-    let hide_delay = tooltip_ctx.hide_delay;
-    let when = tooltip_ctx.open;
-
-    let show_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
-    let hide_handle: StoredValue<Option<TimeoutHandle>> = StoredValue::new(None);
-    let cls = RwSignal::new(if when.get_untracked() {
-        show_class.clone()
-    } else {
-        hide_class.clone()
-    });
-    let show = RwSignal::new(when.get_untracked());
 
     let UseElementBoundingReturn {
         width: content_width,
@@ -192,7 +195,7 @@ pub fn Content(
         ..
     } = use_element_bounding(tooltip_ctx.trigger_ref);
 
-    let style = move || {
+    let style_signal = Signal::derive(move || {
         tooltip_ctx.positioning.calculate_position_style(
             *top.read(),
             *left.read(),
@@ -203,54 +206,21 @@ pub fn Content(
             tooltip_ctx.arrow_size as f64,
             tooltip_ctx.arrow_size as f64,
         )
-    };
-
-    let eff = RenderEffect::new(move |_| {
-        let show_class = show_class.clone();
-        if when.get() {
-            // clear any possibly active timer
-            if let Some(h) = show_handle.get_value() {
-                h.clear();
-            }
-            if let Some(h) = hide_handle.get_value() {
-                h.clear();
-            }
-
-            let h = leptos_dom::helpers::set_timeout_with_handle(
-                move || cls.set(show_class.clone()),
-                Duration::from_millis(1),
-            )
-            .expect("set timeout in AnimatedShow");
-            show_handle.set_value(Some(h));
-
-            cls.set(hide_class.clone());
-            show.set(true);
-        } else {
-            cls.set(hide_class.clone());
-
-            let h =
-                leptos_dom::helpers::set_timeout_with_handle(move || show.set(false), hide_delay)
-                    .expect("set timeout in AnimatedShow");
-            hide_handle.set_value(Some(h));
-        }
-    });
-
-    on_cleanup(move || {
-        if let Some(Some(h)) = show_handle.try_get_value() {
-            h.clear();
-        }
-        if let Some(Some(h)) = hide_handle.try_get_value() {
-            h.clear();
-        }
-        drop(eff);
     });
 
     view! {
-        <Show when={move || show.get()} fallback={|| ()}>
-            <div node_ref={content_ref} class={move || cls.get()} style={style}>
-                {children()}
-            </div>
-        </Show>
+        <CustomAnimatedShow
+            when={tooltip_ctx.open}
+            show_class={cn!(class, show_class)}
+            hide_class={cn!(class, hide_class)}
+            hide_delay={tooltip_ctx.hide_delay}
+            style_signal={style_signal}
+            node_ref={content_ref}
+            attr:id={tooltip_ctx.tooltip_id.get_value()}
+            attr:role="tooltip"
+        >
+            {children()}
+        </CustomAnimatedShow>
     }
 }
 

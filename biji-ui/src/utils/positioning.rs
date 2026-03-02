@@ -1,28 +1,59 @@
-#[derive(Copy, Clone, Debug)]
+/// Specifies where content should be positioned relative to a trigger element.
+///
+/// Each variant places the content along one of the four edges of the trigger,
+/// with optional alignment (`Start` / `End`) along the perpendicular axis.
+/// When no alignment suffix is given, the content is centered along that edge.
+///
+/// ```text
+///         TopStart    Top    TopEnd
+///            ┌─────────────────┐
+/// LeftStart  │                 │  RightStart
+///       Left │     trigger     │  Right
+///  LeftEnd   │                 │  RightEnd
+///            └─────────────────┘
+///      BottomStart  Bottom  BottomEnd
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
 pub enum Positioning {
+    /// Centered above the trigger.
+    #[default]
     Top,
+    /// Above the trigger, aligned to the start (left) edge.
     TopStart,
+    /// Above the trigger, aligned to the end (right) edge.
     TopEnd,
+    /// Centered to the right of the trigger.
     Right,
+    /// To the right of the trigger, aligned to the start (top) edge.
     RightStart,
+    /// To the right of the trigger, aligned to the end (bottom) edge.
     RightEnd,
+    /// Centered below the trigger.
     Bottom,
+    /// Below the trigger, aligned to the start (left) edge.
     BottomStart,
+    /// Below the trigger, aligned to the end (right) edge.
     BottomEnd,
+    /// Centered to the left of the trigger.
     Left,
+    /// To the left of the trigger, aligned to the start (top) edge.
     LeftStart,
+    /// To the left of the trigger, aligned to the end (bottom) edge.
     LeftEnd,
 }
 
-impl Default for Positioning {
-    fn default() -> Self {
-        Positioning::Top
-    }
-}
-
 impl Positioning {
-    /// Calculate the position of content relative to a trigger element
-    /// Returns (top, left) coordinates in pixels
+    /// Calculate the position of content relative to a trigger element.
+    ///
+    /// Returns `(top, left)` coordinates in pixels, suitable for use with
+    /// `position: fixed` CSS styling.
+    ///
+    /// # Arguments
+    ///
+    /// * `trigger_top` / `trigger_left` – the trigger element's viewport coordinates.
+    /// * `trigger_width` / `trigger_height` – the trigger element's dimensions.
+    /// * `content_height` / `content_width` – the content element's dimensions.
+    /// * `offset` – additional spacing (in pixels) between the trigger and content.
     pub fn calculate_position(
         self,
         trigger_top: f64,
@@ -93,8 +124,18 @@ impl Positioning {
         }
     }
 
-    /// Calculate the position and rotation for an arrow indicator
-    /// Returns (top, left, rotation) where rotation is in degrees
+    /// Calculate the position and rotation for an arrow indicator.
+    ///
+    /// Returns `(top, left, rotation)` where `top` and `left` are pixel
+    /// coordinates and `rotation` is in degrees. The arrow is intended to
+    /// be a small square element rotated so that one corner points toward
+    /// the trigger.
+    ///
+    /// # Arguments
+    ///
+    /// * `trigger_top` / `trigger_left` – the trigger element's viewport coordinates.
+    /// * `trigger_width` / `trigger_height` – the trigger element's dimensions.
+    /// * `arrow_size` – the width/height of the square arrow element in pixels.
     pub fn calculate_arrow_position(
         self,
         trigger_top: f64,
@@ -127,7 +168,14 @@ impl Positioning {
         }
     }
 
-    /// Calculate position as a CSS style string with arrow CSS variables
+    /// Calculate position as a CSS `style` attribute string including arrow CSS custom properties.
+    ///
+    /// The returned string sets `position: fixed`, `top`, `left`, and three
+    /// CSS custom properties consumed by the arrow element:
+    ///
+    /// * `--biji-tooltip-arrow-top`
+    /// * `--biji-tooltip-arrow-left`
+    /// * `--biji-tooltip-arrow-rotation`
     pub fn calculate_position_style(
         self,
         trigger_top: f64,
@@ -161,7 +209,10 @@ impl Positioning {
         )
     }
 
-    /// Calculate position as a simple CSS style string without arrow variables
+    /// Calculate position as a simple CSS `style` attribute string without arrow variables.
+    ///
+    /// Returns a string containing only `position: fixed`, `top`, and `left`.
+    /// Use this when an arrow indicator is not needed (e.g., dropdown menus).
     pub fn calculate_position_style_simple(
         self,
         trigger_top: f64,
