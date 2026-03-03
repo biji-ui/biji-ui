@@ -3,13 +3,59 @@ name = "biji-ui-docs"
 version = { workspace = true }
 edition = { workspace = true }
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
-leptos = { version = "0.8", features = ["csr"] }
+leptos = { version = "0.8" }
 leptos_meta = { version = "0.8" }
 leptos_router = { version = "0.8" }
 leptos-use = { version = "0.16" }
 console_error_panic_hook = "0.1.7"
 uuid = { version = "1.8", features = ["serde", "v4", "js"] }
 
+# hydrate-only
+wasm-bindgen = { version = "0.2", optional = true }
+
+# SSR-only
+leptos_axum = { version = "0.8", optional = true }
+axum = { version = "0.8", optional = true }
+tower = { version = "0.5", features = ["full"], optional = true }
+tower-http = { version = "0.6", features = ["fs"], optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+
 biji-ui = { path = "../biji-ui" }
 jspackages = { path = "../jspackages" }
+
+[features]
+default = ["ssr"]
+csr = ["leptos/csr"]
+hydrate = [
+    "leptos/hydrate",
+    "dep:wasm-bindgen",
+]
+ssr = [
+    "dep:leptos_axum",
+    "dep:axum",
+    "dep:tower",
+    "dep:tower-http",
+    "dep:tokio",
+    "leptos/ssr",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+    "leptos-use/ssr",
+    "leptos-use/axum",
+]
+
+[package.metadata.leptos]
+output-name = "biji-ui-docs"
+site-root = "target/site"
+site-pkg-dir = "pkg"
+tailwind-input-file = "input.scss"
+site-addr = "0.0.0.0:8080"
+reload-port = 3001
+env = "DEV"
+bin-features = ["ssr"]
+bin-default-features = false
+lib-features = ["hydrate"]
+lib-default-features = false
