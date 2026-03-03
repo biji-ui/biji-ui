@@ -5,7 +5,7 @@ target = "biji-ui-docs/index.html"
 
 [serve]
 addresses = ["127.0.0.1"]
-port = 8080
+port = 8090
 
 [tools]
 tailwindcss = "4.2.1"
