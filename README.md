@@ -55,6 +55,28 @@ pub fn AccordionExample() -> impl IntoView {
 }
 ```
 
+## Developing the Docs
+
+Prerequisites: [Rust](https://rustup.rs/), [cargo-leptos](https://github.com/leptos-rs/cargo-leptos), [pnpm](https://pnpm.io/)
+
+```bash
+# Install cargo-leptos
+cargo install cargo-leptos
+
+# Install JS dependencies (Shiki syntax highlighter)
+make jspackages-install
+
+# SSR dev server with hot reload (recommended)
+make dev
+
+# CSR-only dev server via Trunk
+make dev-csr
+```
+
+The docs site (`biji-ui-docs`) supports two modes:
+- **SSR** (`make dev`) — Axum server with hydration, matches production
+- **CSR** (`make dev-csr`) — Trunk, WASM-only, no server required
+
 ## Version Compatibility
 
 Biji UI | Leptos
