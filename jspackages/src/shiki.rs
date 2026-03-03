@@ -9,6 +9,10 @@ extern "C" {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn code_to_html(_code: &str, _lang: &str, _theme: &str) -> String {
-    String::new()
+pub fn code_to_html(code: &str, _lang: &str, _theme: &str) -> String {
+    let escaped = code
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;");
+    format!("<pre class=\"shiki\"><code>{escaped}</code></pre>")
 }
