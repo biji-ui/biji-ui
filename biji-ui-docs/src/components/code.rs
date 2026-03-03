@@ -1,6 +1,6 @@
 use jspackages::shiki::code_to_html;
 use leptos::prelude::*;
-use leptos_use::{use_color_mode, ColorMode, UseColorModeReturn};
+use leptos_use::{ColorMode, UseColorModeReturn, use_color_mode};
 
 #[component]
 pub fn Code(
@@ -10,7 +10,17 @@ pub fn Code(
 ) -> impl IntoView {
     let UseColorModeReturn { mode, .. } = use_color_mode();
 
-    let (_highlighted, set_highlighted) = signal(String::new());
+    let initial = {
+        #[cfg(feature = "ssr")]
+        {
+            code_to_html(code, language, "vesper")
+        }
+        #[cfg(not(feature = "ssr"))]
+        {
+            String::new()
+        }
+    };
+    let (highlighted, set_highlighted) = signal(initial);
 
     Effect::new(move |_| {
         let theme = match mode.get() {
@@ -23,5 +33,5 @@ pub fn Code(
         set_highlighted.set(code);
     });
 
-    view! { <code inner_html={_highlighted} class={class}></code> }
+    view! { <code inner_html={highlighted} class={class}></code> }
 }

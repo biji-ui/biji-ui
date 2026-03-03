@@ -5,7 +5,10 @@ use leptos::{logging::log, portal::Portal, prelude::*};
 
 use crate::{
     components::{
-        api_table::{DataAttrRow, DataAttrsTable, KeyboardRow, KeyboardTable, PropRow, PropsTable, SectionHeading},
+        api_table::{
+            DataAttrRow, DataAttrsTable, KeyboardRow, KeyboardTable, PropRow, PropsTable,
+            SectionHeading,
+        },
         code::Code,
     },
     icons,
@@ -24,7 +27,7 @@ pub fn MyMenubar() -> impl IntoView {
                 positioning={menubar::Positioning::BottomStart}
                 hide_delay={Duration::from_millis(200)}
             >
-                <menubar::Trigger class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent">
+                <menubar::Trigger class="py-1.5 px-2 text-sm rounded-sm hover:bg-accent">
                     "File"
                 </menubar::Trigger>
                 <Portal>
@@ -33,12 +36,12 @@ pub fn MyMenubar() -> impl IntoView {
                         show_class="opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out"
                     >
-                        <menubar::Item class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent data-[highlighted]:bg-muted">
+                        <menubar::Item class="py-1.5 px-2 text-sm rounded-sm data-[highlighted]:bg-muted hover:bg-accent">
                             "New file"
                         </menubar::Item>
                         <menubar::Item
                             disabled=true
-                            class="px-2 py-1.5 text-sm rounded-sm data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+                            class="py-1.5 px-2 text-sm rounded-sm data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                         >
                             "New window"
                         </menubar::Item>
@@ -50,7 +53,7 @@ pub fn MyMenubar() -> impl IntoView {
                 positioning={menubar::Positioning::BottomStart}
                 hide_delay={Duration::from_millis(200)}
             >
-                <menubar::Trigger class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent">
+                <menubar::Trigger class="py-1.5 px-2 text-sm rounded-sm hover:bg-accent">
                     "Edit"
                 </menubar::Trigger>
                 <Portal>
@@ -59,10 +62,10 @@ pub fn MyMenubar() -> impl IntoView {
                         show_class="opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out"
                     >
-                        <menubar::Item class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent data-[highlighted]:bg-muted">
+                        <menubar::Item class="py-1.5 px-2 text-sm rounded-sm data-[highlighted]:bg-muted hover:bg-accent">
                             "Undo"
                         </menubar::Item>
-                        <menubar::Item class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent data-[highlighted]:bg-muted">
+                        <menubar::Item class="py-1.5 px-2 text-sm rounded-sm data-[highlighted]:bg-muted hover:bg-accent">
                             "Redo"
                         </menubar::Item>
                     </menubar::Content>
@@ -331,57 +334,6 @@ pub fn MenubarExample() -> impl IntoView {
                                     <menubar::Item class={ITEM_STYLE}>"Copy link"</menubar::Item>
                                     <hr class="h-px border-border" />
                                     <menubar::SubMenu hide_delay={Duration::from_millis(200)}>
-                                        <menubar::SubMenuTrigger class={cn!(
-                                            "h-full w-full items-center justify-between", ITEM_STYLE
-                                        )}>
-                                            "More"
-                                            <icons::ChevronRight class="h-4"></icons::ChevronRight>
-                                        </menubar::SubMenuTrigger>
-                                        <Portal>
-                                            <menubar::SubMenuContent
-                                                class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
-                                                show_class="z-10 opacity-100 transition duration-150 ease-in"
-                                                hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                                            >
-                                                <menubar::Item class={ITEM_STYLE}>"Facebook"</menubar::Item>
-                                                <menubar::Item class={ITEM_STYLE}>"LinkedIn"</menubar::Item>
-                                                <menubar::Item class={ITEM_STYLE}>
-                                                    "Instagram"
-                                                </menubar::Item>
-                                            </menubar::SubMenuContent>
-                                        </Portal>
-                                    </menubar::SubMenu>
-                                </menubar::SubMenuContent>
-                            </Portal>
-                        </menubar::SubMenu>
-                        <hr class="h-px border-border" />
-                        <menubar::SubMenu
-                            class="relative"
-                            positioning={menubar::Positioning::RightStart}
-                            hide_delay={Duration::from_millis(200)}
-                        >
-                            <menubar::SubMenuTrigger class={cn!(
-                                "h-full w-full items-center justify-between", ITEM_STYLE
-                            )}>
-                                "Share" <icons::ChevronRight class="h-4"></icons::ChevronRight>
-                            </menubar::SubMenuTrigger>
-                            <Portal>
-                                <menubar::SubMenuContent
-                                    class="flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
-                                    show_class="z-10 opacity-100 transition duration-150 ease-in"
-                                    hide_class="opacity-0 transition duration-200 ease-out -z-10"
-                                >
-                                    <menubar::Item class={ITEM_STYLE}>"Email"</menubar::Item>
-                                    <menubar::Item class={ITEM_STYLE} disabled=true>
-                                        "Message"
-                                    </menubar::Item>
-                                    <menubar::Item class={ITEM_STYLE}>"Copy link"</menubar::Item>
-                                    <hr class="h-px border-border" />
-                                    <menubar::SubMenu
-                                        class="relative"
-                                        positioning={menubar::Positioning::RightStart}
-                                        hide_delay={Duration::from_millis(200)}
-                                    >
                                         <menubar::SubMenuTrigger class={cn!(
                                             "h-full w-full items-center justify-between", ITEM_STYLE
                                         )}>
