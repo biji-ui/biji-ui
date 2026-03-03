@@ -1,5 +1,4 @@
-# Get started with a build env with Rust nightly
-FROM rustlang/rust:nightly-bookworm as builder
+FROM rustlang/rust:nightly-bookworm@sha256:0aea4a70cd0287dee9670b486edd7877a8361c702729b8f24b25733467f8a58b AS builder
 
 # Install cargo-binstall, which makes it easier to install other
 # cargo extensions like cargo-leptos
@@ -20,7 +19,7 @@ COPY . .
 # Build the app
 RUN LEPTOS_TAILWIND_VERSION=v4.2.1 cargo leptos build --release -vv
 
-FROM debian:bookworm-slim as runtime
+FROM debian:bookworm-slim@sha256:74d56e3931e0d5a1dd51f8c8a2466d21de84a271cd3b5a733b803aa91abf4421 AS runtime
 WORKDIR /app
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends openssl ca-certificates \
