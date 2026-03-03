@@ -10,7 +10,13 @@ pub fn Code(
 ) -> impl IntoView {
     let UseColorModeReturn { mode, .. } = use_color_mode();
 
-    let (_highlighted, set_highlighted) = signal(String::new());
+    let initial = {
+        #[cfg(feature = "ssr")]
+        { code_to_html(code, language, "vesper") }
+        #[cfg(not(feature = "ssr"))]
+        { String::new() }
+    };
+    let (_highlighted, set_highlighted) = signal(initial);
 
     Effect::new(move |_| {
         let theme = match mode.get() {
