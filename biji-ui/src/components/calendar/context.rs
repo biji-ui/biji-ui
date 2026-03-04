@@ -72,7 +72,18 @@ impl CalendarContext {
         date > lo && date < hi
     }
 
-    /// Update the internal value and fire the `on_change` callback.
+    /// Update the selection value and fire the `on_change` callback.
+    ///
+    /// In **controlled mode** (`value` was passed as an external `RwSignal`),
+    /// `self.value` IS that external signal, so the `set` here mutates it
+    /// directly and immediately notifies any reactive subscriber. `on_change`
+    /// is then also fired. If the caller reacts to the signal *and* passes
+    /// `on_change`, it will observe the change twice — prefer reacting to the
+    /// signal alone in controlled mode; use `on_change` only for out-of-band
+    /// side effects (e.g. persisting to a server).
+    ///
+    /// In **uncontrolled mode** `self.value` is a private signal; `on_change`
+    /// is the only mechanism by which the parent can observe selection changes.
     pub fn emit_change(&self, new_val: CalendarValue) {
         self.value.set(new_val.clone());
         if let Some(cb) = self.on_change {

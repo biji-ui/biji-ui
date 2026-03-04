@@ -172,7 +172,7 @@ const ROOT_PROPS: &[PropRow] = &[
         name: "on_change",
         prop_type: "Option<Callback<CalendarValue>>",
         default: "None",
-        description: "Called whenever the selection changes.",
+        description: "Called whenever the selection changes. In controlled mode the external value signal is already updated before this fires — prefer reacting to the signal directly to avoid double-notification. Use on_change for out-of-band side effects such as persisting to a server.",
     },
 ];
 
