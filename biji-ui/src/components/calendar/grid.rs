@@ -40,7 +40,7 @@ pub fn Grid(
 
     view! {
         <Provider value={grid_ctx}>
-            <div class={class}>{children()}</div>
+            <div role="grid" class={class}>{children()}</div>
         </Provider>
     }
 }
@@ -118,7 +118,7 @@ pub fn GridBody(
 
     view! {
         <div
-            role="grid"
+            role="rowgroup"
             class={move || {
                 let view_class = match cal_ctx.view.get() {
                     CalendarView::Day => sv_day.get_value(),
