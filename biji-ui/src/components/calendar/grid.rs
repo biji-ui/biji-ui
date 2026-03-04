@@ -197,7 +197,9 @@ fn render_day_cell(
     });
 
     let _ = use_event_listener(btn_ref, mouseenter, move |_| {
-        cal_ctx.hover_date.set(Some(date));
+        if !is_disabled {
+            cal_ctx.hover_date.set(Some(date));
+        }
     });
     let _ = use_event_listener(btn_ref, mouseleave, move |_| {
         cal_ctx.hover_date.set(None);
@@ -313,17 +315,49 @@ fn handle_day_click(ctx: CalendarContext, date: NaiveDate) {
     ctx.emit_change(new_val);
 }
 
+/// Walk from `start` by `step` days until a non-disabled date is found.
+/// Returns `None` if no such date is found within 62 steps (two months).
+fn step_to_non_disabled(ctx: CalendarContext, start: NaiveDate, step: i64) -> Option<NaiveDate> {
+    let mut d = start;
+    for _ in 0..62 {
+        if !ctx.date_is_disabled(d) {
+            return Some(d);
+        }
+        d = d.checked_add_signed(Duration::days(step))?;
+    }
+    None
+}
+
 fn handle_day_keydown(ctx: CalendarContext, date: NaiveDate, evt: web_sys::KeyboardEvent) {
     let key = evt.key();
     let new_focus: Option<NaiveDate> = match key.as_str() {
-        "ArrowLeft" => date.checked_sub_signed(Duration::days(1)),
-        "ArrowRight" => date.checked_add_signed(Duration::days(1)),
-        "ArrowUp" => date.checked_sub_signed(Duration::days(7)),
-        "ArrowDown" => date.checked_add_signed(Duration::days(7)),
-        "Home" => NaiveDate::from_ymd_opt(date.year(), date.month(), 1),
-        "End" => last_day_of_month(date),
-        "PageUp" => date.checked_sub_months(Months::new(1)),
-        "PageDown" => date.checked_add_months(Months::new(1)),
+        // Backward navigation: scan backward (-1) from the candidate.
+        "ArrowLeft" => date
+            .checked_sub_signed(Duration::days(1))
+            .and_then(|d| step_to_non_disabled(ctx, d, -1)),
+        "ArrowUp" => date
+            .checked_sub_signed(Duration::days(7))
+            .and_then(|d| step_to_non_disabled(ctx, d, -1)),
+        // Forward navigation: scan forward (+1) from the candidate.
+        "ArrowRight" => date
+            .checked_add_signed(Duration::days(1))
+            .and_then(|d| step_to_non_disabled(ctx, d, 1)),
+        "ArrowDown" => date
+            .checked_add_signed(Duration::days(7))
+            .and_then(|d| step_to_non_disabled(ctx, d, 1)),
+        // Home: first of month, scan forward for nearest enabled date.
+        "Home" => NaiveDate::from_ymd_opt(date.year(), date.month(), 1)
+            .and_then(|d| step_to_non_disabled(ctx, d, 1)),
+        // End: last of month, scan backward for nearest enabled date.
+        "End" => last_day_of_month(date)
+            .and_then(|d| step_to_non_disabled(ctx, d, -1)),
+        // Page navigation: jump to same day in adjacent month, scan forward.
+        "PageUp" => date
+            .checked_sub_months(Months::new(1))
+            .and_then(|d| step_to_non_disabled(ctx, d, 1)),
+        "PageDown" => date
+            .checked_add_months(Months::new(1))
+            .and_then(|d| step_to_non_disabled(ctx, d, 1)),
         "Enter" | " " => {
             // Prevent the browser from synthesising a click event on the button,
             // which would call handle_day_click a second time and toggle it back.

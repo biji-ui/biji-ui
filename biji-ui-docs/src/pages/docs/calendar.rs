@@ -122,6 +122,17 @@ view! {
     </calendar::Root>
 }"#;
 
+const CUSTOM_DISABLED_CODE: &str = r#"// Disable weekends (Saturday and Sunday).
+<calendar::Root
+    selection_type={calendar::SelectionType::Single}
+    is_date_disabled={Box::new(|date: chrono::NaiveDate| {
+        use chrono::Datelike;
+        matches!(date.weekday(), chrono::Weekday::Sat | chrono::Weekday::Sun)
+    })}
+>
+    // ... header and grid
+</calendar::Root>"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -413,6 +424,18 @@ pub fn CalendarDocPage() -> impl IntoView {
                 <MinMaxCalendar />
             </DocPreview>
             <Code class={code_class} code={MIN_MAX_CODE} language="rust" />
+            <h3 class="mt-8 mb-2 text-base font-semibold">"Custom disabled dates"</h3>
+            <p class="mb-5 text-sm text-muted-foreground">
+                "For arbitrary rules use "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"is_date_disabled"</code>
+                ". The predicate receives each date and returns "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"true"</code>
+                " to disable it. Here weekends (Saturday and Sunday) are disabled."
+            </p>
+            <DocPreview>
+                <CustomDisabledCalendar />
+            </DocPreview>
+            <Code class={code_class} code={CUSTOM_DISABLED_CODE} language="rust" />
             <SectionHeading title="API Reference" />
             <PropsTable title="Root" rows={ROOT_PROPS} />
             <PropsTable title="Header" rows={HEADER_PROPS} />
@@ -577,6 +600,29 @@ fn NavButtons(value: RwSignal<biji_ui::components::calendar::CalendarValue>) -> 
                 value.set(CalendarValue::Single(Some(ny)));
                 ctx.placeholder.set(ny.with_day(1).unwrap_or(ny));
             }>"Next Year"</button>
+        </div>
+    }
+}
+
+#[component]
+fn CustomDisabledCalendar() -> impl IntoView {
+    use biji_ui::components::calendar;
+
+    let value = RwSignal::new(calendar::CalendarValue::Single(None));
+
+    view! {
+        <div class="flex flex-col gap-2">
+            <p class="text-xs font-medium text-muted-foreground">"Custom disabled dates"</p>
+            <calendar::Root
+                value={value}
+                selection_type={calendar::SelectionType::Single}
+                is_date_disabled={Box::new(|date: chrono::NaiveDate| {
+                    use chrono::Datelike;
+                    matches!(date.weekday(), chrono::Weekday::Sat | chrono::Weekday::Sun)
+                })}
+            >
+                <CalendarShell />
+            </calendar::Root>
         </div>
     }
 }
