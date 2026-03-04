@@ -12,10 +12,6 @@ use super::{
     types::{CalendarValue, CalendarView, SelectionType, WeekStartsOn},
 };
 
-// ---------------------------------------------------------------------------
-// Grid
-// ---------------------------------------------------------------------------
-
 /// Renders one month grid. `month_offset` controls which month relative to the
 /// calendar's anchor month this grid shows (0 = anchor, 1 = next month, etc.).
 #[component]
@@ -56,10 +52,6 @@ fn compute_grid_month(placeholder: NaiveDate, offset: usize) -> NaiveDate {
         .unwrap_or(placeholder)
 }
 
-// ---------------------------------------------------------------------------
-// GridHead
-// ---------------------------------------------------------------------------
-
 /// Renders a row of 7 weekday header cells ordered by `week_starts_on`.
 /// Automatically hidden when the calendar is in Month or Year view.
 #[component]
@@ -72,7 +64,9 @@ pub fn GridHead(#[prop(into, optional)] class: String) -> impl IntoView {
         <div
             class={sv_class.get_value()}
             role="row"
-            style={move || if cal_ctx.view.get() != CalendarView::Day { "visibility:hidden" } else { "" }}
+            style={move || {
+                if cal_ctx.view.get() != CalendarView::Day { "visibility:hidden" } else { "" }
+            }}
         >
             {labels
                 .into_iter()
@@ -87,10 +81,6 @@ pub fn GridHead(#[prop(into, optional)] class: String) -> impl IntoView {
         </div>
     }
 }
-
-// ---------------------------------------------------------------------------
-// GridBody
-// ---------------------------------------------------------------------------
 
 /// Renders the calendar body. Switches between day / month / year grids based on
 /// the current `CalendarView`.
@@ -127,37 +117,35 @@ pub fn GridBody(
             role="grid"
             class={move || {
                 let view_class = match cal_ctx.view.get() {
-                    CalendarView::Day   => sv_day.get_value(),
+                    CalendarView::Day => sv_day.get_value(),
                     CalendarView::Month => sv_month.get_value(),
-                    CalendarView::Year  => sv_year.get_value(),
+                    CalendarView::Year => sv_year.get_value(),
                 };
                 let base = sv_class.get_value();
                 match (base.is_empty(), view_class.is_empty()) {
                     (true, _) => view_class,
                     (_, true) => base,
-                    _         => format!("{} {}", base, view_class),
+                    _ => format!("{} {}", base, view_class),
                 }
             }}
         >
             {move || {
-                // Primary grid = the one whose month matches the anchor (month_offset == 0).
-                // Secondary grids only render in Day view; Month/Year pickers are shown once.
                 let grid_month = grid_ctx.month.get();
                 let is_primary = grid_month == cal_ctx.placeholder.get();
                 match cal_ctx.view.get() {
-                    CalendarView::Day                      => render_day_grid(cal_ctx, grid_ctx).into_any(),
-                    CalendarView::Month if is_primary      => render_month_grid(cal_ctx, grid_ctx).into_any(),
-                    CalendarView::Year  if is_primary      => render_year_grid(cal_ctx, grid_ctx).into_any(),
-                    _                                      => ().into_any(),
+                    CalendarView::Day => render_day_grid(cal_ctx, grid_ctx).into_any(),
+                    CalendarView::Month if is_primary => {
+                        render_month_grid(cal_ctx, grid_ctx).into_any()
+                    }
+                    CalendarView::Year if is_primary => {
+                        render_year_grid(cal_ctx, grid_ctx).into_any()
+                    }
+                    _ => ().into_any(),
                 }
             }}
         </div>
     }
 }
-
-// ---------------------------------------------------------------------------
-// Day grid — flat cells, no row wrappers
-// ---------------------------------------------------------------------------
 
 fn render_day_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl IntoView {
     let today = chrono::Local::now().date_naive();
@@ -237,22 +225,22 @@ fn render_day_cell(
             data-selected={move || cal_ctx.value.with(|v| v.contains(date))}
             data-in-range={move || {
                 match cal_ctx.value.get() {
-                    CalendarValue::Range { start: Some(s), end: Some(e) } => {
-                        date > s && date < e
-                    }
+                    CalendarValue::Range { start: Some(s), end: Some(e) } => date > s && date < e,
                     _ => cal_ctx.date_in_hover_range(date),
                 }
             }}
             data-range-start={move || {
                 matches!(
                     cal_ctx.value.get(),
-                    CalendarValue::Range { start: Some(s), .. } if s == date
+                    CalendarValue::Range { start: Some(s), .. }
+                    if s == date
                 )
             }}
             data-range-end={move || {
                 matches!(
                     cal_ctx.value.get(),
-                    CalendarValue::Range { end: Some(e), .. } if e == date
+                    CalendarValue::Range { end: Some(e), .. }
+                    if e == date
                 )
             }}
         >
@@ -287,15 +275,27 @@ fn handle_day_click(ctx: CalendarContext, date: NaiveDate) {
                 start: Some(date),
                 end: None,
             },
-            CalendarValue::Range { start: Some(s), end: None } => {
+            CalendarValue::Range {
+                start: Some(s),
+                end: None,
+            } => {
                 let (lo, hi) = if date >= s { (s, date) } else { (date, s) };
-                CalendarValue::Range { start: Some(lo), end: Some(hi) }
+                CalendarValue::Range {
+                    start: Some(lo),
+                    end: Some(hi),
+                }
             }
-            CalendarValue::Range { start: Some(_), end: Some(_) } => CalendarValue::Range {
+            CalendarValue::Range {
+                start: Some(_),
+                end: Some(_),
+            } => CalendarValue::Range {
                 start: Some(date),
                 end: None,
             },
-            _ => CalendarValue::Range { start: Some(date), end: None },
+            _ => CalendarValue::Range {
+                start: Some(date),
+                end: None,
+            },
         },
     };
     ctx.emit_change(new_val);
@@ -304,14 +304,14 @@ fn handle_day_click(ctx: CalendarContext, date: NaiveDate) {
 fn handle_day_keydown(ctx: CalendarContext, date: NaiveDate, evt: web_sys::KeyboardEvent) {
     let key = evt.key();
     let new_focus: Option<NaiveDate> = match key.as_str() {
-        "ArrowLeft"  => date.checked_sub_signed(Duration::days(1)),
+        "ArrowLeft" => date.checked_sub_signed(Duration::days(1)),
         "ArrowRight" => date.checked_add_signed(Duration::days(1)),
-        "ArrowUp"    => date.checked_sub_signed(Duration::days(7)),
-        "ArrowDown"  => date.checked_add_signed(Duration::days(7)),
-        "Home"       => NaiveDate::from_ymd_opt(date.year(), date.month(), 1),
-        "End"        => last_day_of_month(date),
-        "PageUp"     => date.checked_sub_months(Months::new(1)),
-        "PageDown"   => date.checked_add_months(Months::new(1)),
+        "ArrowUp" => date.checked_sub_signed(Duration::days(7)),
+        "ArrowDown" => date.checked_add_signed(Duration::days(7)),
+        "Home" => NaiveDate::from_ymd_opt(date.year(), date.month(), 1),
+        "End" => last_day_of_month(date),
+        "PageUp" => date.checked_sub_months(Months::new(1)),
+        "PageDown" => date.checked_add_months(Months::new(1)),
         "Enter" | " " => {
             // Prevent the browser from synthesising a click event on the button,
             // which would call handle_day_click a second time and toggle it back.
@@ -348,10 +348,6 @@ fn handle_day_keydown(ctx: CalendarContext, date: NaiveDate, evt: web_sys::Keybo
     }
 }
 
-// ---------------------------------------------------------------------------
-// Month grid — flat 12 cells (use grid-cols-4 for a 3×4 layout)
-// ---------------------------------------------------------------------------
-
 fn render_month_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl IntoView {
     // Untracked: outer closure subscribes.
     let year = grid_ctx.month.get_untracked().year();
@@ -360,8 +356,7 @@ fn render_month_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl In
     let current_year = today.year();
 
     const MONTH_NAMES: [&str; 12] = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
 
     (1u32..=12)
@@ -419,25 +414,21 @@ fn render_month_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl In
         .collect_view()
 }
 
-fn handle_month_keydown(
-    ctx: CalendarContext,
-    month_date: NaiveDate,
-    evt: web_sys::KeyboardEvent,
-) {
+fn handle_month_keydown(ctx: CalendarContext, month_date: NaiveDate, evt: web_sys::KeyboardEvent) {
     let key = evt.key();
     let new_focus: Option<NaiveDate> = match key.as_str() {
         // Left/Right: ±1 month; wraps into adjacent year.
-        "ArrowLeft"  => month_date.checked_sub_months(Months::new(1)),
+        "ArrowLeft" => month_date.checked_sub_months(Months::new(1)),
         "ArrowRight" => month_date.checked_add_months(Months::new(1)),
         // Up/Down: ±4 months (one row in the 4-column grid).
-        "ArrowUp"    => month_date.checked_sub_months(Months::new(4)),
-        "ArrowDown"  => month_date.checked_add_months(Months::new(4)),
+        "ArrowUp" => month_date.checked_sub_months(Months::new(4)),
+        "ArrowDown" => month_date.checked_add_months(Months::new(4)),
         // Home/End: first/last month of the displayed year.
-        "Home"       => NaiveDate::from_ymd_opt(month_date.year(), 1, 1),
-        "End"        => NaiveDate::from_ymd_opt(month_date.year(), 12, 1),
+        "Home" => NaiveDate::from_ymd_opt(month_date.year(), 1, 1),
+        "End" => NaiveDate::from_ymd_opt(month_date.year(), 12, 1),
         // PageUp/PageDown: same month, previous/next year.
-        "PageUp"     => month_date.with_year(month_date.year() - 1),
-        "PageDown"   => month_date.with_year(month_date.year() + 1),
+        "PageUp" => month_date.with_year(month_date.year() - 1),
+        "PageDown" => month_date.with_year(month_date.year() + 1),
         "Enter" | " " => {
             evt.prevent_default();
             ctx.focused_date.set(Some(month_date));
@@ -459,10 +450,6 @@ fn handle_month_keydown(
         }
     }
 }
-
-// ---------------------------------------------------------------------------
-// Year grid — flat 12 cells (use grid-cols-4 for a 3×4 layout)
-// ---------------------------------------------------------------------------
 
 fn render_year_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl IntoView {
     let anchor_year = grid_ctx.month.get_untracked().year();
@@ -534,17 +521,17 @@ fn handle_year_keydown(
     let key = evt.key();
     let new_year: Option<i32> = match key.as_str() {
         // Left/Right: ±1 year; wraps into adjacent decade.
-        "ArrowLeft"  => Some(year - 1),
+        "ArrowLeft" => Some(year - 1),
         "ArrowRight" => Some(year + 1),
         // Up/Down: ±4 years (one row in the 4-column grid).
-        "ArrowUp"    => Some(year - 4),
-        "ArrowDown"  => Some(year + 4),
+        "ArrowUp" => Some(year - 4),
+        "ArrowDown" => Some(year + 4),
         // Home/End: first/last year in the current 12-year window.
-        "Home"       => Some(decade_start),
-        "End"        => Some(decade_start + 11),
+        "Home" => Some(decade_start),
+        "End" => Some(decade_start + 11),
         // PageUp/PageDown: previous/next 12-year window.
-        "PageUp"     => Some(year - 12),
-        "PageDown"   => Some(year + 12),
+        "PageUp" => Some(year - 12),
+        "PageDown" => Some(year + 12),
         "Enter" | " " => {
             evt.prevent_default();
             if let Some(new_date) = NaiveDate::from_ymd_opt(year, anchor_month, 1) {
@@ -570,15 +557,11 @@ fn handle_year_keydown(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Pure date helpers
-// ---------------------------------------------------------------------------
-
 /// Returns a flat vector of weeks, each week being 7 `Option<NaiveDate>` cells.
 /// `None` represents a padding cell (date outside the month).
 fn compute_weeks(month: NaiveDate, week_starts_on: WeekStartsOn) -> Vec<Vec<Option<NaiveDate>>> {
-    let first_day = NaiveDate::from_ymd_opt(month.year(), month.month(), 1)
-        .expect("valid first of month");
+    let first_day =
+        NaiveDate::from_ymd_opt(month.year(), month.month(), 1).expect("valid first of month");
     let days_in_month = days_in_month(month);
 
     // Days from Sunday for the first of the month (0 = Sun, 1 = Mon, …)
