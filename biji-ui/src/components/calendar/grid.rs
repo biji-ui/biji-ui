@@ -67,6 +67,7 @@ pub fn GridHead(#[prop(into, optional)] class: String) -> impl IntoView {
             style={move || {
                 if cal_ctx.view.get() != CalendarView::Day { "visibility:hidden" } else { "" }
             }}
+            aria-hidden={move || cal_ctx.view.get() != CalendarView::Day}
         >
             {labels
                 .into_iter()
@@ -168,7 +169,11 @@ fn render_day_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl Into
                     Some(date) => render_day_cell(cal_ctx, grid_ctx, date, today).into_any(),
                 })
                 .collect_view();
-            view! { <div role="row" style="display:contents">{cells}</div> }
+            view! {
+                <div role="row" style="display:contents">
+                    {cells}
+                </div>
+            }
         })
         .collect_view()
 }
@@ -349,8 +354,7 @@ fn handle_day_keydown(ctx: CalendarContext, date: NaiveDate, evt: web_sys::Keybo
         "Home" => NaiveDate::from_ymd_opt(date.year(), date.month(), 1)
             .and_then(|d| step_to_non_disabled(ctx, d, 1)),
         // End: last of month, scan backward for nearest enabled date.
-        "End" => last_day_of_month(date)
-            .and_then(|d| step_to_non_disabled(ctx, d, -1)),
+        "End" => last_day_of_month(date).and_then(|d| step_to_non_disabled(ctx, d, -1)),
         // Page navigation: jump to same day in adjacent month, scan forward.
         "PageUp" => date
             .checked_sub_months(Months::new(1))
