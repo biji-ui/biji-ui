@@ -202,7 +202,7 @@ const GRID_BODY_PROPS: &[PropRow] = &[
         name: "day_class",
         prop_type: "String",
         default: "\"\"",
-        description: "Additional class applied when showing the day grid (view = Day). Apply grid grid-cols-7 here.",
+        description: "Additional class applied when showing the day grid (view = Day). Apply grid grid-cols-7 here. Each week row is wrapped in a role=\"row\" element with display:contents so column layout is inherited from this class.",
     },
     PropRow {
         name: "month_class",

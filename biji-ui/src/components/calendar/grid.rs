@@ -85,9 +85,12 @@ pub fn GridHead(#[prop(into, optional)] class: String) -> impl IntoView {
 /// Renders the calendar body. Switches between day / month / year grids based on
 /// the current `CalendarView`.
 ///
-/// Renders a flat list of cells (no row wrappers). Apply `grid grid-cols-7` via
-/// `day_class` for the day grid, and `grid grid-cols-4` via `month_class` /
-/// `year_class` for the month and year pickers.
+/// Each week in the day grid is wrapped in a `role="row"` element that uses
+/// `display: contents` so the parent's `grid grid-cols-7` (set via `day_class`)
+/// still controls column layout. This satisfies the ARIA grid pattern
+/// (`role="grid"` → `role="row"` → `role="gridcell"`) without requiring a
+/// separate row class. Apply `grid grid-cols-4` via `month_class` / `year_class`
+/// for the month and year pickers.
 #[component]
 pub fn GridBody(
     /// Class always applied to the body container.
@@ -152,12 +155,20 @@ fn render_day_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl Into
     // Untracked: the outer GridBody closure already subscribes to grid_ctx.month.
     let month = grid_ctx.month.get_untracked();
 
+    // Each week is wrapped in role="row" with display:contents so the parent's
+    // CSS grid (grid-cols-7) still controls column layout, while satisfying the
+    // ARIA grid hierarchy: role="grid" > role="row" > role="gridcell".
     compute_weeks(month, cal_ctx.week_starts_on)
         .into_iter()
-        .flat_map(|week| week.into_iter())
-        .map(|day_opt| match day_opt {
-            None => view! { <div aria-hidden="true"></div> }.into_any(),
-            Some(date) => render_day_cell(cal_ctx, grid_ctx, date, today).into_any(),
+        .map(|week| {
+            let cells = week
+                .into_iter()
+                .map(|day_opt| match day_opt {
+                    None => view! { <div aria-hidden="true"></div> }.into_any(),
+                    Some(date) => render_day_cell(cal_ctx, grid_ctx, date, today).into_any(),
+                })
+                .collect_view();
+            view! { <div role="row" style="display:contents">{cells}</div> }
         })
         .collect_view()
 }
