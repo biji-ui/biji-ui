@@ -107,6 +107,21 @@ view! {
     </calendar::Root>
 }"#;
 
+const MIN_MAX_CODE: &str = r#"use chrono::Duration;
+
+let today = chrono::Local::now().date_naive();
+let week_ago = today.checked_sub_signed(Duration::weeks(1)).unwrap_or(today);
+
+view! {
+    <calendar::Root
+        min_date={week_ago}
+        max_date={today}
+        selection_type={calendar::SelectionType::Single}
+    >
+        // ... header and grid
+    </calendar::Root>
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -384,6 +399,20 @@ pub fn CalendarDocPage() -> impl IntoView {
                 <ControlledCalendar />
             </DocPreview>
             <Code class={code_class} code={CONTROLLED_CODE} language="rust" />
+            <h3 class="mt-8 mb-2 text-base font-semibold">"Date constraints"</h3>
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"min_date"</code>
+                " and "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"max_date"</code>
+                " to restrict the selectable range. Dates outside the range are rendered with "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"data-disabled"</code>
+                " and cannot be clicked or keyboard-navigated to."
+            </p>
+            <DocPreview>
+                <MinMaxCalendar />
+            </DocPreview>
+            <Code class={code_class} code={MIN_MAX_CODE} language="rust" />
             <SectionHeading title="API Reference" />
             <PropsTable title="Root" rows={ROOT_PROPS} />
             <PropsTable title="Header" rows={HEADER_PROPS} />
@@ -548,6 +577,33 @@ fn NavButtons(value: RwSignal<biji_ui::components::calendar::CalendarValue>) -> 
                 value.set(CalendarValue::Single(Some(ny)));
                 ctx.placeholder.set(ny.with_day(1).unwrap_or(ny));
             }>"Next Year"</button>
+        </div>
+    }
+}
+
+#[component]
+fn MinMaxCalendar() -> impl IntoView {
+    use biji_ui::components::calendar;
+    use chrono::Duration;
+
+    let today = chrono::Local::now().date_naive();
+    let week_ago = today
+        .checked_sub_signed(Duration::weeks(1))
+        .unwrap_or(today);
+
+    let value = RwSignal::new(calendar::CalendarValue::Single(None));
+
+    view! {
+        <div class="flex flex-col gap-2">
+            <p class="text-xs font-medium text-muted-foreground">"Date constraints"</p>
+            <calendar::Root
+                value={value}
+                selection_type={calendar::SelectionType::Single}
+                min_date={week_ago}
+                max_date={today}
+            >
+                <CalendarShell />
+            </calendar::Root>
         </div>
     }
 }
