@@ -75,6 +75,38 @@ const MULTI_MONTH_CODE: &str = r#"// Set months=2 on Root, then render one Grid 
     </div>
 </calendar::Root>"#;
 
+const CONTROLLED_CODE: &str = r#"// The parent owns the value signal and writes to it directly.
+let today = chrono::Local::now().date_naive();
+let value = RwSignal::new(calendar::CalendarValue::Single(None));
+
+// NavButtons must live inside <calendar::Root> to access CalendarContext,
+// which lets it also navigate the displayed month when setting the value.
+#[component]
+fn NavButtons(value: RwSignal<calendar::CalendarValue>) -> impl IntoView {
+    use biji_ui::components::calendar::{CalendarContext, CalendarValue};
+    use chrono::Datelike;
+    let ctx = expect_context::<CalendarContext>();
+    let today = chrono::Local::now().date_naive();
+    let ly = today.with_year(today.year() - 1).unwrap_or(today);
+    let lw = today.checked_sub_signed(chrono::Duration::weeks(1)).unwrap_or(today);
+    let nw = today.checked_add_signed(chrono::Duration::weeks(1)).unwrap_or(today);
+    let ny = today.with_year(today.year() + 1).unwrap_or(today);
+    view! {
+        <button on:click=move |_| {
+            value.set(CalendarValue::Single(Some(ly)));
+            ctx.placeholder.set(ly.with_day(1).unwrap_or(ly));
+        }>"Last Year"</button>
+        // ... Last Week, Today, Next Week, Next Year follow the same pattern
+    }
+}
+
+view! {
+    <calendar::Root value={value} selection_type={calendar::SelectionType::Single}>
+        <NavButtons value={value} />
+        // ... header and grid
+    </calendar::Root>
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -338,6 +370,20 @@ pub fn CalendarDocPage() -> impl IntoView {
                 <MultiMonthCalendar />
             </DocPreview>
             <Code class={code_class} code={MULTI_MONTH_CODE} language="rust" />
+            <h3 class="mt-8 mb-2 text-base font-semibold">"Controlled"</h3>
+            <p class="mb-5 text-sm text-muted-foreground">
+                "The "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"value"</code>
+                " signal is owned by the parent and can be written to at any time. Components inside "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"Root"</code>
+                " can also access "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"CalendarContext"</code>
+                " directly to navigate the displayed month alongside the value change."
+            </p>
+            <DocPreview>
+                <ControlledCalendar />
+            </DocPreview>
+            <Code class={code_class} code={CONTROLLED_CODE} language="rust" />
             <SectionHeading title="API Reference" />
             <PropsTable title="Root" rows={ROOT_PROPS} />
             <PropsTable title="Header" rows={HEADER_PROPS} />
@@ -441,6 +487,67 @@ fn MultiMonthCalendar() -> impl IntoView {
                     </div>
                 </div>
             </calendar::Root>
+        </div>
+    }
+}
+
+#[component]
+fn ControlledCalendar() -> impl IntoView {
+    use biji_ui::components::calendar;
+
+    let value = RwSignal::new(calendar::CalendarValue::Single(None));
+
+    view! {
+        <div class="flex flex-col gap-2">
+            <p class="text-xs font-medium text-muted-foreground">"Controlled"</p>
+            <calendar::Root value={value} selection_type={calendar::SelectionType::Single}>
+                <NavButtons value={value} />
+                <CalendarShell />
+            </calendar::Root>
+        </div>
+    }
+}
+
+#[component]
+fn NavButtons(value: RwSignal<biji_ui::components::calendar::CalendarValue>) -> impl IntoView {
+    use biji_ui::components::calendar::{CalendarContext, CalendarValue};
+    use chrono::Datelike;
+
+    let ctx = expect_context::<CalendarContext>();
+    let today = chrono::Local::now().date_naive();
+    let ly = today.with_year(today.year() - 1).unwrap_or(today);
+    let lw = today
+        .checked_sub_signed(chrono::Duration::weeks(1))
+        .unwrap_or(today);
+    let nw = today
+        .checked_add_signed(chrono::Duration::weeks(1))
+        .unwrap_or(today);
+    let ny = today.with_year(today.year() + 1).unwrap_or(today);
+
+    let btn = "px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-background hover:bg-muted transition-colors cursor-pointer";
+
+    view! {
+        <div class="flex flex-wrap justify-center gap-2 w-[272px] mb-4">
+            <button class=btn on:click=move |_| {
+                value.set(CalendarValue::Single(Some(ly)));
+                ctx.placeholder.set(ly.with_day(1).unwrap_or(ly));
+            }>"Last Year"</button>
+            <button class=btn on:click=move |_| {
+                value.set(CalendarValue::Single(Some(lw)));
+                ctx.placeholder.set(lw.with_day(1).unwrap_or(lw));
+            }>"Last Week"</button>
+            <button class=btn on:click=move |_| {
+                value.set(CalendarValue::Single(Some(today)));
+                ctx.placeholder.set(today.with_day(1).unwrap_or(today));
+            }>"Today"</button>
+            <button class=btn on:click=move |_| {
+                value.set(CalendarValue::Single(Some(nw)));
+                ctx.placeholder.set(nw.with_day(1).unwrap_or(nw));
+            }>"Next Week"</button>
+            <button class=btn on:click=move |_| {
+                value.set(CalendarValue::Single(Some(ny)));
+                ctx.placeholder.set(ny.with_day(1).unwrap_or(ny));
+            }>"Next Year"</button>
         </div>
     }
 }
