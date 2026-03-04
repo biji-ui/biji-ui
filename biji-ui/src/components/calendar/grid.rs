@@ -225,6 +225,7 @@ fn render_day_cell(
         <button
             node_ref={btn_ref}
             role="gridcell"
+            aria-label={date.format("%B %-d, %Y").to_string()}
             disabled={is_disabled}
             tabindex={move || if !is_disabled && is_tab_target() { 0 } else { -1 }}
             data-today={is_today}
@@ -407,6 +408,7 @@ fn render_month_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl In
             view! {
                 <button
                     node_ref={btn_ref}
+                    aria-label={month_date.format("%B %Y").to_string()}
                     tabindex={move || if is_tab_target() { 0 } else { -1 }}
                     data-current-month={is_current}
                     data-selected={move || {
