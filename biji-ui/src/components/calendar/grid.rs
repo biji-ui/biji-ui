@@ -508,6 +508,7 @@ fn render_year_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl Int
             view! {
                 <button
                     node_ref={btn_ref}
+                    aria-label={year.to_string()}
                     tabindex={move || if is_tab_target() { 0 } else { -1 }}
                     data-current-year={is_current}
                     data-selected={move || {
