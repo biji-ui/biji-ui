@@ -37,11 +37,14 @@ pub fn Root(
     #[prop(optional)] on_change: Option<Callback<CalendarValue>>,
     children: Children,
 ) -> impl IntoView {
-    // Determine the initial value (controlled takes precedence over default_value).
-    let initial_value = value
-        .map(|s| s.get_untracked())
-        .or(default_value)
-        .unwrap_or_else(|| CalendarValue::default_for(selection_type));
+    // In controlled mode the external signal IS ctx.value — writes from either side
+    // are immediately visible to the other. In uncontrolled mode a fresh signal is
+    // created from default_value (or an empty default).
+    let value_signal = value.unwrap_or_else(|| {
+        let init = default_value
+            .unwrap_or_else(|| CalendarValue::default_for(selection_type));
+        RwSignal::new(init)
+    });
 
     // Determine anchor month, clamped to the first day of that month.
     let anchor = {
@@ -52,7 +55,7 @@ pub fn Root(
     let ctx = CalendarContext {
         placeholder: RwSignal::new(anchor),
         view: RwSignal::new(CalendarView::Day),
-        value: RwSignal::new(initial_value),
+        value: value_signal,
         selection_type,
         months,
         min_date,
