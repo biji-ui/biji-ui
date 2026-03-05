@@ -41,14 +41,25 @@ pub fn AccordionExample() -> impl IntoView {
 }
 "#;
 
+    let install_specific = concat!(
+        "# Enable only the components you need\n",
+        "biji-ui = { version = \"",
+        env!("CARGO_PKG_VERSION"),
+        "\", features = [\"accordion\", \"dialog\"] }\n\n",
+        "# Or enable everything\n",
+        "biji-ui = { version = \"",
+        env!("CARGO_PKG_VERSION"),
+        "\", features = [\"full\"] }",
+    );
+
     view! {
         <article class="flex flex-col pt-16 pb-10 h-full">
             <h1 class="mb-2 text-2xl font-bold">"Getting Started"</h1>
-            <p class="my-5 text-base">"Install biji-ui using Cargo."</p>
+            <p class="my-5 text-base">"Add biji-ui to your Cargo.toml. Components are opt-in via feature flags."</p>
             <Code
                 class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
-                code="cargo install biji-ui"
-                language="bash"
+                code={install_specific}
+                language="toml"
             />
             <p class="my-5 text-base">"You can then import and start using them in your app."</p>
             <Code

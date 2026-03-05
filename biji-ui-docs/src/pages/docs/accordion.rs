@@ -42,6 +42,12 @@ pub fn MyAccordion() -> impl IntoView {
     }
 }"#;
 
+const INSTALL_CODE: &str = concat!(
+    "biji-ui = { version = \"",
+    env!("CARGO_PKG_VERSION"),
+    "\", features = [\"accordion\"] }",
+);
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -156,6 +162,12 @@ pub fn AccordionDocPage() -> impl IntoView {
             <DocPreview>
                 <AccordionExample />
             </DocPreview>
+            <SectionHeading title="Installation" />
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={INSTALL_CODE}
+                language="toml"
+            />
             <SectionHeading title="Usage" />
             <Code
                 class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
