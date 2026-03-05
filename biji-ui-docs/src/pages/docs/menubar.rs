@@ -14,6 +14,12 @@ use crate::{
     icons,
 };
 
+const INSTALL_CODE: &str = concat!(
+    "biji-ui = { version = \"",
+    env!("CARGO_PKG_VERSION"),
+    "\", features = [\"menubar\"] }",
+);
+
 const USAGE_CODE: &str = r#"use std::time::Duration;
 use leptos::{portal::Portal, prelude::*};
 use biji_ui::components::menubar;
@@ -260,6 +266,12 @@ pub fn MenubarDocPage() -> impl IntoView {
             <DocPreview>
                 <MenubarExample />
             </DocPreview>
+            <SectionHeading title="Installation" />
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={INSTALL_CODE}
+                language="toml"
+            />
             <SectionHeading title="Usage" />
             <Code
                 class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
