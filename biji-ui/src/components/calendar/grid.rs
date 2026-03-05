@@ -695,3 +695,144 @@ fn last_day_of_month(date: NaiveDate) -> Option<NaiveDate> {
     };
     NaiveDate::from_ymd_opt(year, month, 1)?.pred_opt()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn d(y: i32, m: u32, day: u32) -> NaiveDate {
+        NaiveDate::from_ymd_opt(y, m, day).unwrap()
+    }
+
+    // ── compute_weeks ─────────────────────────────────────────────────────────
+
+    #[test]
+    fn compute_weeks_always_six_rows_seven_cols() {
+        let months = [
+            d(2025, 1, 1), // 31 days, starts Wednesday
+            d(2025, 3, 1), // 31 days, starts Saturday
+            d(2023, 2, 1), // 28 days non-leap, starts Wednesday
+            d(2024, 2, 1), // 29 days leap, starts Thursday
+            d(2025, 4, 1), // 30 days
+        ];
+        for month in months {
+            for ws in [WeekStartsOn::Sunday, WeekStartsOn::Monday] {
+                let weeks = compute_weeks(month, ws);
+                assert_eq!(weeks.len(), 6, "expected 6 rows for {} (ws={ws:?})", month);
+                for row in &weeks {
+                    assert_eq!(row.len(), 7, "row must have 7 cells for {} (ws={ws:?})", month);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn compute_weeks_all_days_present_exactly_once() {
+        // March 2025 (31 days) with Sunday start.
+        let weeks = compute_weeks(d(2025, 3, 1), WeekStartsOn::Sunday);
+        let dates: Vec<NaiveDate> = weeks.iter().flatten().filter_map(|&x| x).collect();
+        assert_eq!(dates.len(), 31);
+        assert_eq!(dates[0], d(2025, 3, 1));
+        assert_eq!(dates[30], d(2025, 3, 31));
+        // Dates must be in ascending order with no gaps.
+        for i in 1..dates.len() {
+            assert_eq!(dates[i], dates[i - 1].succ_opt().unwrap());
+        }
+    }
+
+    #[test]
+    fn compute_weeks_sunday_start_padding_saturday_month() {
+        // March 1, 2025 is a Saturday → 6 padding cells before the first day.
+        let weeks = compute_weeks(d(2025, 3, 1), WeekStartsOn::Sunday);
+        let row0 = &weeks[0];
+        for &cell in &row0[0..6] {
+            assert_eq!(cell, None, "expected padding None in first 6 cols");
+        }
+        assert_eq!(row0[6], Some(d(2025, 3, 1)));
+    }
+
+    #[test]
+    fn compute_weeks_monday_start_padding_saturday_month() {
+        // March 1, 2025 is a Saturday → 5 padding cells for Monday start.
+        let weeks = compute_weeks(d(2025, 3, 1), WeekStartsOn::Monday);
+        let row0 = &weeks[0];
+        for &cell in &row0[0..5] {
+            assert_eq!(cell, None, "expected padding None in first 5 cols");
+        }
+        assert_eq!(row0[5], Some(d(2025, 3, 1)));
+        assert_eq!(row0[6], Some(d(2025, 3, 2)));
+    }
+
+    #[test]
+    fn compute_weeks_no_padding_when_first_day_is_week_start() {
+        // Jan 1, 2023 is a Sunday → no padding when week starts on Sunday.
+        let weeks = compute_weeks(d(2023, 1, 1), WeekStartsOn::Sunday);
+        assert_eq!(weeks[0][0], Some(d(2023, 1, 1)));
+        // Same day with Monday start should have 6 padding cells.
+        let weeks_mon = compute_weeks(d(2023, 1, 1), WeekStartsOn::Monday);
+        for &cell in &weeks_mon[0][0..6] {
+            assert_eq!(cell, None);
+        }
+        assert_eq!(weeks_mon[0][6], Some(d(2023, 1, 1)));
+    }
+
+    #[test]
+    fn compute_weeks_leap_year_february() {
+        // Feb 2024: 29 days, starts Thursday (num_days_from_sunday=4) → 4 padding cells.
+        let weeks = compute_weeks(d(2024, 2, 1), WeekStartsOn::Sunday);
+        let dates: Vec<NaiveDate> = weeks.iter().flatten().filter_map(|&x| x).collect();
+        assert_eq!(dates.len(), 29);
+        assert_eq!(dates[28], d(2024, 2, 29));
+        assert_eq!(weeks[0][0], None);
+        assert_eq!(weeks[0][3], None);
+        assert_eq!(weeks[0][4], Some(d(2024, 2, 1)));
+    }
+
+    #[test]
+    fn compute_weeks_non_leap_year_february() {
+        // Feb 2023: 28 days, starts Wednesday (num_days_from_sunday=3) → 3 padding cells.
+        let weeks = compute_weeks(d(2023, 2, 1), WeekStartsOn::Sunday);
+        let dates: Vec<NaiveDate> = weeks.iter().flatten().filter_map(|&x| x).collect();
+        assert_eq!(dates.len(), 28);
+        assert_eq!(dates[27], d(2023, 2, 28));
+        assert_eq!(weeks[0][3], Some(d(2023, 2, 1)));
+    }
+
+    // ── days_in_month ─────────────────────────────────────────────────────────
+
+    #[test]
+    fn days_in_month_standard_months() {
+        assert_eq!(days_in_month(d(2025, 1, 1)), 31); // January
+        assert_eq!(days_in_month(d(2025, 3, 1)), 31); // March
+        assert_eq!(days_in_month(d(2025, 4, 1)), 30); // April
+        assert_eq!(days_in_month(d(2025, 6, 1)), 30); // June
+        assert_eq!(days_in_month(d(2025, 9, 1)), 30); // September
+        assert_eq!(days_in_month(d(2025, 11, 1)), 30); // November
+    }
+
+    #[test]
+    fn days_in_month_december_year_boundary() {
+        // December rolls the year over internally; must still return 31.
+        assert_eq!(days_in_month(d(2024, 12, 1)), 31);
+        assert_eq!(days_in_month(d(2025, 12, 31)), 31);
+    }
+
+    #[test]
+    fn days_in_month_february_leap_rules() {
+        assert_eq!(days_in_month(d(2023, 2, 1)), 28); // common year
+        assert_eq!(days_in_month(d(2024, 2, 1)), 29); // divisible by 4
+        assert_eq!(days_in_month(d(2100, 2, 1)), 28); // divisible by 100, not 400
+        assert_eq!(days_in_month(d(2000, 2, 1)), 29); // divisible by 400
+    }
+
+    // ── last_day_of_month ─────────────────────────────────────────────────────
+
+    #[test]
+    fn last_day_of_month_various() {
+        assert_eq!(last_day_of_month(d(2025, 1, 1)), Some(d(2025, 1, 31)));
+        assert_eq!(last_day_of_month(d(2025, 4, 15)), Some(d(2025, 4, 30)));
+        assert_eq!(last_day_of_month(d(2023, 2, 1)), Some(d(2023, 2, 28)));
+        assert_eq!(last_day_of_month(d(2024, 2, 1)), Some(d(2024, 2, 29)));
+        assert_eq!(last_day_of_month(d(2024, 12, 1)), Some(d(2024, 12, 31)));
+    }
+}
