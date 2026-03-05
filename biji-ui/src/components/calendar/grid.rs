@@ -90,8 +90,8 @@ pub fn GridHead(#[prop(into, optional)] class: String) -> impl IntoView {
 /// `display: contents` so the parent's `grid grid-cols-7` (set via `day_class`)
 /// still controls column layout. This satisfies the ARIA grid pattern
 /// (`role="grid"` → `role="row"` → `role="gridcell"`) without requiring a
-/// separate row class. Apply `grid grid-cols-4` via `month_class` / `year_class`
-/// for the month and year pickers.
+/// separate row class. Apply `grid grid-cols-4` via `month_class` and
+/// `grid grid-cols-5` via `year_class` for the month and year pickers.
 #[component]
 pub fn GridBody(
     /// Class always applied to the body container.
@@ -409,57 +409,71 @@ fn render_month_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl In
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
 
-    (1u32..=12)
-        .map(|month_num| {
-            let month_date = NaiveDate::from_ymd_opt(year, month_num, 1).expect("valid month");
-            let is_current = month_num == current_month && year == current_year;
+    // 3 rows × 4 columns, each row wrapped in role="row" with display:contents
+    // so the parent's CSS grid (grid-cols-4 on GridBody) controls column layout,
+    // satisfying ARIA: role="grid" > role="row" > gridcell.
+    (0u32..3)
+        .map(|row| {
+            let cells = (0u32..4)
+                .map(|col| {
+                    let month_num = row * 4 + col + 1;
+                    let month_date =
+                        NaiveDate::from_ymd_opt(year, month_num, 1).expect("valid month");
+                    let is_current = month_num == current_month && year == current_year;
 
-            let btn_ref = NodeRef::<html::Button>::new();
+                    let btn_ref = NodeRef::<html::Button>::new();
 
-            // Move DOM focus to this button when it becomes the keyboard target.
-            Effect::new(move |_| {
-                if let Some(fd) = cal_ctx.focused_date.get() {
-                    if fd.year() == year && fd.month() == month_num {
-                        if let Some(el) = btn_ref.get() {
-                            let _ = el.focus();
-                        }
-                    }
-                }
-            });
-
-            // Roving tabindex: entry point when nothing is focused yet is the
-            // anchor month (grid_ctx.month is always the 1st of that month).
-            let is_tab_target = move || match cal_ctx.focused_date.get() {
-                Some(fd) => fd.year() == year && fd.month() == month_num,
-                None => month_date == grid_ctx.month.get(),
-            };
-
-            let _ = use_event_listener(btn_ref, click, move |_| {
-                cal_ctx.focused_date.set(Some(month_date));
-                cal_ctx.placeholder.set(month_date);
-                cal_ctx.view.set(CalendarView::Day);
-            });
-            let _ = use_event_listener(btn_ref, keydown, move |evt| {
-                handle_month_keydown(cal_ctx, month_date, evt);
-            });
-
-            view! {
-                <button
-                    node_ref={btn_ref}
-                    aria-label={month_date.format("%B %Y").to_string()}
-                    tabindex={move || if is_tab_target() { 0 } else { -1 }}
-                    data-current-month={is_current}
-                    data-selected={move || {
-                        match cal_ctx.value.get() {
-                            CalendarValue::Single(Some(d)) => {
-                                d.year() == year && d.month() == month_num
+                    // Move DOM focus to this button when it becomes the keyboard target.
+                    Effect::new(move |_| {
+                        if let Some(fd) = cal_ctx.focused_date.get() {
+                            if fd.year() == year && fd.month() == month_num {
+                                if let Some(el) = btn_ref.get() {
+                                    let _ = el.focus();
+                                }
                             }
-                            _ => false,
                         }
-                    }}
-                >
-                    {MONTH_NAMES[(month_num - 1) as usize]}
-                </button>
+                    });
+
+                    // Roving tabindex: entry point when nothing is focused yet is the
+                    // anchor month (grid_ctx.month is always the 1st of that month).
+                    let is_tab_target = move || match cal_ctx.focused_date.get() {
+                        Some(fd) => fd.year() == year && fd.month() == month_num,
+                        None => month_date == grid_ctx.month.get(),
+                    };
+
+                    let _ = use_event_listener(btn_ref, click, move |_| {
+                        cal_ctx.focused_date.set(Some(month_date));
+                        cal_ctx.placeholder.set(month_date);
+                        cal_ctx.view.set(CalendarView::Day);
+                    });
+                    let _ = use_event_listener(btn_ref, keydown, move |evt| {
+                        handle_month_keydown(cal_ctx, month_date, evt);
+                    });
+
+                    view! {
+                        <button
+                            node_ref={btn_ref}
+                            aria-label={month_date.format("%B %Y").to_string()}
+                            tabindex={move || if is_tab_target() { 0 } else { -1 }}
+                            data-current-month={is_current}
+                            data-selected={move || {
+                                match cal_ctx.value.get() {
+                                    CalendarValue::Single(Some(d)) => {
+                                        d.year() == year && d.month() == month_num
+                                    }
+                                    _ => false,
+                                }
+                            }}
+                        >
+                            {MONTH_NAMES[(month_num - 1) as usize]}
+                        </button>
+                    }
+                })
+                .collect_view();
+            view! {
+                <div role="row" style="display:contents">
+                    {cells}
+                </div>
             }
         })
         .collect_view()
@@ -505,59 +519,72 @@ fn handle_month_keydown(ctx: CalendarContext, month_date: NaiveDate, evt: web_sy
 fn render_year_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl IntoView {
     let anchor_year = grid_ctx.month.get_untracked().year();
     let anchor_month = grid_ctx.month.get_untracked().month();
-    let decade_start = (anchor_year / 12) * 12;
+    let decade_start = (anchor_year / 10) * 10;
     let current_year = chrono::Local::now().date_naive().year();
 
-    (0i32..12)
-        .map(|i| {
-            let year = decade_start + i;
-            let is_current = year == current_year;
+    // 2 rows × 5 columns, each row wrapped in role="row" with display:contents
+    // so the parent's CSS grid (grid-cols-5 on GridBody) controls column layout,
+    // satisfying ARIA: role="grid" > role="row" > gridcell.
+    (0i32..2)
+        .map(|row| {
+            let cells = (0i32..5)
+                .map(|col| {
+                    let i = row * 5 + col;
+                    let year = decade_start + i;
+                    let is_current = year == current_year;
 
-            let btn_ref = NodeRef::<html::Button>::new();
+                    let btn_ref = NodeRef::<html::Button>::new();
 
-            // Move DOM focus to this button when it becomes the keyboard target.
-            Effect::new(move |_| {
-                if let Some(fd) = cal_ctx.focused_date.get() {
-                    if fd.year() == year {
-                        if let Some(el) = btn_ref.get() {
-                            let _ = el.focus();
+                    // Move DOM focus to this button when it becomes the keyboard target.
+                    Effect::new(move |_| {
+                        if let Some(fd) = cal_ctx.focused_date.get() {
+                            if fd.year() == year {
+                                if let Some(el) = btn_ref.get() {
+                                    let _ = el.focus();
+                                }
+                            }
                         }
+                    });
+
+                    // Roving tabindex: entry point when nothing is focused is the anchor year.
+                    let is_tab_target = move || match cal_ctx.focused_date.get() {
+                        Some(fd) => fd.year() == year,
+                        None => year == grid_ctx.month.get().year(),
+                    };
+
+                    let _ = use_event_listener(btn_ref, click, move |_| {
+                        if let Some(new_date) = NaiveDate::from_ymd_opt(year, anchor_month, 1) {
+                            cal_ctx.focused_date.set(Some(new_date));
+                            cal_ctx.placeholder.set(new_date);
+                        }
+                        cal_ctx.view.set(CalendarView::Month);
+                    });
+                    let _ = use_event_listener(btn_ref, keydown, move |evt| {
+                        handle_year_keydown(cal_ctx, year, anchor_month, decade_start, evt);
+                    });
+
+                    view! {
+                        <button
+                            node_ref={btn_ref}
+                            aria-label={year.to_string()}
+                            tabindex={move || if is_tab_target() { 0 } else { -1 }}
+                            data-current-year={is_current}
+                            data-selected={move || {
+                                match cal_ctx.value.get() {
+                                    CalendarValue::Single(Some(d)) => d.year() == year,
+                                    _ => false,
+                                }
+                            }}
+                        >
+                            {year}
+                        </button>
                     }
-                }
-            });
-
-            // Roving tabindex: entry point when nothing is focused is the anchor year.
-            let is_tab_target = move || match cal_ctx.focused_date.get() {
-                Some(fd) => fd.year() == year,
-                None => year == grid_ctx.month.get().year(),
-            };
-
-            let _ = use_event_listener(btn_ref, click, move |_| {
-                if let Some(new_date) = NaiveDate::from_ymd_opt(year, anchor_month, 1) {
-                    cal_ctx.focused_date.set(Some(new_date));
-                    cal_ctx.placeholder.set(new_date);
-                }
-                cal_ctx.view.set(CalendarView::Month);
-            });
-            let _ = use_event_listener(btn_ref, keydown, move |evt| {
-                handle_year_keydown(cal_ctx, year, anchor_month, decade_start, evt);
-            });
-
+                })
+                .collect_view();
             view! {
-                <button
-                    node_ref={btn_ref}
-                    aria-label={year.to_string()}
-                    tabindex={move || if is_tab_target() { 0 } else { -1 }}
-                    data-current-year={is_current}
-                    data-selected={move || {
-                        match cal_ctx.value.get() {
-                            CalendarValue::Single(Some(d)) => d.year() == year,
-                            _ => false,
-                        }
-                    }}
-                >
-                    {year}
-                </button>
+                <div role="row" style="display:contents">
+                    {cells}
+                </div>
             }
         })
         .collect_view()
@@ -575,15 +602,15 @@ fn handle_year_keydown(
         // Left/Right: ±1 year; wraps into adjacent decade.
         "ArrowLeft" => Some(year - 1),
         "ArrowRight" => Some(year + 1),
-        // Up/Down: ±4 years (one row in the 4-column grid).
-        "ArrowUp" => Some(year - 4),
-        "ArrowDown" => Some(year + 4),
-        // Home/End: first/last year in the current 12-year window.
+        // Up/Down: ±5 years (one row in the 5-column grid).
+        "ArrowUp" => Some(year - 5),
+        "ArrowDown" => Some(year + 5),
+        // Home/End: first/last year in the current decade window.
         "Home" => Some(decade_start),
-        "End" => Some(decade_start + 11),
-        // PageUp/PageDown: previous/next 12-year window.
-        "PageUp" => Some(year - 12),
-        "PageDown" => Some(year + 12),
+        "End" => Some(decade_start + 9),
+        // PageUp/PageDown: previous/next decade.
+        "PageUp" => Some(year - 10),
+        "PageDown" => Some(year + 10),
         "Enter" | " " => {
             evt.prevent_default();
             if let Some(new_date) = NaiveDate::from_ymd_opt(year, anchor_month, 1) {
@@ -601,7 +628,7 @@ fn handle_year_keydown(
             evt.prevent_default();
             ctx.focused_date.set(Some(new_date));
             // If focus moved outside the current decade window, scroll to show it.
-            let new_decade = (new_y / 12) * 12;
+            let new_decade = (new_y / 10) * 10;
             if new_decade != decade_start {
                 ctx.placeholder.set(new_date);
             }

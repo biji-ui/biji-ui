@@ -64,8 +64,8 @@ pub fn Heading(#[prop(into, optional)] class: String) -> impl IntoView {
             }
             CalendarView::Year => {
                 let year = placeholder.year();
-                let decade_start = (year / 12) * 12;
-                format!("{} \u{2013} {}", decade_start, decade_start + 11)
+                let decade_start = (year / 10) * 10;
+                format!("{} \u{2013} {}", decade_start, decade_start + 9)
             }
         }
     };
@@ -132,10 +132,10 @@ fn navigate(ctx: CalendarContext, direction: Direction) {
             current.with_year(current.year() + 1)
         }
         (Direction::Prev, CalendarView::Year) => {
-            current.with_year(current.year() - 12)
+            current.with_year(current.year() - 10)
         }
         (Direction::Next, CalendarView::Year) => {
-            current.with_year(current.year() + 12)
+            current.with_year(current.year() + 10)
         }
     };
 
