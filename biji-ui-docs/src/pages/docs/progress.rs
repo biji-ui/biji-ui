@@ -19,7 +19,7 @@ pub fn MyProgress() -> impl IntoView {
     view! {
         <progress::Root
             class="overflow-hidden relative w-full h-2 rounded-full bg-secondary"
-            value=75.0
+            value=Some(75.0_f64)
             max=100.0
         >
             <progress::Indicator
@@ -35,18 +35,22 @@ use biji_ui::components::progress;
 
 #[component]
 pub fn ReactiveProgress() -> impl IntoView {
-    let value = RwSignal::new(50.0_f64);
+    let value = RwSignal::new(Some(50.0_f64));
     let steps: &[f64] = &[0.0, 25.0, 50.0, 75.0, 100.0];
 
     view! {
         <div class="space-y-6">
             <progress::Root
                 class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
+                value=value
                 max=100.0
             >
                 <div
                     class="h-full transition-all duration-500 ease-in-out bg-primary"
-                    style={move || format!("width: {}%", value.get())}
+                    style={move || {
+                        let pct = value.get().unwrap_or(0.0);
+                        format!("width: {}%", pct)
+                    }}
                 />
             </progress::Root>
             <div class="flex gap-2 justify-between">
@@ -55,8 +59,8 @@ pub fn ReactiveProgress() -> impl IntoView {
                     .map(|&s| view! {
                         <button
                             class="py-1.5 px-3 text-sm rounded-md border transition-colors outline-none focus:ring-2 border-border data-[active]:bg-muted data-[active]:font-medium hover:bg-muted focus:ring-ring"
-                            data-active={move || value.get() == s}
-                            on:click={move |_| value.set(s)}
+                            data-active={move || value.get() == Some(s)}
+                            on:click={move |_| value.set(Some(s))}
                         >
                             {format!("{}%", s as u32)}
                         </button>
@@ -76,9 +80,9 @@ const ROOT_PROPS: &[PropRow] = &[
     },
     PropRow {
         name: "value",
-        prop_type: "Option<f64>",
+        prop_type: "MaybeSignal<Option<f64>>",
         default: "None",
-        description: "The current progress value. When None, the progress is indeterminate.",
+        description: "The current progress value. Accepts a static Some(f64) or a reactive signal. When None, the progress is indeterminate.",
     },
     PropRow {
         name: "max",
@@ -166,7 +170,7 @@ pub fn ProgressExample() -> impl IntoView {
                 <p class="text-xs text-muted-foreground">"25%"</p>
                 <progress::Root
                     class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
-                    value=25.0
+                    value=Some(25.0_f64)
                     max=100.0
                 >
                     <progress::Indicator
@@ -179,7 +183,7 @@ pub fn ProgressExample() -> impl IntoView {
                 <p class="text-xs text-muted-foreground">"60%"</p>
                 <progress::Root
                     class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
-                    value=60.0
+                    value=Some(60.0_f64)
                     max=100.0
                 >
                     <progress::Indicator
@@ -192,7 +196,7 @@ pub fn ProgressExample() -> impl IntoView {
                 <p class="text-xs text-muted-foreground">"Complete"</p>
                 <progress::Root
                     class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
-                    value=100.0
+                    value=Some(100.0_f64)
                     max=100.0
                 >
                     <progress::Indicator
@@ -209,18 +213,19 @@ pub fn ProgressExample() -> impl IntoView {
 pub fn ReactiveProgressExample() -> impl IntoView {
     use biji_ui::components::progress;
 
-    let value = RwSignal::new(50.0_f64);
+    let value = RwSignal::new(Some(50.0_f64));
     let steps: &[f64] = &[0.0, 25.0, 50.0, 75.0, 100.0];
 
     view! {
         <div class="w-full sm:max-w-[70%] space-y-6">
             <progress::Root
                 class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
+                value=value
                 max=100.0
             >
                 <div
                     class="h-full transition-all duration-500 ease-in-out bg-primary"
-                    style={move || format!("width: {}%", value.get())}
+                    style={move || format!("width: {}%", value.get().unwrap_or(0.0))}
                 />
             </progress::Root>
             <div class="flex gap-2 justify-between">
@@ -230,8 +235,8 @@ pub fn ReactiveProgressExample() -> impl IntoView {
                         view! {
                             <button
                                 class="py-1.5 px-3 text-sm rounded-md border transition-colors outline-none focus:ring-2 border-border data-[active]:bg-muted data-[active]:font-medium hover:bg-muted focus:ring-ring"
-                                data-active={move || value.get() == s}
-                                on:click={move |_| value.set(s)}
+                                data-active={move || value.get() == Some(s)}
+                                on:click={move |_| value.set(Some(s))}
                             >
                                 {format!("{}%", s as u32)}
                             </button>
