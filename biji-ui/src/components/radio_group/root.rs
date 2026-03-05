@@ -3,7 +3,7 @@ use std::sync::atomic::AtomicUsize;
 use leptos::{context::Provider, ev::{click, focus, keydown}, prelude::*};
 use leptos_use::use_event_listener;
 
-use crate::items::{Focus, ManageFocus, NavigateItems};
+use crate::items::{FilterActiveItems, Focus, ManageFocus, NavigateItems};
 
 use super::context::{RadioGroupContext, RadioItemContext};
 
@@ -106,19 +106,33 @@ pub fn Item(
         }
     });
 
+    let is_checked = Memo::new(move |_| item_ctx.is_checked(group_ctx.value.get()));
+
     view! {
         <Provider value={item_ctx}>
             <button
                 node_ref={item_ctx.trigger_ref}
+                type="button"
                 role="radio"
-                aria-checked={move || {
-                    if item_ctx.is_checked(group_ctx.value.get()) { "true" } else { "false" }
-                }}
+                aria-checked={move || if is_checked.get() { "true" } else { "false" }}
                 aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
-                data-state={move || item_ctx.data_state(group_ctx.value.get())}
+                data-state={move || if is_checked.get() { "checked" } else { "unchecked" }}
                 data-disabled={item_ctx.disabled}
                 tabindex={move || {
-                    if item_ctx.is_checked(group_ctx.value.get()) { "0" } else { "-1" }
+                    if is_checked.get() {
+                        "0"
+                    } else if group_ctx.value.get().is_none()
+                        && group_ctx
+                            .filter_active_items()
+                            .into_iter()
+                            .next()
+                            .map(|i| i.index)
+                            == Some(item_ctx.index)
+                    {
+                        "0"
+                    } else {
+                        "-1"
+                    }
                 }}
                 class={class}
             >
