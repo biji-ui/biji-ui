@@ -293,10 +293,6 @@ const DATA_ATTRS: &[DataAttrRow] = &[
         description: "On day / month / year buttons: present when that cell is part of the current selection.",
     },
     DataAttrRow {
-        name: "data-outside-month",
-        description: "On day buttons: present when the date belongs to an adjacent month (padding cell).",
-    },
-    DataAttrRow {
         name: "data-disabled",
         description: "On day buttons: present when the date is disabled via min_date, max_date, or is_date_disabled.",
     },
@@ -496,7 +492,7 @@ fn MultiMonthCalendar() -> impl IntoView {
     });
 
     let btn = "min-h-[253px] [&_button]:w-full [&_button]:text-sm [&_button]:rounded-md [&_button]:transition-colors [&_button:hover]:bg-muted [&_button[data-selected]]:bg-primary [&_button[data-selected]]:text-primary-foreground [&_button[data-disabled]]:opacity-30 [&_button[data-disabled]]:pointer-events-none";
-    let day = "grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold [&_button[data-outside-month]]:text-muted-foreground/40 [&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground";
+    let day = "grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold[&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground";
     let month = "content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-month]]:font-bold";
     let year = "content-start grid grid-cols-5 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold";
     let head = "grid grid-cols-7 text-center text-xs text-muted-foreground mb-1 [&>div]:py-1";
@@ -686,7 +682,7 @@ fn CalendarShell() -> impl IntoView {
                 <calendar::GridHead class="grid grid-cols-7 text-center text-xs text-muted-foreground mb-1 [&>div]:py-1" />
                 <calendar::GridBody
                     class={btn}
-                    day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold [&_button[data-outside-month]]:text-muted-foreground/40 [&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground"
+                    day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold[&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground"
                     month_class="content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-month]]:font-bold"
                     year_class="content-start grid grid-cols-5 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold"
                 />
