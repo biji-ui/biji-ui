@@ -80,7 +80,7 @@ const ROOT_PROPS: &[PropRow] = &[
     },
     PropRow {
         name: "value",
-        prop_type: "MaybeSignal<Option<f64>>",
+        prop_type: "Signal<Option<f64>>",
         default: "None",
         description: "The current progress value. Accepts a static Some(f64) or a reactive signal. When None, the progress is indeterminate.",
     },
@@ -92,12 +92,20 @@ const ROOT_PROPS: &[PropRow] = &[
     },
 ];
 
-const INDICATOR_PROPS: &[PropRow] = &[PropRow {
-    name: "class",
-    prop_type: "String",
-    default: "\"\"",
-    description: "CSS class applied to the indicator element. Use CSS transform to control the fill width.",
-}];
+const INDICATOR_PROPS: &[PropRow] = &[
+    PropRow {
+        name: "class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied to the indicator element.",
+    },
+    PropRow {
+        name: "style",
+        prop_type: "String",
+        default: "\"\"",
+        description: "Inline style applied to the indicator element. Use a CSS transform (e.g. translateX) or width to control the fill position.",
+    },
+];
 
 const DATA_ATTRS: &[DataAttrRow] = &[
     DataAttrRow {
