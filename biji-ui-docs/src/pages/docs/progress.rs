@@ -18,12 +18,12 @@ use biji_ui::components::progress;
 pub fn MyProgress() -> impl IntoView {
     view! {
         <progress::Root
-            class="relative h-2 w-full overflow-hidden rounded-full bg-secondary"
+            class="overflow-hidden relative w-full h-2 rounded-full bg-secondary"
             value=75.0
             max=100.0
         >
             <progress::Indicator
-                class="h-full w-full flex-1 bg-primary transition-all"
+                class="flex-1 w-full h-full transition-all bg-primary"
                 style="transform: translateX(-25%)"
             />
         </progress::Root>
@@ -41,11 +41,11 @@ pub fn ReactiveProgress() -> impl IntoView {
     view! {
         <div class="space-y-6">
             <progress::Root
-                class="relative h-3 w-full overflow-hidden rounded-full bg-secondary"
+                class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
                 max=100.0
             >
                 <div
-                    class="h-full bg-primary transition-all duration-500 ease-in-out"
+                    class="h-full transition-all duration-500 ease-in-out bg-primary"
                     style={move || format!("width: {}%", value.get())}
                 />
             </progress::Root>
@@ -54,7 +54,7 @@ pub fn ReactiveProgress() -> impl IntoView {
                     .iter()
                     .map(|&s| view! {
                         <button
-                            class="rounded-md px-3 py-1.5 text-sm border border-border hover:bg-muted transition-colors data-[active]:bg-muted data-[active]:font-medium outline-none focus:ring-2 focus:ring-ring"
+                            class="py-1.5 px-3 text-sm rounded-md border transition-colors outline-none focus:ring-2 border-border data-[active]:bg-muted data-[active]:font-medium hover:bg-muted focus:ring-ring"
                             data-active={move || value.get() == s}
                             on:click={move |_| value.set(s)}
                         >
@@ -98,7 +98,7 @@ const INDICATOR_PROPS: &[PropRow] = &[PropRow {
 const DATA_ATTRS: &[DataAttrRow] = &[
     DataAttrRow {
         name: "data-state",
-        description: "\"indeterminate\" when value is None; \"loading\" while in progress; \"complete\" when value equals max. Present on Root and Indicator.",
+        description: "\"indeterminate\" when value is None; \"loading\" while in progress; \"complete\" when value is greater than or equal to max. Present on Root and Indicator.",
     },
     DataAttrRow {
         name: "data-value",
@@ -137,7 +137,7 @@ pub fn ProgressDocPage() -> impl IntoView {
             <SectionHeading title="Example" />
             <p class="mb-4 text-sm text-muted-foreground">
                 "Drive the progress bar reactively with a signal. Place a reactive "
-                <code class="rounded bg-muted px-1 py-0.5 font-mono text-xs">"<div>"</code>
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"<div>"</code>
                 " inside the root as the indicator and update its width via an inline style closure."
             </p>
             <DocPreview>
@@ -165,12 +165,12 @@ pub fn ProgressExample() -> impl IntoView {
             <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">"25%"</p>
                 <progress::Root
-                    class="relative h-3 w-full overflow-hidden rounded-full bg-secondary"
+                    class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
                     value=25.0
                     max=100.0
                 >
                     <progress::Indicator
-                        class="h-full w-full flex-1 bg-primary transition-all"
+                        class="flex-1 w-full h-full transition-all bg-primary"
                         style="transform: translateX(-75%)"
                     />
                 </progress::Root>
@@ -178,12 +178,12 @@ pub fn ProgressExample() -> impl IntoView {
             <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">"60%"</p>
                 <progress::Root
-                    class="relative h-3 w-full overflow-hidden rounded-full bg-secondary"
+                    class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
                     value=60.0
                     max=100.0
                 >
                     <progress::Indicator
-                        class="h-full w-full flex-1 bg-primary transition-all"
+                        class="flex-1 w-full h-full transition-all bg-primary"
                         style="transform: translateX(-40%)"
                     />
                 </progress::Root>
@@ -191,12 +191,12 @@ pub fn ProgressExample() -> impl IntoView {
             <div class="space-y-1">
                 <p class="text-xs text-muted-foreground">"Complete"</p>
                 <progress::Root
-                    class="relative h-3 w-full overflow-hidden rounded-full bg-secondary"
+                    class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
                     value=100.0
                     max=100.0
                 >
                     <progress::Indicator
-                        class="h-full w-full flex-1 bg-primary transition-all"
+                        class="flex-1 w-full h-full transition-all bg-primary"
                         style="transform: translateX(0%)"
                     />
                 </progress::Root>
@@ -215,11 +215,11 @@ pub fn ReactiveProgressExample() -> impl IntoView {
     view! {
         <div class="w-full sm:max-w-[70%] space-y-6">
             <progress::Root
-                class="relative h-3 w-full overflow-hidden rounded-full bg-secondary"
+                class="overflow-hidden relative w-full h-3 rounded-full bg-secondary"
                 max=100.0
             >
                 <div
-                    class="h-full bg-primary transition-all duration-500 ease-in-out"
+                    class="h-full transition-all duration-500 ease-in-out bg-primary"
                     style={move || format!("width: {}%", value.get())}
                 />
             </progress::Root>
@@ -229,7 +229,7 @@ pub fn ReactiveProgressExample() -> impl IntoView {
                     .map(|&s| {
                         view! {
                             <button
-                                class="rounded-md px-3 py-1.5 text-sm border border-border hover:bg-muted transition-colors data-[active]:bg-muted data-[active]:font-medium outline-none focus:ring-2 focus:ring-ring"
+                                class="py-1.5 px-3 text-sm rounded-md border transition-colors outline-none focus:ring-2 border-border data-[active]:bg-muted data-[active]:font-medium hover:bg-muted focus:ring-ring"
                                 data-active={move || value.get() == s}
                                 on:click={move |_| value.set(s)}
                             >
