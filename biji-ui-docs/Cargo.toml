@@ -24,7 +24,7 @@ tower = { version = "0.5", features = ["full"], optional = true }
 tower-http = { version = "0.6", features = ["fs"], optional = true }
 tokio = { version = "1", features = ["full"], optional = true }
 
-biji-ui = { path = "../biji-ui" }
+biji-ui = { path = "../biji-ui", features = ["full"] }
 chrono = { version = "0.4", features = ["wasmbind"] }
 jspackages = { path = "../jspackages" }
 
