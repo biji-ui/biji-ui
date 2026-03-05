@@ -186,6 +186,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 name = "biji-ui"
 version = "0.3.2"
 dependencies = [
+ "chrono",
  "leptos",
  "leptos-use",
  "wasm-bindgen",
@@ -198,6 +199,7 @@ version = "0.3.2"
 dependencies = [
  "axum",
  "biji-ui",
+ "chrono",
  "console_error_panic_hook",
  "jspackages",
  "leptos",
