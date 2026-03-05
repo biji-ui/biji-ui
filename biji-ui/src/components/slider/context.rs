@@ -20,7 +20,11 @@ impl SliderContext {
 
     pub fn set_value_from_pct(&self, pct: f64) {
         let raw = self.min + pct.clamp(0.0, 1.0) * (self.max - self.min);
-        let stepped = ((raw - self.min) / self.step).round() * self.step + self.min;
+        let stepped = if self.step.is_finite() && self.step > 0.0 {
+            ((raw - self.min) / self.step).round() * self.step + self.min
+        } else {
+            raw
+        };
         self.value.set(stepped.clamp(self.min, self.max));
     }
 

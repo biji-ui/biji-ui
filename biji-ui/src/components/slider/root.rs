@@ -19,6 +19,7 @@ pub fn Root(
     #[prop(default = false)] disabled: bool,
     #[prop(optional)] on_value_change: Option<Callback<f64>>,
 ) -> impl IntoView {
+    let (min, max) = if min <= max { (min, max) } else { (max, min) };
     let ctx = SliderContext {
         value: RwSignal::new(value.clamp(min, max)),
         min,
