@@ -33,7 +33,7 @@ pub fn MyCalendar() -> impl IntoView {
                 <calendar::GridBody
                     day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square"
                     month_class="grid grid-cols-4 gap-1 [&_button]:py-2"
-                    year_class="grid grid-cols-4 gap-1 [&_button]:py-2"
+                    year_class="grid grid-cols-5 gap-1 [&_button]:py-2"
                 />
             </calendar::Grid>
         </calendar::Root>
@@ -240,7 +240,7 @@ const GRID_BODY_PROPS: &[PropRow] = &[
         name: "year_class",
         prop_type: "String",
         default: "\"\"",
-        description: "Additional class applied when showing the year picker (view = Year). Apply grid grid-cols-4 here.",
+        description: "Additional class applied when showing the year picker (view = Year). Apply grid grid-cols-5 here for the 5-column decade grid.",
     },
 ];
 
@@ -341,7 +341,7 @@ const KEYBOARD: &[KeyboardRow] = &[
     },
     KeyboardRow {
         key: "PageUp / PageDown",
-        description: "Day: previous/next month. Month: same month, previous/next year. Year: previous/next 12-year window.",
+        description: "Day: previous/next month. Month: same month, previous/next year. Year: previous/next decade.",
     },
     KeyboardRow {
         key: "Enter / Space",
@@ -498,7 +498,7 @@ fn MultiMonthCalendar() -> impl IntoView {
     let btn = "min-h-[253px] [&_button]:w-full [&_button]:text-sm [&_button]:rounded-md [&_button]:transition-colors [&_button:hover]:bg-muted [&_button[data-selected]]:bg-primary [&_button[data-selected]]:text-primary-foreground [&_button[data-disabled]]:opacity-30 [&_button[data-disabled]]:pointer-events-none";
     let day = "grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold [&_button[data-outside-month]]:text-muted-foreground/40 [&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground";
     let month = "content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-month]]:font-bold";
-    let year = "content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold";
+    let year = "content-start grid grid-cols-5 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold";
     let head = "grid grid-cols-7 text-center text-xs text-muted-foreground mb-1 [&>div]:py-1";
 
     view! {
@@ -688,7 +688,7 @@ fn CalendarShell() -> impl IntoView {
                     class={btn}
                     day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold [&_button[data-outside-month]]:text-muted-foreground/40 [&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground"
                     month_class="content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-month]]:font-bold"
-                    year_class="content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold"
+                    year_class="content-start grid grid-cols-5 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold"
                 />
             </calendar::Grid>
         </div>
