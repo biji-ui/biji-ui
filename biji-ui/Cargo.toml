@@ -9,14 +9,17 @@ repository = "https://github.com/biji-ui/biji-ui"
 
 [features]
 default = []
-full = ["accordion", "calendar", "dialog", "menu", "menubar", "tooltip"]
+full = ["accordion", "calendar", "collapsible", "dialog", "menu", "menubar", "progress", "separator", "tooltip"]
 
-accordion = []
-calendar  = ["dep:chrono"]
-dialog    = []
-menu      = ["menubar"]
-menubar   = []
-tooltip   = []
+accordion   = []
+calendar    = ["dep:chrono"]
+collapsible = []
+dialog      = []
+menu        = ["menubar"]
+menubar     = []
+progress    = []
+separator   = []
+tooltip     = []
 
 [dependencies]
 leptos = { version = "0.8" }
