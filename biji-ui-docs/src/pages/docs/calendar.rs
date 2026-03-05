@@ -8,6 +8,12 @@ use crate::components::{
     code::Code,
 };
 
+const INSTALL_CODE: &str = concat!(
+    "biji-ui = { version = \"",
+    env!("CARGO_PKG_VERSION"),
+    "\", features = [\"calendar\"] }",
+);
+
 const USAGE_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::calendar;
 
@@ -360,6 +366,12 @@ pub fn CalendarDocPage() -> impl IntoView {
             <DocPreview>
                 <SingleCalendar />
             </DocPreview>
+            <SectionHeading title="Installation" />
+            <Code
+                class={code_class}
+                code={INSTALL_CODE}
+                language="toml"
+            />
             <SectionHeading title="Usage" />
             <Code class={code_class} code={USAGE_CODE} language="rust" />
             <SectionHeading title="Examples" />

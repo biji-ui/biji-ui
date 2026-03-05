@@ -16,7 +16,7 @@
 //!
 //! ## Quick Start
 //!
-//! ```rust
+//! ```rust,ignore
 //! use leptos::prelude::*;
 //! use biji_ui::components::accordion;
 //!

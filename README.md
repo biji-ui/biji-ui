@@ -12,13 +12,21 @@ Biji UI is inspired by popular headless UI libraries like HeadlessUI for React a
 
 ## Usage
 
-Installation
+### Installation
 
-```bash
-cargo add biji-ui
+Components are opt-in via feature flags. Add only what you need:
+
+```toml
+# Enable specific components
+biji-ui = { version = "0.4", features = ["accordion", "dialog"] }
+
+# Or enable everything
+biji-ui = { version = "0.4", features = ["full"] }
 ```
 
-Example
+Available features: `accordion`, `calendar`, `dialog`, `menu`, `menubar`, `tooltip`, `full`
+
+### Example
 
 ```rust
 use leptos::prelude::*;
@@ -84,3 +92,4 @@ Biji UI | Leptos
 0.1.x   | 0.6.x
 0.2.x   | 0.7.x
 0.3.x   | 0.8.x
+0.4.x   | 0.8.x
