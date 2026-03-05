@@ -6,12 +6,13 @@ import dark from "@shikijs/themes/vesper";
 
 import rust from "@shikijs/langs/rust";
 import bash from "@shikijs/langs/bash";
+import toml from "@shikijs/langs/toml";
 
 import wasm from "shiki/wasm";
 
 const highlighter = await createHighlighterCore({
   themes: [light, dark],
-  langs: [rust, bash],
+  langs: [rust, bash, toml],
   engine: createOnigurumaEngine(wasm),
 });
 
