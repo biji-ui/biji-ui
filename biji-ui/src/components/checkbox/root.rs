@@ -45,6 +45,7 @@ pub fn Root(
         <Provider value={ctx}>
             <button
                 node_ref={ctx.trigger_ref}
+                type="button"
                 role="checkbox"
                 aria-checked={move || ctx.checked.get().aria_checked()}
                 aria-disabled={if ctx.disabled { Some("true") } else { None }}
