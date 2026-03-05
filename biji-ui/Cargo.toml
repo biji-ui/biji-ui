@@ -9,16 +9,20 @@ repository = "https://github.com/biji-ui/biji-ui"
 
 [features]
 default = []
-full = ["accordion", "calendar", "collapsible", "dialog", "menu", "menubar", "progress", "separator", "tooltip"]
+full = ["accordion", "calendar", "checkbox", "collapsible", "dialog", "menu", "menubar", "progress", "radio_group", "separator", "slider", "switch", "tooltip"]
 
 accordion   = []
 calendar    = ["dep:chrono"]
+checkbox    = []
 collapsible = []
 dialog      = []
 menu        = ["menubar"]
 menubar     = []
 progress    = []
+radio_group = []
 separator   = []
+slider      = []
+switch      = []
 tooltip     = []
 
 [dependencies]
@@ -38,6 +42,7 @@ features = [
     "HtmlAnchorElement",
     "HtmlButtonElement",
     "HtmlCollection",
+    "HtmlDivElement",
     "HtmlElement",
     "KeyboardEvent",
     "MouseEvent",

@@ -5,13 +5,17 @@ use leptos_router::{components::*, hooks::use_location};
 
 pub mod accordion;
 pub mod calendar;
+pub mod checkbox;
 pub mod collapsible;
 pub mod dialog;
 pub mod dropdown_menu;
 pub mod getting_started;
 pub mod menubar;
 pub mod progress;
+pub mod radio_group;
 pub mod separator;
+pub mod slider;
+pub mod switch;
 pub mod tooltip;
 
 use biji_ui::components::{
@@ -197,12 +201,16 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
     let components = [
         ("/docs/accordion", "Accordion"),
         ("/docs/calendar", "Calendar"),
+        ("/docs/checkbox", "Checkbox"),
         ("/docs/collapsible", "Collapsible"),
         ("/docs/dialog", "Dialog"),
         ("/docs/dropdown-menu", "Dropdown Menu"),
         ("/docs/menubar", "Menubar"),
         ("/docs/progress", "Progress"),
+        ("/docs/radio-group", "Radio Group"),
         ("/docs/separator", "Separator"),
+        ("/docs/slider", "Slider"),
+        ("/docs/switch", "Switch"),
         ("/docs/tooltip", "Tooltip"),
     ];
 
