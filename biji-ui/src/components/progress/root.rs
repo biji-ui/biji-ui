@@ -16,6 +16,9 @@ impl ProgressContext {
     }
 
     pub fn percentage(&self) -> Option<f64> {
+        if self.max <= 0.0 {
+            return None;
+        }
         self.value.map(|v| (v / self.max * 100.0).clamp(0.0, 100.0))
     }
 }
