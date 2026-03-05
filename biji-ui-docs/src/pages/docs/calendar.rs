@@ -325,7 +325,7 @@ const KEYBOARD: &[KeyboardRow] = &[
     },
     KeyboardRow {
         key: "ArrowUp / ArrowDown",
-        description: "Day: ±1 week. Month: ±4 months (one row). Year: ±4 years (one row).",
+        description: "Day: ±1 week. Month: ±4 months (one row). Year: ±5 years (one row).",
     },
     KeyboardRow {
         key: "Home",
@@ -394,13 +394,13 @@ pub fn CalendarDocPage() -> impl IntoView {
             <Code class={code_class} code={MULTI_MONTH_CODE} language="rust" />
             <h3 class="mt-8 mb-2 text-base font-semibold">"Controlled"</h3>
             <p class="mb-5 text-sm text-muted-foreground">
-                "The "
-                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"value"</code>
+                "The " <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"value"</code>
                 " signal is owned by the parent and can be written to at any time. Components inside "
                 <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"Root"</code>
                 " can also access "
-                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"CalendarContext"</code>
-                " directly to navigate the displayed month alongside the value change."
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">
+                    "CalendarContext"
+                </code> " directly to navigate the displayed month alongside the value change."
             </p>
             <DocPreview>
                 <ControlledCalendar />
@@ -423,8 +423,9 @@ pub fn CalendarDocPage() -> impl IntoView {
             <h3 class="mt-8 mb-2 text-base font-semibold">"Custom disabled dates"</h3>
             <p class="mb-5 text-sm text-muted-foreground">
                 "For arbitrary rules use "
-                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"is_date_disabled"</code>
-                ". The predicate receives each date and returns "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">
+                    "is_date_disabled"
+                </code> ". The predicate receives each date and returns "
                 <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"true"</code>
                 " to disable it. Here weekends (Saturday and Sunday) are disabled."
             </p>
@@ -492,7 +493,7 @@ fn MultiMonthCalendar() -> impl IntoView {
     });
 
     let btn = "min-h-[253px] [&_button]:w-full [&_button]:text-sm [&_button]:rounded-md [&_button]:transition-colors [&_button:hover]:bg-muted [&_button[data-selected]]:bg-primary [&_button[data-selected]]:text-primary-foreground [&_button[data-disabled]]:opacity-30 [&_button[data-disabled]]:pointer-events-none";
-    let day = "grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold[&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground";
+    let day = "grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold [&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground";
     let month = "content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-month]]:font-bold";
     let year = "content-start grid grid-cols-5 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold";
     let head = "grid grid-cols-7 text-center text-xs text-muted-foreground mb-1 [&>div]:py-1";
@@ -575,27 +576,52 @@ fn NavButtons(value: RwSignal<biji_ui::components::calendar::CalendarValue>) -> 
     let btn = "px-3 py-1.5 text-xs font-medium rounded-full border border-border bg-background hover:bg-muted transition-colors cursor-pointer";
 
     view! {
-        <div class="flex flex-wrap justify-center gap-2 w-[272px] mb-4">
-            <button class=btn on:click=move |_| {
-                value.set(CalendarValue::Single(Some(ly)));
-                ctx.placeholder.set(ly.with_day(1).unwrap_or(ly));
-            }>"Last Year"</button>
-            <button class=btn on:click=move |_| {
-                value.set(CalendarValue::Single(Some(lw)));
-                ctx.placeholder.set(lw.with_day(1).unwrap_or(lw));
-            }>"Last Week"</button>
-            <button class=btn on:click=move |_| {
-                value.set(CalendarValue::Single(Some(today)));
-                ctx.placeholder.set(today.with_day(1).unwrap_or(today));
-            }>"Today"</button>
-            <button class=btn on:click=move |_| {
-                value.set(CalendarValue::Single(Some(nw)));
-                ctx.placeholder.set(nw.with_day(1).unwrap_or(nw));
-            }>"Next Week"</button>
-            <button class=btn on:click=move |_| {
-                value.set(CalendarValue::Single(Some(ny)));
-                ctx.placeholder.set(ny.with_day(1).unwrap_or(ny));
-            }>"Next Year"</button>
+        <div class="flex flex-wrap gap-2 justify-center mb-4 w-[272px]">
+            <button
+                class={btn}
+                on:click={move |_| {
+                    value.set(CalendarValue::Single(Some(ly)));
+                    ctx.placeholder.set(ly.with_day(1).unwrap_or(ly));
+                }}
+            >
+                "Last Year"
+            </button>
+            <button
+                class={btn}
+                on:click={move |_| {
+                    value.set(CalendarValue::Single(Some(lw)));
+                    ctx.placeholder.set(lw.with_day(1).unwrap_or(lw));
+                }}
+            >
+                "Last Week"
+            </button>
+            <button
+                class={btn}
+                on:click={move |_| {
+                    value.set(CalendarValue::Single(Some(today)));
+                    ctx.placeholder.set(today.with_day(1).unwrap_or(today));
+                }}
+            >
+                "Today"
+            </button>
+            <button
+                class={btn}
+                on:click={move |_| {
+                    value.set(CalendarValue::Single(Some(nw)));
+                    ctx.placeholder.set(nw.with_day(1).unwrap_or(nw));
+                }}
+            >
+                "Next Week"
+            </button>
+            <button
+                class={btn}
+                on:click={move |_| {
+                    value.set(CalendarValue::Single(Some(ny)));
+                    ctx.placeholder.set(ny.with_day(1).unwrap_or(ny));
+                }}
+            >
+                "Next Year"
+            </button>
         </div>
     }
 }
@@ -682,7 +708,7 @@ fn CalendarShell() -> impl IntoView {
                 <calendar::GridHead class="grid grid-cols-7 text-center text-xs text-muted-foreground mb-1 [&>div]:py-1" />
                 <calendar::GridBody
                     class={btn}
-                    day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold[&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground"
+                    day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold [&_button[data-in-range]]:bg-primary/20 [&_button[data-range-start]]:bg-primary [&_button[data-range-start]]:text-primary-foreground [&_button[data-range-end]]:bg-primary [&_button[data-range-end]]:text-primary-foreground"
                     month_class="content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-month]]:font-bold"
                     year_class="content-start grid grid-cols-5 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold"
                 />
