@@ -23,9 +23,11 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 }
 
 use crate::pages::docs::{
-    DocsPage, accordion::AccordionDocPage, calendar::CalendarDocPage, dialog::DialogDocPage,
+    DocsPage, accordion::AccordionDocPage, calendar::CalendarDocPage,
+    collapsible::CollapsibleDocPage, dialog::DialogDocPage,
     dropdown_menu::DropdownMenuDocPage, getting_started::GettingStartedPage,
-    menubar::MenubarDocPage, tooltip::TooltipDocPage,
+    menubar::MenubarDocPage, progress::ProgressDocPage, separator::SeparatorDocPage,
+    tooltip::TooltipDocPage,
 };
 
 #[component]
@@ -46,9 +48,12 @@ pub fn App() -> impl IntoView {
                         <Route path={path!("getting-started")} view={GettingStartedPage} />
                         <Route path={path!("accordion")} view={AccordionDocPage} />
                         <Route path={path!("calendar")} view={CalendarDocPage} />
+                        <Route path={path!("collapsible")} view={CollapsibleDocPage} />
                         <Route path={path!("dialog")} view={DialogDocPage} />
                         <Route path={path!("dropdown-menu")} view={DropdownMenuDocPage} />
                         <Route path={path!("menubar")} view={MenubarDocPage} />
+                        <Route path={path!("progress")} view={ProgressDocPage} />
+                        <Route path={path!("separator")} view={SeparatorDocPage} />
                         <Route path={path!("tooltip")} view={TooltipDocPage} />
                     </ParentRoute>
                 </Routes>
