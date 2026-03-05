@@ -236,10 +236,6 @@ fn render_day_cell(
             disabled={is_disabled}
             tabindex={move || if !is_disabled && is_tab_target() { 0 } else { -1 }}
             data-today={is_today}
-            data-outside-month={move || {
-                let m = grid_month.get();
-                date.month() != m.month() || date.year() != m.year()
-            }}
             data-disabled={is_disabled}
             data-selected={move || cal_ctx.value.with(|v| v.contains(date))}
             data-in-range={move || {
