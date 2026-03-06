@@ -17,6 +17,7 @@ pub struct RadioGroupContext {
     pub items: RwSignal<HashMap<usize, RadioItemContext>>,
     pub disabled: bool,
     pub(crate) next_id: StoredValue<AtomicUsize>,
+    pub(crate) on_value_change: Option<Callback<String>>,
 }
 
 impl RadioGroupContext {

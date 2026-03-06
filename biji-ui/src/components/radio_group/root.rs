@@ -21,9 +21,8 @@ pub fn Root(
         items: RwSignal::new(Default::default()),
         disabled,
         next_id: StoredValue::new(AtomicUsize::new(0)),
+        on_value_change,
     };
-
-    provide_context(on_value_change);
 
     view! {
         <Provider value={ctx}>
@@ -47,7 +46,6 @@ pub fn Item(
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     let group_ctx = expect_context::<RadioGroupContext>();
-    let on_value_change = use_context::<Option<Callback<String>>>().flatten();
 
     let index = group_ctx.next_index();
     let item_ctx = RadioItemContext {
@@ -69,7 +67,7 @@ pub fn Item(
         }
         let val = item_ctx.value.with_value(|v| v.clone());
         group_ctx.select(val.clone());
-        if let Some(cb) = on_value_change {
+        if let Some(cb) = group_ctx.on_value_change {
             cb.run(val);
         }
     });
@@ -79,6 +77,9 @@ pub fn Item(
     });
 
     let _ = use_event_listener(item_ctx.trigger_ref, keydown, move |evt| {
+        if item_ctx.disabled {
+            return;
+        }
         match evt.key().as_str() {
             "ArrowDown" | "ArrowRight" => {
                 evt.prevent_default();
@@ -86,7 +87,7 @@ pub fn Item(
                     next.focus();
                     let val = next.value.with_value(|v| v.clone());
                     group_ctx.select(val.clone());
-                    if let Some(cb) = on_value_change {
+                    if let Some(cb) = group_ctx.on_value_change {
                         cb.run(val);
                     }
                 }
@@ -97,7 +98,7 @@ pub fn Item(
                     prev.focus();
                     let val = prev.value.with_value(|v| v.clone());
                     group_ctx.select(val.clone());
-                    if let Some(cb) = on_value_change {
+                    if let Some(cb) = group_ctx.on_value_change {
                         cb.run(val);
                     }
                 }
@@ -119,7 +120,9 @@ pub fn Item(
                 data-state={move || if is_checked.get() { "checked" } else { "unchecked" }}
                 data-disabled={item_ctx.disabled}
                 tabindex={move || {
-                    if is_checked.get() {
+                    if item_ctx.disabled {
+                        "-1"
+                    } else if is_checked.get() {
                         "0"
                     } else if group_ctx.value.get().is_none()
                         && group_ctx
