@@ -8,6 +8,7 @@ pub struct SliderContext {
     pub step: f64,
     pub disabled: bool,
     pub track_ref: NodeRef<Div>,
+    pub(crate) on_value_change: Option<Callback<f64>>,
 }
 
 impl SliderContext {
@@ -19,6 +20,9 @@ impl SliderContext {
     }
 
     pub fn set_value_from_pct(&self, pct: f64) {
+        if !pct.is_finite() {
+            return;
+        }
         let raw = self.min + pct.clamp(0.0, 1.0) * (self.max - self.min);
         let stepped = if self.step.is_finite() && self.step > 0.0 {
             ((raw - self.min) / self.step).round() * self.step + self.min

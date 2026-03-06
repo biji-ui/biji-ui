@@ -27,9 +27,8 @@ pub fn Root(
         step,
         disabled,
         track_ref: NodeRef::new(),
+        on_value_change,
     };
-
-    provide_context(on_value_change);
 
     view! {
         <Provider value={ctx}>
@@ -81,7 +80,6 @@ pub fn Range(#[prop(into, optional)] class: String) -> impl IntoView {
 #[component]
 pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
     let ctx = expect_context::<SliderContext>();
-    let on_value_change = use_context::<Option<Callback<f64>>>().flatten();
     let thumb_ref: NodeRef<Div> = NodeRef::new();
     let is_dragging = RwSignal::new(false);
 
@@ -104,7 +102,7 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
             let rect = track.get_bounding_client_rect();
             let pct = (evt.client_x() as f64 - rect.left()) / rect.width();
             ctx.set_value_from_pct(pct);
-            if let Some(cb) = on_value_change {
+            if let Some(cb) = ctx.on_value_change {
                 cb.run(ctx.value.get());
             }
         }
@@ -134,7 +132,7 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
         };
         evt.prevent_default();
         ctx.value.set(new_value.clamp(ctx.min, ctx.max));
-        if let Some(cb) = on_value_change {
+        if let Some(cb) = ctx.on_value_change {
             cb.run(ctx.value.get());
         }
     });
