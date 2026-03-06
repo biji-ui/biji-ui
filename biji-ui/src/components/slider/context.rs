@@ -13,10 +13,13 @@ pub struct SliderContext {
 
 impl SliderContext {
     pub fn percentage(&self) -> f64 {
-        if self.max <= self.min {
+        let value = self.value.get();
+        let min = self.min;
+        let max = self.max;
+        if !value.is_finite() || !min.is_finite() || !max.is_finite() || max <= min {
             return 0.0;
         }
-        ((self.value.get() - self.min) / (self.max - self.min) * 100.0).clamp(0.0, 100.0)
+        ((value - min) / (max - min) * 100.0).clamp(0.0, 100.0)
     }
 
     pub fn set_value_from_pct(&self, pct: f64) {
