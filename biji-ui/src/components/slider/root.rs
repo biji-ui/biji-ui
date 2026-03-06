@@ -90,6 +90,7 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
         evt.prevent_default();
         if let Some(el) = thumb_ref.get() {
             let _ = el.set_pointer_capture(evt.pointer_id());
+            let _ = el.focus();
         }
         is_dragging.set(true);
     });
