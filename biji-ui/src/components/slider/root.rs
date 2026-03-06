@@ -121,12 +121,13 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
         if ctx.disabled {
             return;
         }
+        let step = if ctx.step.is_finite() && ctx.step > 0.0 { ctx.step } else { 1.0 };
         let current = ctx.value.get();
         let new_value = match evt.key().as_str() {
-            "ArrowRight" | "ArrowUp" => current + ctx.step,
-            "ArrowLeft" | "ArrowDown" => current - ctx.step,
-            "PageUp" => current + ctx.step * 10.0,
-            "PageDown" => current - ctx.step * 10.0,
+            "ArrowRight" | "ArrowUp" => current + step,
+            "ArrowLeft" | "ArrowDown" => current - step,
+            "PageUp" => current + step * 10.0,
+            "PageDown" => current - step * 10.0,
             "Home" => ctx.min,
             "End" => ctx.max,
             _ => return,
