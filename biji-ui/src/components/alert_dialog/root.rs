@@ -1,9 +1,9 @@
 use std::{
-    sync::atomic::{AtomicUsize, Ordering},
+    sync::{Arc, Mutex, atomic::{AtomicUsize, Ordering}},
     time::Duration,
 };
 
-use leptos::{context::Provider, ev::click, prelude::*};
+use leptos::{context::Provider, ev::click, leptos_dom::helpers::TimeoutHandle, prelude::*};
 use leptos_use::use_event_listener;
 use wasm_bindgen::JsCast;
 
@@ -115,10 +115,18 @@ pub fn Content(
     let ctx = expect_context::<AlertDialogContext>();
     let content_ref = ctx.content_ref;
 
-    let _focus_eff = RenderEffect::new(move |_| {
+    let focus_handle: Arc<Mutex<Option<TimeoutHandle>>> = Arc::new(Mutex::new(None));
+    let focus_handle_cleanup = Arc::clone(&focus_handle);
+    let focus_eff = RenderEffect::new(move |_| {
+        // Cancel any pending focus timeout before scheduling a new one.
+        if let Some(h) = focus_handle.lock().unwrap().take() {
+            h.clear();
+        }
         if ctx.open.get() {
-            let _ = leptos::leptos_dom::helpers::set_timeout_with_handle(
+            let fh = Arc::clone(&focus_handle);
+            let h = leptos::leptos_dom::helpers::set_timeout_with_handle(
                 move || {
+                    *fh.lock().unwrap() = None;
                     if let Some(cancel) = ctx.cancel_ref.get() {
                         let _ = cancel.focus();
                     } else if let Some(el) = content_ref.get() {
@@ -126,8 +134,16 @@ pub fn Content(
                     }
                 },
                 Duration::from_millis(10),
-            );
+            )
+            .expect("set_timeout in alert_dialog focus");
+            *focus_handle.lock().unwrap() = Some(h);
         }
+    });
+    on_cleanup(move || {
+        if let Some(h) = focus_handle_cleanup.lock().unwrap().take() {
+            h.clear();
+        }
+        drop(focus_eff);
     });
 
     let _ = use_event_listener(content_ref, leptos::ev::keydown, move |evt| {
@@ -146,10 +162,6 @@ pub fn Content(
             }
             _ => {}
         }
-    });
-
-    on_cleanup(move || {
-        drop(_focus_eff);
     });
 
     view! {
