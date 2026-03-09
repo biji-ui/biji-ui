@@ -4,6 +4,7 @@ use leptos::{portal::Portal, prelude::*};
 
 use crate::components::{
     api_table::{DataAttrRow, DataAttrsTable, KeyboardRow, KeyboardTable, PropRow, PropsTable, SectionHeading},
+    button::{Variant, btn},
     code::Code,
 };
 
@@ -230,7 +231,7 @@ pub fn AlertDialogExample() -> impl IntoView {
 
     view! {
         <alert_dialog::Root hide_delay={Duration::from_millis(200)}>
-            <alert_dialog::Trigger class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-sm hover:bg-destructive/90 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <alert_dialog::Trigger class={btn(Variant::Destructive)}>
                 "Delete account"
             </alert_dialog::Trigger>
             <Portal>
@@ -251,10 +252,10 @@ pub fn AlertDialogExample() -> impl IntoView {
                         "This action cannot be undone. This will permanently delete your account and remove your data from our servers."
                     </alert_dialog::Description>
                     <div class="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
-                        <alert_dialog::Cancel class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                        <alert_dialog::Cancel class={btn(Variant::Outline)}>
                             "Cancel"
                         </alert_dialog::Cancel>
-                        <alert_dialog::Action class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                        <alert_dialog::Action class={btn(Variant::Destructive)}>
                             "Yes, delete account"
                         </alert_dialog::Action>
                     </div>

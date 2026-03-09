@@ -5,6 +5,7 @@ use crate::components::{
         DataAttrRow, DataAttrsTable, KeyboardRow, KeyboardTable, PropRow, PropsTable,
         SectionHeading,
     },
+    button::{Variant, btn},
     code::Code,
 };
 
@@ -274,7 +275,7 @@ pub fn PopoverExample() -> impl IntoView {
     view! {
         <div class="flex flex-wrap gap-6 justify-center">
             <popover::Root positioning={popover::Positioning::Bottom}>
-                <popover::Trigger class="inline-flex justify-center items-center py-2 px-4 text-sm font-medium rounded-md border shadow-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none border-border bg-background hover:bg-accent hover:text-accent-foreground focus:ring-ring">
+                <popover::Trigger class={btn(Variant::Outline)}>
                     "Open popover"
                 </popover::Trigger>
                 <Portal>
