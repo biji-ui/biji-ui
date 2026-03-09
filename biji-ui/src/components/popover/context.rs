@@ -5,51 +5,52 @@ use leptos::{
     prelude::*,
 };
 
-use crate::{components::tooltip::singleton, utils::positioning::{AvoidCollisions, Positioning}};
+use crate::utils::positioning::{AvoidCollisions, Positioning};
 
 #[derive(Copy, Clone)]
-pub struct TooltipContext {
+pub struct PopoverContext {
     pub trigger_ref: NodeRef<Button>,
     pub content_ref: NodeRef<Div>,
     pub open: RwSignal<bool>,
-    pub pointer_inside_trigger: RwSignal<bool>,
-    pub pointer_inside_content: RwSignal<bool>,
     pub hide_delay: Duration,
     pub positioning: Positioning,
     pub arrow_size: i32,
-    pub tooltip_id: StoredValue<String>,
-    /// Numeric ID used by the singleton registry to enforce one-at-a-time.
-    pub numeric_id: usize,
+    pub popover_id: StoredValue<String>,
     pub avoid_collisions: AvoidCollisions,
+    pub auto_focus: bool,
+    pub(crate) on_open_change: Option<Callback<bool>>,
 }
 
-impl Default for TooltipContext {
+impl Default for PopoverContext {
     fn default() -> Self {
         Self {
             trigger_ref: NodeRef::default(),
             content_ref: NodeRef::default(),
             open: RwSignal::new(false),
-            pointer_inside_trigger: RwSignal::new(false),
-            pointer_inside_content: RwSignal::new(false),
             hide_delay: Duration::from_millis(200),
-            positioning: Positioning::default(),
+            positioning: Positioning::Bottom,
             arrow_size: 8,
-            tooltip_id: StoredValue::new(String::new()),
-            numeric_id: 0,
+            popover_id: StoredValue::new(String::new()),
             avoid_collisions: AvoidCollisions::Flip,
+            auto_focus: true,
+            on_open_change: None,
         }
     }
 }
 
-impl TooltipContext {
+impl PopoverContext {
     pub fn open(&self) {
-        singleton::activate(self.numeric_id);
         self.open.set(true);
+        if let Some(cb) = self.on_open_change {
+            cb.run(true);
+        }
     }
 
     pub fn close(&self) {
-        singleton::deactivate(self.numeric_id);
         self.open.set(false);
+        if let Some(cb) = self.on_open_change {
+            cb.run(false);
+        }
     }
 
     pub fn toggle(&self) {
@@ -58,5 +59,9 @@ impl TooltipContext {
         } else {
             self.open();
         }
+    }
+
+    pub fn data_state(&self) -> &'static str {
+        if self.open.get() { "open" } else { "closed" }
     }
 }
