@@ -5,7 +5,7 @@ use leptos::{
     prelude::*,
 };
 
-use crate::utils::positioning::Positioning;
+use crate::utils::positioning::{AvoidCollisions, Positioning};
 
 #[derive(Copy, Clone)]
 pub struct TooltipContext {
@@ -18,6 +18,7 @@ pub struct TooltipContext {
     pub positioning: Positioning,
     pub arrow_size: i32,
     pub tooltip_id: StoredValue<String>,
+    pub avoid_collisions: AvoidCollisions,
 }
 
 impl Default for TooltipContext {
@@ -32,6 +33,7 @@ impl Default for TooltipContext {
             positioning: Positioning::default(),
             arrow_size: 8,
             tooltip_id: StoredValue::new(String::new()),
+            avoid_collisions: AvoidCollisions::Flip,
         }
     }
 }
