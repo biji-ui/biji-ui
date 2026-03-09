@@ -266,6 +266,7 @@ pub fn Content(
             node_ref={content_ref}
             attr:id={ctx.popover_id.get_value()}
             attr:role="dialog"
+            attr:tabindex="-1"
         >
             {children()}
         </CustomAnimatedShow>
