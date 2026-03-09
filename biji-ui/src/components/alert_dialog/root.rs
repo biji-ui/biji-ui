@@ -175,6 +175,7 @@ pub fn Content(
             attr:aria-modal="true"
             attr:aria-labelledby={ctx.title_id.get_value()}
             attr:aria-describedby={ctx.desc_id.get_value()}
+            attr:tabindex="-1"
         >
             {children()}
         </CustomAnimatedShow>
