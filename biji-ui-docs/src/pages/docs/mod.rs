@@ -4,6 +4,7 @@ use leptos::{portal::Portal, prelude::*};
 use leptos_router::{components::*, hooks::use_location};
 
 pub mod accordion;
+pub mod alert_dialog;
 pub mod calendar;
 pub mod checkbox;
 pub mod collapsible;
@@ -11,6 +12,7 @@ pub mod dialog;
 pub mod dropdown_menu;
 pub mod getting_started;
 pub mod menubar;
+pub mod popover;
 pub mod progress;
 pub mod radio_group;
 pub mod separator;
@@ -200,12 +202,14 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
 
     let components = [
         ("/docs/accordion", "Accordion"),
+        ("/docs/alert-dialog", "Alert Dialog"),
         ("/docs/calendar", "Calendar"),
         ("/docs/checkbox", "Checkbox"),
         ("/docs/collapsible", "Collapsible"),
         ("/docs/dialog", "Dialog"),
         ("/docs/dropdown-menu", "Dropdown Menu"),
         ("/docs/menubar", "Menubar"),
+        ("/docs/popover", "Popover"),
         ("/docs/progress", "Progress"),
         ("/docs/radio-group", "Radio Group"),
         ("/docs/separator", "Separator"),
