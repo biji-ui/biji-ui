@@ -73,6 +73,24 @@ pub fn TriggerEvents(children: Children) -> impl IntoView {
         let mut trigger_points =
             get_points_from_el(&(trigger_top, trigger_right, trigger_bottom, trigger_left));
 
+        // Use use_element_bounding signals only as reactive dependencies so this
+        // closure re-runs when the content mounts/unmounts.
+        let _ = content_width.get();
+        let _ = content_height.get();
+
+        // Read actual dimensions via offsetWidth/offsetHeight — identical to the
+        // approach in Content — so that CSS scale transforms (e.g. scale-95 during
+        // the open animation) do not produce shrunken values.
+        let (cw, ch) = tooltip_ctx
+            .content_ref
+            .get_untracked()
+            .and_then(|el| {
+                let node: &web_sys::Node = el.as_ref();
+                node.dyn_ref::<web_sys::HtmlElement>()
+                    .map(|h| (h.offset_width() as f64, h.offset_height() as f64))
+            })
+            .unwrap_or((0.0, 0.0));
+
         let vp_w = web_sys::window()
             .and_then(|w| w.inner_width().ok())
             .and_then(|v| v.as_f64())
@@ -82,8 +100,8 @@ pub fn TriggerEvents(children: Children) -> impl IntoView {
             .and_then(|v| v.as_f64())
             .unwrap_or(1080.0);
         let eff = tooltip_ctx.positioning.effective_positioning(
-            content_width.get(),
-            content_height.get(),
+            cw,
+            ch,
             trigger_top.get(),
             trigger_left.get(),
             trigger_width.get(),
@@ -98,19 +116,16 @@ pub fn TriggerEvents(children: Children) -> impl IntoView {
             trigger_left.get(),
             trigger_width.get(),
             trigger_height.get(),
-            content_height.get(),
-            content_width.get(),
+            ch,
+            cw,
             tooltip_ctx.arrow_size as f64,
         );
 
         let mut content_points = vec![
             (content_pos.1, content_pos.0),
-            (content_pos.1 + content_width.get(), content_pos.0),
-            (
-                content_pos.1 + content_width.get(),
-                content_pos.0 + content_height.get(),
-            ),
-            (content_pos.1, content_pos.0 + content_height.get()),
+            (content_pos.1 + cw, content_pos.0),
+            (content_pos.1 + cw, content_pos.0 + ch),
+            (content_pos.1, content_pos.0 + ch),
         ];
 
         trigger_points.append(&mut content_points);
