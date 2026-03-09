@@ -1,6 +1,9 @@
 #[cfg(feature = "accordion")]
 pub mod accordion;
 
+#[cfg(feature = "alert_dialog")]
+pub mod alert_dialog;
+
 #[cfg(feature = "calendar")]
 pub mod calendar;
 
@@ -18,6 +21,9 @@ pub mod menu;
 
 #[cfg(feature = "menubar")]
 pub mod menubar;
+
+#[cfg(feature = "popover")]
+pub mod popover;
 
 #[cfg(feature = "progress")]
 pub mod progress;
