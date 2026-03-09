@@ -54,6 +54,12 @@ const ROOT_PROPS: &[PropRow] = &[
         default: "200ms",
         description: "How long to wait before unmounting the content after the pointer leaves. Should match your CSS transition duration.",
     },
+    PropRow {
+        name: "avoid_collisions",
+        prop_type: "AvoidCollisions",
+        default: "Flip",
+        description: "How the tooltip reacts when it would overflow the viewport.",
+    },
 ];
 
 const TRIGGER_PROPS: &[PropRow] = &[PropRow {
@@ -68,7 +74,7 @@ const CONTENT_PROPS: &[PropRow] = &[
         name: "class",
         prop_type: "String",
         default: "\"\"",
-        description: "CSS class applied in both visible and hidden states.",
+        description: "CSS class applied in both visible and hidden states. Use `transition` rather than `transition-all` to avoid animating position changes. Add `origin-[var(--biji-transform-origin)]` to scale animations from the trigger direction.",
     },
     PropRow {
         name: "show_class",
@@ -90,6 +96,12 @@ const ARROW_PROPS: &[PropRow] = &[PropRow {
     default: "\"\"",
     description: "CSS class applied to the arrow indicator element. Position and rotation are handled automatically.",
 }];
+
+const AVOID_COLLISIONS_PROPS: &[PropRow] = &[
+    PropRow { name: "Flip", prop_type: "AvoidCollisions", default: "default", description: "Keeps the preferred side. Flips to the opposite side if it does not fit. If neither fits, uses whichever has more space." },
+    PropRow { name: "AutoPlace", prop_type: "AvoidCollisions", default: "", description: "Always places the tooltip on the side with the most available space, regardless of the preferred positioning." },
+    PropRow { name: "None", prop_type: "AvoidCollisions", default: "", description: "No collision detection. Always uses the exact positioning specified." },
+];
 
 const POSITIONING_PROPS: &[PropRow] = &[
     PropRow { name: "TopStart", prop_type: "Positioning", default: "", description: "Above the trigger, aligned to its left edge." },
@@ -135,6 +147,7 @@ pub fn TooltipDocPage() -> impl IntoView {
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
             <PropsTable title="Arrow" rows={ARROW_PROPS} />
+            <PropsTable title="AvoidCollisions" rows={AVOID_COLLISIONS_PROPS} />
             <PropsTable title="Positioning" rows={POSITIONING_PROPS} />
         </DocPage>
     }
