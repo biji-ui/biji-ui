@@ -4,6 +4,7 @@ use leptos::{portal::Portal, prelude::*};
 
 use crate::components::{
     api_table::{KeyboardRow, KeyboardTable, PropRow, PropsTable, SectionHeading},
+    button::{Variant, btn},
     code::Code,
 };
 
@@ -179,7 +180,7 @@ pub fn DialogExample() -> impl IntoView {
 
     view! {
         <dialog::Root hide_delay={Duration::from_millis(200)}>
-            <dialog::Trigger class="rounded bg-indigo-600 px-4 py-2 font-bold text-white hover:bg-indigo-500">
+            <dialog::Trigger class={btn(Variant::Default)}>
                 "Confirm payment"
             </dialog::Trigger>
             <Portal>

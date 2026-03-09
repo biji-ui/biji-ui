@@ -2,6 +2,7 @@ use leptos::{portal::Portal, prelude::*};
 
 use crate::components::{
     api_table::{PropRow, PropsTable, SectionHeading},
+    button::{Variant, btn},
     code::Code,
 };
 
@@ -170,7 +171,7 @@ pub fn Content() -> impl IntoView {
     }
 }
 
-pub const BUTTON_BASE_STYLE: &str = "inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium whitespace-nowrap text-primary-foreground ring-offset-background transition-colors focus-visible:outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+pub const BUTTON_BASE_STYLE: &str = btn(Variant::Default);
 
 #[component]
 pub fn TooltipExample() -> impl IntoView {
