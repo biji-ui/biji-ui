@@ -1,4 +1,5 @@
 pub mod context;
+pub(crate) mod singleton;
 pub mod tooltip;
 
 pub use crate::utils::positioning::{AvoidCollisions, Positioning};

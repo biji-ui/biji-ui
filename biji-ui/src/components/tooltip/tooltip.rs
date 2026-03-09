@@ -9,7 +9,7 @@ use wasm_bindgen::JsCast;
 
 use crate::{
     cn,
-    components::tooltip::context::TooltipContext,
+    components::tooltip::{context::TooltipContext, singleton},
     custom_animated_show::CustomAnimatedShow,
     utils::{
         polygon::{get_points_from_el, make_hull, point_in_polygon},
@@ -19,9 +19,9 @@ use crate::{
 
 static TOOLTIP_ID_COUNTER: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
-fn next_tooltip_id() -> String {
+fn next_tooltip_id() -> (usize, String) {
     let id = TOOLTIP_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    format!("biji-tooltip-{}", id)
+    (id, format!("biji-tooltip-{}", id))
 }
 
 #[component]
@@ -187,13 +187,21 @@ pub fn Root(
     #[prop(default = Positioning::default())] positioning: Positioning,
     #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
 ) -> impl IntoView {
+    let (numeric_id, string_id) = next_tooltip_id();
+    let open_signal = RwSignal::new(false);
+
     let ctx = TooltipContext {
         hide_delay,
         positioning,
         avoid_collisions,
-        tooltip_id: StoredValue::new(next_tooltip_id()),
+        numeric_id,
+        tooltip_id: StoredValue::new(string_id),
+        open: open_signal,
         ..TooltipContext::default()
     };
+
+    singleton::register(numeric_id, move || open_signal.set(false));
+    on_cleanup(move || singleton::unregister(numeric_id));
 
     view! {
         <Provider value={ctx}>
