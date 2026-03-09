@@ -5,7 +5,7 @@ use leptos::{
     prelude::*,
 };
 
-use crate::utils::positioning::{AvoidCollisions, Positioning};
+use crate::{components::tooltip::singleton, utils::positioning::{AvoidCollisions, Positioning}};
 
 #[derive(Copy, Clone)]
 pub struct TooltipContext {
@@ -18,6 +18,8 @@ pub struct TooltipContext {
     pub positioning: Positioning,
     pub arrow_size: i32,
     pub tooltip_id: StoredValue<String>,
+    /// Numeric ID used by the singleton registry to enforce one-at-a-time.
+    pub numeric_id: usize,
     pub avoid_collisions: AvoidCollisions,
 }
 
@@ -33,6 +35,7 @@ impl Default for TooltipContext {
             positioning: Positioning::default(),
             arrow_size: 8,
             tooltip_id: StoredValue::new(String::new()),
+            numeric_id: 0,
             avoid_collisions: AvoidCollisions::Flip,
         }
     }
@@ -40,10 +43,12 @@ impl Default for TooltipContext {
 
 impl TooltipContext {
     pub fn open(&self) {
+        singleton::activate(self.numeric_id);
         self.open.set(true);
     }
 
     pub fn close(&self) {
+        singleton::deactivate(self.numeric_id);
         self.open.set(false);
     }
 
