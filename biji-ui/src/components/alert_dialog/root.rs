@@ -7,7 +7,9 @@ use leptos::{context::Provider, ev::click, prelude::*};
 use leptos_use::use_event_listener;
 use wasm_bindgen::JsCast;
 
-use crate::{cn, custom_animated_show::CustomAnimatedShow, utils::prevent_scroll::use_prevent_scroll};
+use crate::{
+    cn, custom_animated_show::CustomAnimatedShow, utils::prevent_scroll::use_prevent_scroll,
+};
 
 use super::context::AlertDialogContext;
 
@@ -54,10 +56,7 @@ pub fn Root(
 fn RootEvents(children: Children) -> impl IntoView {
     let ctx = expect_context::<AlertDialogContext>();
 
-    let eff = use_prevent_scroll(
-        move || ctx.prevent_scroll && ctx.open.get(),
-        ctx.hide_delay,
-    );
+    let eff = use_prevent_scroll(move || ctx.prevent_scroll && ctx.open.get(), ctx.hide_delay);
 
     on_cleanup(move || {
         drop(eff);

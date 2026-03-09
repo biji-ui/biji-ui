@@ -11,6 +11,7 @@ use leptos_use::{
 use wasm_bindgen::JsCast;
 
 use crate::{
+    cn,
     custom_animated_show::CustomAnimatedShow,
     items::{Focus, ManageFocus, NavigateItems, Toggle},
     utils::{positioning::{AvoidCollisions, Positioning}, prevent_scroll::use_prevent_scroll},
@@ -285,7 +286,7 @@ pub fn MenuContent(
         ..
     } = use_element_bounding(menu_ctx.trigger_ref);
 
-    let style = move || {
+    let style_signal = Signal::derive(move || {
         let raw_cw = *content_width.read();
         let raw_ch = *content_height.read();
         let _ = menu_ctx.open.get();
@@ -351,18 +352,19 @@ pub fn MenuContent(
             cw,
             0.0,
         )
-    };
+    });
 
     view! {
         <CustomAnimatedShow
             when={menu_ctx.open}
-            show_class={show_class.clone()}
-            hide_class={hide_class.clone()}
+            show_class={cn!(class, show_class)}
+            hide_class={cn!(class, hide_class)}
             hide_delay={menu_ctx.hide_delay}
+            style_signal={style_signal}
+            node_ref={content_ref}
+            attr:role="menu"
         >
-            <div node_ref={content_ref} class={class.clone()} style={style} role="menu">
-                {children()}
-            </div>
+            {children()}
         </CustomAnimatedShow>
     }
 }
