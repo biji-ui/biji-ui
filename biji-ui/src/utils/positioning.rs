@@ -1,3 +1,32 @@
+/// Controls how positioned overlays react when they would overflow the viewport.
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
+pub enum AvoidCollisions {
+    /// Keeps the preferred side. Flips to the opposite side when there is not
+    /// enough space. If neither side fits, uses whichever has more available space.
+    #[default]
+    Flip,
+    /// Always places the overlay on the side with the most available space,
+    /// regardless of the preferred positioning.
+    AutoPlace,
+    /// No collision detection. Always uses the exact `Positioning` specified.
+    None,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum MainSide {
+    Top,
+    Bottom,
+    Left,
+    Right,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum Alignment {
+    Center,
+    Start,
+    End,
+}
+
 /// Specifies where content should be positioned relative to a trigger element.
 ///
 /// Each variant places the content along one of the four edges of the trigger,
@@ -204,9 +233,141 @@ impl Positioning {
             arrow_size,
         );
         format!(
-            "position: fixed; top: {}px; left: {}px; --biji-tooltip-arrow-top: {}px; --biji-tooltip-arrow-left: {}px; --biji-tooltip-arrow-rotation: {}deg;",
-            position.0, position.1, arrow_position.0, arrow_position.1, arrow_position.2
+            "position: fixed; top: {}px; left: {}px; --biji-transform-origin: {}; --biji-tooltip-arrow-top: {}px; --biji-tooltip-arrow-left: {}px; --biji-tooltip-arrow-rotation: {}deg;",
+            position.0, position.1, self.transform_origin(), arrow_position.0, arrow_position.1, arrow_position.2
         )
+    }
+
+    fn main_side(self) -> MainSide {
+        match self {
+            Positioning::Top | Positioning::TopStart | Positioning::TopEnd => MainSide::Top,
+            Positioning::Right | Positioning::RightStart | Positioning::RightEnd => MainSide::Right,
+            Positioning::Bottom | Positioning::BottomStart | Positioning::BottomEnd => {
+                MainSide::Bottom
+            }
+            Positioning::Left | Positioning::LeftStart | Positioning::LeftEnd => MainSide::Left,
+        }
+    }
+
+    fn alignment(self) -> Alignment {
+        match self {
+            Positioning::TopStart
+            | Positioning::RightStart
+            | Positioning::BottomStart
+            | Positioning::LeftStart => Alignment::Start,
+            Positioning::TopEnd
+            | Positioning::RightEnd
+            | Positioning::BottomEnd
+            | Positioning::LeftEnd => Alignment::End,
+            _ => Alignment::Center,
+        }
+    }
+
+    fn with_main_side(self, side: MainSide) -> Positioning {
+        match (side, self.alignment()) {
+            (MainSide::Top, Alignment::Center) => Positioning::Top,
+            (MainSide::Top, Alignment::Start) => Positioning::TopStart,
+            (MainSide::Top, Alignment::End) => Positioning::TopEnd,
+            (MainSide::Right, Alignment::Center) => Positioning::Right,
+            (MainSide::Right, Alignment::Start) => Positioning::RightStart,
+            (MainSide::Right, Alignment::End) => Positioning::RightEnd,
+            (MainSide::Bottom, Alignment::Center) => Positioning::Bottom,
+            (MainSide::Bottom, Alignment::Start) => Positioning::BottomStart,
+            (MainSide::Bottom, Alignment::End) => Positioning::BottomEnd,
+            (MainSide::Left, Alignment::Center) => Positioning::Left,
+            (MainSide::Left, Alignment::Start) => Positioning::LeftStart,
+            (MainSide::Left, Alignment::End) => Positioning::LeftEnd,
+        }
+    }
+
+    fn opposite(side: MainSide) -> MainSide {
+        match side {
+            MainSide::Top => MainSide::Bottom,
+            MainSide::Bottom => MainSide::Top,
+            MainSide::Left => MainSide::Right,
+            MainSide::Right => MainSide::Left,
+        }
+    }
+
+    /// Return the effective `Positioning` to use after applying collision avoidance.
+    ///
+    /// Computes which side actually has enough room given the current viewport,
+    /// trigger rect, and content dimensions. The result can then be passed to
+    /// `calculate_position_style` or `calculate_position_style_simple`.
+    pub fn effective_positioning(
+        self,
+        content_width: f64,
+        content_height: f64,
+        trigger_top: f64,
+        trigger_left: f64,
+        trigger_width: f64,
+        trigger_height: f64,
+        offset: f64,
+        viewport_width: f64,
+        viewport_height: f64,
+        avoid: AvoidCollisions,
+    ) -> Positioning {
+        if avoid == AvoidCollisions::None {
+            return self;
+        }
+
+        let space_top = trigger_top - offset;
+        let space_bottom = viewport_height - (trigger_top + trigger_height) - offset;
+        let space_left = trigger_left - offset;
+        let space_right = viewport_width - (trigger_left + trigger_width) - offset;
+
+        let space_for = |side: MainSide| match side {
+            MainSide::Top => space_top,
+            MainSide::Bottom => space_bottom,
+            MainSide::Left => space_left,
+            MainSide::Right => space_right,
+        };
+
+        let required_for = |side: MainSide| match side {
+            MainSide::Top | MainSide::Bottom => content_height,
+            MainSide::Left | MainSide::Right => content_width,
+        };
+
+        match avoid {
+            AvoidCollisions::Flip => {
+                let preferred = self.main_side();
+                if space_for(preferred) >= required_for(preferred) {
+                    return self;
+                }
+                let opposite = Self::opposite(preferred);
+                if space_for(opposite) >= required_for(opposite) {
+                    return self.with_main_side(opposite);
+                }
+                // Neither fits — pick whichever has more space.
+                if space_for(opposite) > space_for(preferred) {
+                    self.with_main_side(opposite)
+                } else {
+                    self
+                }
+            }
+            AvoidCollisions::AutoPlace => {
+                let sides = [
+                    MainSide::Top,
+                    MainSide::Bottom,
+                    MainSide::Left,
+                    MainSide::Right,
+                ];
+                // Pick the side with the greatest surplus (available minus needed).
+                let best = sides
+                    .iter()
+                    .copied()
+                    .max_by(|&a, &b| {
+                        let surplus_a = space_for(a) - required_for(a);
+                        let surplus_b = space_for(b) - required_for(b);
+                        surplus_a
+                            .partial_cmp(&surplus_b)
+                            .unwrap_or(std::cmp::Ordering::Equal)
+                    })
+                    .unwrap_or(self.main_side());
+                self.with_main_side(best)
+            }
+            AvoidCollisions::None => unreachable!("None is handled by early return above"),
+        }
     }
 
     /// Calculate position as a simple CSS `style` attribute string without arrow variables.
@@ -233,8 +394,30 @@ impl Positioning {
             offset,
         );
         format!(
-            "position: fixed; top: {}px; left: {}px;",
-            position.0, position.1
+            "position: fixed; top: {}px; left: {}px; --biji-transform-origin: {};",
+            position.0, position.1, self.transform_origin()
         )
+    }
+
+    /// Returns the CSS `transform-origin` value that points toward the trigger.
+    ///
+    /// Use via `origin-[var(--biji-transform-origin)]` (Tailwind arbitrary value)
+    /// or `transform-origin: var(--biji-transform-origin)` in plain CSS to make
+    /// scale animations emanate from the trigger side of the overlay.
+    pub fn transform_origin(self) -> &'static str {
+        match (self.main_side(), self.alignment()) {
+            (MainSide::Top, Alignment::Start) => "bottom left",
+            (MainSide::Top, Alignment::End) => "bottom right",
+            (MainSide::Top, Alignment::Center) => "bottom center",
+            (MainSide::Bottom, Alignment::Start) => "top left",
+            (MainSide::Bottom, Alignment::End) => "top right",
+            (MainSide::Bottom, Alignment::Center) => "top center",
+            (MainSide::Left, Alignment::Start) => "right top",
+            (MainSide::Left, Alignment::End) => "right bottom",
+            (MainSide::Left, Alignment::Center) => "right center",
+            (MainSide::Right, Alignment::Start) => "left top",
+            (MainSide::Right, Alignment::End) => "left bottom",
+            (MainSide::Right, Alignment::Center) => "left center",
+        }
     }
 }

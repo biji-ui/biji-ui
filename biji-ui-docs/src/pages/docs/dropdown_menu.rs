@@ -84,6 +84,12 @@ const MENU_PROPS: &[PropRow] = &[
         description: "How long to wait before unmounting the content after closing begins. Should match your CSS transition duration.",
     },
     PropRow {
+        name: "avoid_collisions",
+        prop_type: "AvoidCollisions",
+        default: "Flip",
+        description: "How the menu reacts when it would overflow the viewport.",
+    },
+    PropRow {
         name: "prevent_scroll",
         prop_type: "bool",
         default: "false",
@@ -97,6 +103,27 @@ const TRIGGER_PROPS: &[PropRow] = &[PropRow {
     default: "\"\"",
     description: "CSS class applied to the trigger element.",
 }];
+
+const POSITIONING_PROPS: &[PropRow] = &[
+    PropRow { name: "TopStart", prop_type: "Positioning", default: "", description: "Above the trigger, aligned to its left edge." },
+    PropRow { name: "Top", prop_type: "Positioning", default: "", description: "Above the trigger, centered." },
+    PropRow { name: "TopEnd", prop_type: "Positioning", default: "", description: "Above the trigger, aligned to its right edge." },
+    PropRow { name: "RightStart", prop_type: "Positioning", default: "", description: "To the right of the trigger, aligned to its top edge." },
+    PropRow { name: "Right", prop_type: "Positioning", default: "", description: "To the right of the trigger, centered." },
+    PropRow { name: "RightEnd", prop_type: "Positioning", default: "", description: "To the right of the trigger, aligned to its bottom edge." },
+    PropRow { name: "BottomStart", prop_type: "Positioning", default: "default", description: "Below the trigger, aligned to its left edge." },
+    PropRow { name: "Bottom", prop_type: "Positioning", default: "", description: "Below the trigger, centered." },
+    PropRow { name: "BottomEnd", prop_type: "Positioning", default: "", description: "Below the trigger, aligned to its right edge." },
+    PropRow { name: "LeftStart", prop_type: "Positioning", default: "", description: "To the left of the trigger, aligned to its top edge." },
+    PropRow { name: "Left", prop_type: "Positioning", default: "", description: "To the left of the trigger, centered." },
+    PropRow { name: "LeftEnd", prop_type: "Positioning", default: "", description: "To the left of the trigger, aligned to its bottom edge." },
+];
+
+const AVOID_COLLISIONS_PROPS: &[PropRow] = &[
+    PropRow { name: "Flip", prop_type: "AvoidCollisions", default: "default", description: "Keeps the preferred side. Flips to the opposite side if it does not fit. If neither fits, uses whichever has more space." },
+    PropRow { name: "AutoPlace", prop_type: "AvoidCollisions", default: "", description: "Always places the menu on the side with the most available space, regardless of the preferred positioning." },
+    PropRow { name: "None", prop_type: "AvoidCollisions", default: "", description: "No collision detection. Always uses the exact positioning specified." },
+];
 
 const CONTENT_PROPS: &[PropRow] = &[
     PropRow {
@@ -242,6 +269,8 @@ pub fn DropdownMenuDocPage() -> impl IntoView {
             <PropsTable title="SubMenu" rows={SUBMENU_PROPS} />
             <PropsTable title="SubMenuTrigger" rows={SUBMENU_TRIGGER_PROPS} />
             <PropsTable title="SubMenuContent" rows={CONTENT_PROPS} />
+            <PropsTable title="Positioning" rows={POSITIONING_PROPS} />
+            <PropsTable title="AvoidCollisions" rows={AVOID_COLLISIONS_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>

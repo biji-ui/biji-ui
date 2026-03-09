@@ -9,7 +9,7 @@ pub use crate::components::menubar::item::SubMenuItemContent as SubMenuContent;
 pub use crate::components::menubar::item::SubMenuItemTrigger as SubMenuTrigger;
 pub use crate::components::menubar::menu::MenuContent as Content;
 pub use crate::components::menubar::menu::MenuTrigger as Trigger;
-pub use crate::utils::positioning::Positioning;
+pub use crate::utils::positioning::{AvoidCollisions, Positioning};
 
 #[component]
 pub fn Menu(
@@ -17,6 +17,7 @@ pub fn Menu(
     #[prop(into, optional)] class: String,
     #[prop(default = false)] allow_loop: bool,
     #[prop(default = Positioning::BottomStart)] positioning: Positioning,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
     #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
     #[prop(default = false)] prevent_scroll: bool,
     children: Children,
@@ -34,6 +35,7 @@ pub fn Menu(
             disabled={disabled}
             class={class}
             positioning={positioning}
+            avoid_collisions={avoid_collisions}
             hide_delay={hide_delay}
         >
             {children()}

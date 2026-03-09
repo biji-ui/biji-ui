@@ -11,7 +11,7 @@ use crate::{
         FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, Toggle,
         filter_active, next_item, previous_item,
     },
-    utils::positioning::Positioning,
+    utils::positioning::{AvoidCollisions, Positioning},
 };
 
 #[derive(Copy, Clone)]
@@ -135,6 +135,7 @@ pub struct MenuContext {
     pub items: RwSignal<HashMap<usize, ItemData>>,
     pub allow_loop: bool,
     pub positioning: Positioning,
+    pub avoid_collisions: AvoidCollisions,
     pub hide_delay: Duration,
     /// When `true`, the next `focus` event on this menu's trigger will not
     /// auto-open the submenu. Used by the ArrowLeft handler to return focus to
@@ -155,6 +156,7 @@ impl Default for MenuContext {
             items: RwSignal::new(HashMap::new()),
             allow_loop: false,
             positioning: Positioning::BottomStart,
+            avoid_collisions: AvoidCollisions::Flip,
             hide_delay: Duration::from_millis(200),
             skip_open_on_focus: RwSignal::new(false),
             next_id: StoredValue::new(AtomicUsize::new(0)),
