@@ -227,6 +227,7 @@ pub fn Content(
     });
 
     let focus_handle: Arc<Mutex<Option<TimeoutHandle>>> = Arc::new(Mutex::new(None));
+    let focus_handle_cleanup = Arc::clone(&focus_handle);
     let focus_eff = RenderEffect::new(move |_| {
         // Cancel any pending focus timeout before scheduling a new one.
         if let Some(h) = focus_handle.lock().unwrap().take() {
@@ -248,7 +249,12 @@ pub fn Content(
         }
     });
 
-    on_cleanup(move || drop(focus_eff));
+    on_cleanup(move || {
+        if let Some(h) = focus_handle_cleanup.lock().unwrap().take() {
+            h.clear();
+        }
+        drop(focus_eff);
+    });
 
     view! {
         <CustomAnimatedShow
