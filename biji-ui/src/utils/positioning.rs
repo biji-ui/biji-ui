@@ -329,7 +329,6 @@ impl Positioning {
         };
 
         match avoid {
-            AvoidCollisions::None => self,
             AvoidCollisions::Flip => {
                 let preferred = self.main_side();
                 if space_for(preferred) >= required_for(preferred) {
@@ -367,6 +366,7 @@ impl Positioning {
                     .unwrap_or(self.main_side());
                 self.with_main_side(best)
             }
+            AvoidCollisions::None => unreachable!("None is handled by early return above"),
         }
     }
 
@@ -405,11 +405,19 @@ impl Positioning {
     /// or `transform-origin: var(--biji-transform-origin)` in plain CSS to make
     /// scale animations emanate from the trigger side of the overlay.
     pub fn transform_origin(self) -> &'static str {
-        match self.main_side() {
-            MainSide::Top => "bottom center",
-            MainSide::Bottom => "top center",
-            MainSide::Left => "right center",
-            MainSide::Right => "left center",
+        match (self.main_side(), self.alignment()) {
+            (MainSide::Top, Alignment::Start) => "bottom left",
+            (MainSide::Top, Alignment::End) => "bottom right",
+            (MainSide::Top, Alignment::Center) => "bottom center",
+            (MainSide::Bottom, Alignment::Start) => "top left",
+            (MainSide::Bottom, Alignment::End) => "top right",
+            (MainSide::Bottom, Alignment::Center) => "top center",
+            (MainSide::Left, Alignment::Start) => "right top",
+            (MainSide::Left, Alignment::End) => "right bottom",
+            (MainSide::Left, Alignment::Center) => "right center",
+            (MainSide::Right, Alignment::Start) => "left top",
+            (MainSide::Right, Alignment::End) => "left bottom",
+            (MainSide::Right, Alignment::Center) => "left center",
         }
     }
 }
