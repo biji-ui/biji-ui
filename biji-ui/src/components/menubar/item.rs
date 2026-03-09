@@ -353,13 +353,69 @@ pub fn SubMenuItemContent(
     } = use_element_bounding(menu_ctx.trigger_ref);
 
     let style = move || {
-        menu_ctx.positioning.calculate_position_style_simple(
-            *trigger_top.read(),
-            *trigger_left.read(),
-            *trigger_width.read(),
-            *trigger_height.read(),
-            *content_height.read(),
-            *content_width.read(),
+        let raw_cw = *content_width.read();
+        let raw_ch = *content_height.read();
+        let _ = menu_ctx.open.get();
+        let _ = trigger_top.read();
+        let _ = trigger_left.read();
+        let _ = trigger_width.read();
+        let _ = trigger_height.read();
+        let hidden = || format!(
+            "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: {};",
+            menu_ctx.positioning.transform_origin()
+        );
+        if raw_cw == 0.0 && raw_ch == 0.0 {
+            return hidden();
+        }
+        let Some(content_div) = content_ref.get_untracked() else {
+            return hidden();
+        };
+        let content_node: &web_sys::Node = content_div.as_ref();
+        let Some(content_html) = content_node.dyn_ref::<web_sys::HtmlElement>() else {
+            return hidden();
+        };
+        let cw = content_html.offset_width() as f64;
+        let ch = content_html.offset_height() as f64;
+        if cw == 0.0 && ch == 0.0 {
+            return hidden();
+        }
+        let Some(trigger) = menu_ctx.trigger_ref.get_untracked() else {
+            return hidden();
+        };
+        let trigger_node: &web_sys::Node = trigger.as_ref();
+        let Some(trigger_el) = trigger_node.dyn_ref::<web_sys::Element>() else {
+            return hidden();
+        };
+        let rect = trigger_el.get_bounding_client_rect();
+        let (t_top, t_left, t_width, t_height) =
+            (rect.top(), rect.left(), rect.width(), rect.height());
+        let vp_w = web_sys::window()
+            .and_then(|w| w.inner_width().ok())
+            .and_then(|v| v.as_f64())
+            .unwrap_or(1920.0);
+        let vp_h = web_sys::window()
+            .and_then(|w| w.inner_height().ok())
+            .and_then(|v| v.as_f64())
+            .unwrap_or(1080.0);
+        let eff = menu_ctx.positioning.effective_positioning(
+            cw,
+            ch,
+            t_top,
+            t_left,
+            t_width,
+            t_height,
+            0.0,
+            vp_w,
+            vp_h,
+            menu_ctx.avoid_collisions,
+        );
+        eff.calculate_position_style_simple(
+            t_top,
+            t_left,
+            t_width,
+            t_height,
+            ch,
+            cw,
             0.0,
         )
     };
