@@ -5,6 +5,7 @@ use leptos::{context::Provider, prelude::*};
 use leptos_use::{
     UseElementBoundingReturn, use_document, use_element_bounding, use_event_listener,
 };
+use wasm_bindgen::JsCast;
 
 use crate::{
     cn,
@@ -12,7 +13,7 @@ use crate::{
     custom_animated_show::CustomAnimatedShow,
     utils::{
         polygon::{get_points_from_el, make_hull, point_in_polygon},
-        positioning::Positioning,
+        positioning::{AvoidCollisions, Positioning},
     },
 };
 
@@ -72,7 +73,27 @@ pub fn TriggerEvents(children: Children) -> impl IntoView {
         let mut trigger_points =
             get_points_from_el(&(trigger_top, trigger_right, trigger_bottom, trigger_left));
 
-        let content_pos = tooltip_ctx.positioning.calculate_position(
+        let vp_w = web_sys::window()
+            .and_then(|w| w.inner_width().ok())
+            .and_then(|v| v.as_f64())
+            .unwrap_or(1920.0);
+        let vp_h = web_sys::window()
+            .and_then(|w| w.inner_height().ok())
+            .and_then(|v| v.as_f64())
+            .unwrap_or(1080.0);
+        let eff = tooltip_ctx.positioning.effective_positioning(
+            content_width.get(),
+            content_height.get(),
+            trigger_top.get(),
+            trigger_left.get(),
+            trigger_width.get(),
+            trigger_height.get(),
+            tooltip_ctx.arrow_size as f64,
+            vp_w,
+            vp_h,
+            tooltip_ctx.avoid_collisions,
+        );
+        let content_pos = eff.calculate_position(
             trigger_top.get(),
             trigger_left.get(),
             trigger_width.get(),
@@ -149,10 +170,12 @@ pub fn Root(
     #[prop(default = Duration::from_millis(200))]
     hide_delay: Duration,
     #[prop(default = Positioning::default())] positioning: Positioning,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
 ) -> impl IntoView {
     let ctx = TooltipContext {
         hide_delay,
         positioning,
+        avoid_collisions,
         tooltip_id: StoredValue::new(next_tooltip_id()),
         ..TooltipContext::default()
     };
@@ -196,13 +219,71 @@ pub fn Content(
     } = use_element_bounding(tooltip_ctx.trigger_ref);
 
     let style_signal = Signal::derive(move || {
-        tooltip_ctx.positioning.calculate_position_style(
-            *top.read(),
-            *left.read(),
-            *width.read(),
-            *height.read(),
-            *content_height.read(),
-            *content_width.read(),
+        let raw_cw = *content_width.read();
+        let raw_ch = *content_height.read();
+        let _ = tooltip_ctx.open.get();
+        let _ = top.read();
+        let _ = left.read();
+        let _ = width.read();
+        let _ = height.read();
+        let hidden = || format!(
+            "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: {};",
+            tooltip_ctx.positioning.transform_origin()
+        );
+        if raw_cw == 0.0 && raw_ch == 0.0 {
+            return hidden();
+        }
+        // Use offsetWidth/offsetHeight to avoid measuring scaled-down dimensions
+        // when the hide_class includes a CSS scale transform.
+        let Some(content_div) = tooltip_ctx.content_ref.get_untracked() else {
+            return hidden();
+        };
+        let content_node: &web_sys::Node = content_div.as_ref();
+        let Some(content_html) = content_node.dyn_ref::<web_sys::HtmlElement>() else {
+            return hidden();
+        };
+        let cw = content_html.offset_width() as f64;
+        let ch = content_html.offset_height() as f64;
+        if cw == 0.0 && ch == 0.0 {
+            return hidden();
+        }
+        let Some(trigger) = tooltip_ctx.trigger_ref.get_untracked() else {
+            return hidden();
+        };
+        let trigger_node: &web_sys::Node = trigger.as_ref();
+        let Some(trigger_el) = trigger_node.dyn_ref::<web_sys::Element>() else {
+            return hidden();
+        };
+        let rect = trigger_el.get_bounding_client_rect();
+        let (t_top, t_left, t_width, t_height) =
+            (rect.top(), rect.left(), rect.width(), rect.height());
+        let vp_w = web_sys::window()
+            .and_then(|w| w.inner_width().ok())
+            .and_then(|v| v.as_f64())
+            .unwrap_or(1920.0);
+        let vp_h = web_sys::window()
+            .and_then(|w| w.inner_height().ok())
+            .and_then(|v| v.as_f64())
+            .unwrap_or(1080.0);
+        let eff = tooltip_ctx.positioning.effective_positioning(
+            cw,
+            ch,
+            t_top,
+            t_left,
+            t_width,
+            t_height,
+            tooltip_ctx.arrow_size as f64,
+            vp_w,
+            vp_h,
+            tooltip_ctx.avoid_collisions,
+        );
+        eff.calculate_position_style(
+            t_top,
+            t_left,
+            t_width,
+            t_height,
+            ch,
+            cw,
             tooltip_ctx.arrow_size as f64,
             tooltip_ctx.arrow_size as f64,
         )
