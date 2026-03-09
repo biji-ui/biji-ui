@@ -222,7 +222,7 @@ const ARROW_PROPS: &[PropRow] = &[PropRow {
 
 const DATA_ATTRS: &[DataAttrRow] = &[DataAttrRow {
     name: "data-state",
-    description: "\"open\" when the popover is visible; \"closed\" when hidden. Present on Trigger and Content.",
+    description: "\"open\" when the popover is visible; \"closed\" when hidden. Present on Trigger.",
 }];
 
 const KEYBOARD: &[KeyboardRow] = &[KeyboardRow {
