@@ -1,9 +1,12 @@
 use std::{
-    sync::atomic::{AtomicUsize, Ordering},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicUsize, Ordering},
+    },
     time::Duration,
 };
 
-use leptos::{context::Provider, ev::keydown, prelude::*};
+use leptos::{context::Provider, ev::keydown, leptos_dom::helpers::TimeoutHandle, prelude::*};
 use leptos_use::{
     UseElementBoundingReturn, on_click_outside, use_document, use_element_bounding,
     use_event_listener,
@@ -87,9 +90,6 @@ fn RootEvents(children: Children) -> impl IntoView {
             });
         if !is_trigger_click {
             ctx.close();
-            if let Some(trigger) = ctx.trigger_ref.get() {
-                let _ = trigger.focus();
-            }
         }
     });
 
@@ -226,20 +226,29 @@ pub fn Content(
         )
     });
 
-    let _focus_eff = RenderEffect::new(move |_| {
+    let focus_handle: Arc<Mutex<Option<TimeoutHandle>>> = Arc::new(Mutex::new(None));
+    let focus_eff = RenderEffect::new(move |_| {
+        // Cancel any pending focus timeout before scheduling a new one.
+        if let Some(h) = focus_handle.lock().unwrap().take() {
+            h.clear();
+        }
         if ctx.open.get() && ctx.auto_focus {
-            let _ = leptos::leptos_dom::helpers::set_timeout_with_handle(
+            let fh = Arc::clone(&focus_handle);
+            let h = leptos::leptos_dom::helpers::set_timeout_with_handle(
                 move || {
+                    *fh.lock().unwrap() = None;
                     if let Some(el) = content_ref.get() {
                         focus_first_element(&el);
                     }
                 },
                 Duration::from_millis(10),
-            );
+            )
+            .expect("set_timeout in popover focus");
+            *focus_handle.lock().unwrap() = Some(h);
         }
     });
 
-    on_cleanup(move || drop(_focus_eff));
+    on_cleanup(move || drop(focus_eff));
 
     view! {
         <CustomAnimatedShow
