@@ -1,4 +1,4 @@
 pub mod context;
 pub mod root;
 
-pub use root::{Empty, Group, Input, Item, List, Root};
+pub use root::{Empty, Group, HighlightedText, Input, Item, List, Root};
