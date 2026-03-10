@@ -31,6 +31,9 @@ pub mod progress;
 #[cfg(feature = "radio_group")]
 pub mod radio_group;
 
+#[cfg(feature = "select")]
+pub mod select;
+
 #[cfg(feature = "separator")]
 pub mod separator;
 
@@ -39,6 +42,9 @@ pub mod slider;
 
 #[cfg(feature = "switch")]
 pub mod switch;
+
+#[cfg(feature = "tabs")]
+pub mod tabs;
 
 #[cfg(feature = "tooltip")]
 pub mod tooltip;

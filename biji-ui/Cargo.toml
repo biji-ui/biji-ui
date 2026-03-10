@@ -9,7 +9,7 @@ repository = "https://github.com/biji-ui/biji-ui"
 
 [features]
 default = []
-full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "dialog", "menu", "menubar", "popover", "progress", "radio_group", "separator", "slider", "switch", "tooltip"]
+full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "dialog", "menu", "menubar", "popover", "progress", "radio_group", "select", "separator", "slider", "switch", "tabs", "tooltip"]
 
 accordion    = []
 alert_dialog = []
@@ -22,9 +22,11 @@ menubar     = []
 popover      = []
 progress    = []
 radio_group = []
+select      = []
 separator   = []
 slider      = []
 switch      = []
+tabs        = []
 tooltip     = []
 
 [dependencies]
