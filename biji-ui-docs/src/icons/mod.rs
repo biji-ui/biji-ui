@@ -10,6 +10,7 @@ pub mod github;
 pub mod grid_pattern;
 pub mod hero_pattern;
 pub mod moon;
+pub mod search;
 pub mod sun;
 pub mod sun_moon;
 pub mod x;
@@ -26,6 +27,8 @@ pub use github::Github;
 pub use grid_pattern::GridPattern;
 pub use hero_pattern::HeroPattern;
 pub use moon::Moon;
+pub use search::Search;
 pub use sun::Sun;
 pub use sun_moon::SunMoon;
 pub use x::X;
+

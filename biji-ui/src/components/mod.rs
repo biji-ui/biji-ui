@@ -16,6 +16,9 @@ pub mod collapsible;
 #[cfg(feature = "combobox")]
 pub mod combobox;
 
+#[cfg(feature = "command")]
+pub mod command;
+
 #[cfg(feature = "context_menu")]
 pub mod context_menu;
 
@@ -27,6 +30,9 @@ pub mod menu;
 
 #[cfg(feature = "menubar")]
 pub mod menubar;
+
+#[cfg(feature = "pin_input")]
+pub mod pin_input;
 
 #[cfg(feature = "popover")]
 pub mod popover;

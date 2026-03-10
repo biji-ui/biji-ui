@@ -25,9 +25,10 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 use crate::pages::docs::{
     DocsPage, accordion::AccordionDocPage, alert_dialog::AlertDialogDocPage,
     calendar::CalendarDocPage, checkbox::CheckboxDocPage, collapsible::CollapsibleDocPage,
-    combobox::ComboboxDocPage, context_menu::ContextMenuDocPage, dialog::DialogDocPage,
-    dropdown_menu::DropdownMenuDocPage, getting_started::GettingStartedPage,
-    menubar::MenubarDocPage, popover::PopoverDocPage, progress::ProgressDocPage,
+    command::CommandDocPage, combobox::ComboboxDocPage, context_menu::ContextMenuDocPage,
+    dialog::DialogDocPage, dropdown_menu::DropdownMenuDocPage,
+    getting_started::GettingStartedPage, menubar::MenubarDocPage,
+    pin_input::PinInputDocPage, popover::PopoverDocPage, progress::ProgressDocPage,
     radio_group::RadioGroupDocPage, select::SelectDocPage, separator::SeparatorDocPage,
     slider::SliderDocPage, switch::SwitchDocPage, tabs::TabsDocPage,
     toggle_group::ToggleGroupDocPage, tooltip::TooltipDocPage,
@@ -54,11 +55,13 @@ pub fn App() -> impl IntoView {
                         <Route path={path!("calendar")} view={CalendarDocPage} />
                         <Route path={path!("checkbox")} view={CheckboxDocPage} />
                         <Route path={path!("collapsible")} view={CollapsibleDocPage} />
+                        <Route path={path!("command")} view={CommandDocPage} />
                         <Route path={path!("combobox")} view={ComboboxDocPage} />
                         <Route path={path!("context-menu")} view={ContextMenuDocPage} />
                         <Route path={path!("dialog")} view={DialogDocPage} />
                         <Route path={path!("dropdown-menu")} view={DropdownMenuDocPage} />
                         <Route path={path!("menubar")} view={MenubarDocPage} />
+                        <Route path={path!("pin-input")} view={PinInputDocPage} />
                         <Route path={path!("popover")} view={PopoverDocPage} />
                         <Route path={path!("progress")} view={ProgressDocPage} />
                         <Route path={path!("radio-group")} view={RadioGroupDocPage} />
