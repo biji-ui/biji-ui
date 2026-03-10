@@ -46,5 +46,8 @@ pub mod switch;
 #[cfg(feature = "tabs")]
 pub mod tabs;
 
+#[cfg(feature = "toggle_group")]
+pub mod toggle_group;
+
 #[cfg(feature = "tooltip")]
 pub mod tooltip;
