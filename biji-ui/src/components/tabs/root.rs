@@ -1,4 +1,4 @@
-use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use leptos::{
     context::Provider,
@@ -11,10 +11,16 @@ use crate::items::{FilterActiveItems, Focus, ManageFocus, NavigateItems};
 
 use super::context::{ActivationMode, Orientation, TabItemContext, TabsContext};
 
-fn next_tab_ids(index: usize) -> (String, String) {
+static TABS_ROOT_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+fn next_root_id() -> usize {
+    TABS_ROOT_COUNTER.fetch_add(1, Ordering::Relaxed)
+}
+
+fn tab_ids(root_id: usize, index: usize) -> (String, String) {
     (
-        format!("biji-tab-trigger-{index}"),
-        format!("biji-tab-panel-{index}"),
+        format!("biji-tab-trigger-{root_id}-{index}"),
+        format!("biji-tab-panel-{root_id}-{index}"),
     )
 }
 
@@ -35,6 +41,7 @@ pub fn Root(
         activation_mode,
         on_value_change,
         next_id: StoredValue::new(AtomicUsize::new(0)),
+        root_id: next_root_id(),
     };
 
     view! {
@@ -81,7 +88,7 @@ pub fn Trigger(
     let ctx = expect_context::<TabsContext>();
 
     let index = ctx.next_index();
-    let (trigger_id, panel_id) = next_tab_ids(index);
+    let (trigger_id, panel_id) = tab_ids(ctx.root_id, index);
 
     let item_ctx = TabItemContext {
         index,
