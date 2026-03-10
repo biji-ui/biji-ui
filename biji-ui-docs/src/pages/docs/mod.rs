@@ -15,6 +15,7 @@ pub mod dialog;
 pub mod dropdown_menu;
 pub mod getting_started;
 pub mod menubar;
+pub mod navigation_menu;
 pub mod pin_input;
 pub mod popover;
 pub mod progress;
@@ -55,6 +56,7 @@ pub const COMPONENT_PAGES: &[(&str, &str)] = &[
     ("/docs/dialog", "Dialog"),
     ("/docs/dropdown-menu", "Dropdown Menu"),
     ("/docs/menubar", "Menubar"),
+    ("/docs/navigation-menu", "Navigation Menu"),
     ("/docs/pin-input", "PIN Input"),
     ("/docs/popover", "Popover"),
     ("/docs/progress", "Progress"),
