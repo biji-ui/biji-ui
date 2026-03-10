@@ -232,22 +232,18 @@ pub fn Content(
     let ctx = expect_context::<TabsContext>();
     let tab_value = StoredValue::new(value);
 
-    // Reactively derive the ARIA IDs by looking up the matching Trigger item.
-    let panel_id = Memo::new(move |_| {
+    // Single scan: returns both IDs or None if no matching Trigger is registered yet.
+    // Attributes are omitted (not set to "") when None.
+    let ids: Memo<Option<(String, String)>> = Memo::new(move |_| {
         ctx.items.with(|m| {
             m.values()
                 .find(|item| item.value.with_value(|v| tab_value.with_value(|tv| v == tv)))
-                .map(|item| item.panel_id.with_value(|s| s.clone()))
-                .unwrap_or_default()
-        })
-    });
-
-    let trigger_id = Memo::new(move |_| {
-        ctx.items.with(|m| {
-            m.values()
-                .find(|item| item.value.with_value(|v| tab_value.with_value(|tv| v == tv)))
-                .map(|item| item.trigger_id.with_value(|s| s.clone()))
-                .unwrap_or_default()
+                .map(|item| {
+                    (
+                        item.trigger_id.with_value(|s| s.clone()),
+                        item.panel_id.with_value(|s| s.clone()),
+                    )
+                })
         })
     });
 
@@ -257,8 +253,8 @@ pub fn Content(
     view! {
         <div
             role="tabpanel"
-            id={move || panel_id.get()}
-            aria-labelledby={move || trigger_id.get()}
+            id={move || ids.get().as_ref().map(|(_, p)| p.clone())}
+            aria-labelledby={move || ids.get().as_ref().map(|(t, _)| t.clone())}
             tabindex="0"
             data-state={move || if is_selected.get() { "active" } else { "inactive" }}
             data-orientation={if ctx.orientation == Orientation::Horizontal {
