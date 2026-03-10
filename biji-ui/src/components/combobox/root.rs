@@ -524,17 +524,21 @@ pub fn InputTrigger(
                 }
             }
             "Home" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_first_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
+                if ctx.open.get() {
+                    evt.prevent_default();
+                    if let Some(item) = ctx.navigate_first_item() {
+                        item.focus();
+                        ctx.set_focus(Some(item.index));
+                    }
                 }
             }
             "End" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_last_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
+                if ctx.open.get() {
+                    evt.prevent_default();
+                    if let Some(item) = ctx.navigate_last_item() {
+                        item.focus();
+                        ctx.set_focus(Some(item.index));
+                    }
                 }
             }
             "Enter" => {
