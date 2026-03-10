@@ -16,6 +16,9 @@ pub mod collapsible;
 #[cfg(feature = "combobox")]
 pub mod combobox;
 
+#[cfg(feature = "context_menu")]
+pub mod context_menu;
+
 #[cfg(feature = "dialog")]
 pub mod dialog;
 
