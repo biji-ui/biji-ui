@@ -8,7 +8,7 @@ use std::{
 };
 
 use leptos::{
-    html::{Button, Div},
+    html::{A, Button, Div},
     leptos_dom::helpers::TimeoutHandle,
     prelude::*,
 };
@@ -148,6 +148,9 @@ pub struct NavMenuItemContext {
     pub value: StoredValue<String>,
     pub disabled: bool,
     pub trigger_ref: NodeRef<Button>,
+    /// Set by a top-level `Link` inside this `Item` (i.e. not nested inside `Content`).
+    /// Allows link-only items to participate in Arrow-key navigation.
+    pub link_ref: NodeRef<A>,
     pub content_ref: NodeRef<Div>,
     pub trigger_id: StoredValue<String>,
     pub content_id: StoredValue<String>,
@@ -170,10 +173,14 @@ impl IsActive for NavMenuItemContext {
 
 impl Focus for NavMenuItemContext {
     fn focus(&self) -> bool {
-        let Some(el) = self.trigger_ref.get() else {
-            return false;
-        };
-        let _ = el.focus();
-        true
+        if let Some(el) = self.trigger_ref.get() {
+            let _ = el.focus();
+            return true;
+        }
+        if let Some(el) = self.link_ref.get() {
+            let _ = el.focus();
+            return true;
+        }
+        false
     }
 }

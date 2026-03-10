@@ -27,6 +27,11 @@ use super::context::{NavMenuContext, NavMenuItemContext};
 
 static NAV_MENU_ROOT_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
+/// Marker placed in context by `Content` so that `Link` can distinguish
+/// "inside a panel" (don't register as nav item) from "top-level nav link".
+#[derive(Copy, Clone)]
+struct InsideNavContent;
+
 fn next_root_id() -> usize {
     NAV_MENU_ROOT_COUNTER.fetch_add(1, Ordering::Relaxed)
 }
@@ -121,15 +126,22 @@ fn RootEvents(children: Children) -> impl IntoView {
         let Some(target) = target else { return };
         let inside = ctx.items.with_untracked(|items| {
             items.values().any(|item| {
-                if let Some(trigger) = item.trigger_ref.get() {
-                    let node: &web_sys::Node = trigger.as_ref();
-                    if node.contains(Some(target.as_ref())) {
+                let t = target.as_ref();
+                if let Some(el) = item.trigger_ref.get() {
+                    let node: &web_sys::Node = el.as_ref();
+                    if node.contains(Some(t)) {
                         return true;
                     }
                 }
-                if let Some(content) = item.content_ref.get() {
-                    let node: &web_sys::Node = content.as_ref();
-                    if node.contains(Some(target.as_ref())) {
+                if let Some(el) = item.link_ref.get() {
+                    let node: &web_sys::Node = el.as_ref();
+                    if node.contains(Some(t)) {
+                        return true;
+                    }
+                }
+                if let Some(el) = item.content_ref.get() {
+                    let node: &web_sys::Node = el.as_ref();
+                    if node.contains(Some(t)) {
                         return true;
                     }
                 }
@@ -147,7 +159,7 @@ fn RootEvents(children: Children) -> impl IntoView {
 #[component]
 pub fn List(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
     view! {
-        <ul role="menubar" aria-orientation="horizontal" class={class}>
+        <ul class={class}>
             {children()}
         </ul>
     }
@@ -173,6 +185,7 @@ pub fn Item(
         value: StoredValue::new(value),
         disabled,
         trigger_ref: NodeRef::new(),
+        link_ref: NodeRef::new(),
         content_ref: NodeRef::new(),
         trigger_id: StoredValue::new(trigger_id),
         content_id: StoredValue::new(content_id),
@@ -208,10 +221,13 @@ pub fn Trigger(
         if item_ctx.disabled {
             return "-1";
         }
-        if is_open.get() {
+        if is_open.get() || ctx.item_in_focus(item_ctx.index) {
             return "0";
         }
+        // When nothing is open and no item has roving focus, keep the first
+        // active item in the tab order so Tab lands somewhere sensible.
         if ctx.open_value.get().is_none()
+            && ctx.item_focus.get().is_none()
             && ctx
                 .filter_active_items()
                 .into_iter()
@@ -307,7 +323,7 @@ fn TriggerEvents(children: Children) -> impl IntoView {
                     }
                 }
             }
-            "ArrowLeft" => {
+            "ArrowLeft" | "ArrowUp" => {
                 evt.prevent_default();
                 if let Some(prev) = ctx.navigate_previous_item() {
                     prev.focus();
@@ -353,6 +369,25 @@ fn TriggerEvents(children: Children) -> impl IntoView {
                     );
                 }
             }
+            // Tab (forward only): if a panel is open, move focus into it instead of
+            // skipping past it (Content is in a portal, so it's not in natural tab order).
+            "Tab" => {
+                if !evt.shift_key()
+                    && ctx.is_open(&value)
+                    && item_ctx.has_content.get_untracked()
+                {
+                    evt.prevent_default();
+                    let content_ref = item_ctx.content_ref;
+                    set_timeout(
+                        move || {
+                            if let Some(el) = content_ref.get() {
+                                focus_first_in_content(&el);
+                            }
+                        },
+                        Duration::from_millis(0),
+                    );
+                }
+            }
             _ => {}
         }
     });
@@ -392,6 +427,9 @@ pub fn Content(
     on_cleanup(move || {
         item_ctx.has_content.set(false);
     });
+
+    // Mark descendants so top-level Links don't mistakenly register as nav items.
+    provide_context(InsideNavContent);
 
     let value = StoredValue::new(item_ctx.value.with_value(|v| v.clone()));
     let is_open = Signal::derive(move || {
@@ -513,15 +551,28 @@ pub fn Link(
     #[prop(default = false)] disabled: bool,
     #[prop(default = true)] close_on_click: bool,
 ) -> impl IntoView {
+    let ctx = use_context::<NavMenuContext>();
+    let item_ctx = use_context::<NavMenuItemContext>();
+    let in_content = use_context::<InsideNavContent>().is_some();
+
+    // When this link is a top-level nav item (directly inside `Item`, not inside
+    // `Content`), attach it to the item's link_ref so Arrow-key navigation can
+    // focus it.  Otherwise use a local throwaway ref.
+    let link_ref = item_ctx
+        .filter(|_| !in_content)
+        .map(|ic| ic.link_ref)
+        .unwrap_or_else(NodeRef::new);
+
     view! {
         <a
+            node_ref={link_ref}
             href={href}
             class={class}
             aria-disabled={if disabled { Some("true") } else { None }}
             data-disabled={disabled}
             on:click={move |_| {
                 if close_on_click {
-                    if let Some(ctx) = use_context::<NavMenuContext>() {
+                    if let Some(ctx) = ctx {
                         ctx.close_immediate();
                     }
                 }

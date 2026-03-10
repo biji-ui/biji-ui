@@ -195,15 +195,15 @@ const DATA_ATTRS: &[DataAttrRow] = &[
 const KEYBOARD: &[KeyboardRow] = &[
     KeyboardRow {
         key: "Tab",
-        description: "Moves focus into and out of the navigation menu.",
+        description: "Moves focus into and out of the navigation menu. When a panel is open, Tab moves into the panel.",
     },
     KeyboardRow {
         key: "ArrowRight",
-        description: "Moves focus to the next Trigger. If a panel is open, opens the next item's panel.",
+        description: "Moves focus to the next Trigger or Link. If a panel is open, opens the next item's panel.",
     },
     KeyboardRow {
-        key: "ArrowLeft",
-        description: "Moves focus to the previous Trigger. If a panel is open, opens the previous item's panel.",
+        key: "ArrowLeft / ArrowUp",
+        description: "Moves focus to the previous Trigger or Link. If a panel is open, opens the previous item's panel.",
     },
     KeyboardRow {
         key: "ArrowDown",
@@ -211,11 +211,11 @@ const KEYBOARD: &[KeyboardRow] = &[
     },
     KeyboardRow {
         key: "Home",
-        description: "Moves focus to the first Trigger.",
+        description: "Moves focus to the first Trigger or Link.",
     },
     KeyboardRow {
         key: "End",
-        description: "Moves focus to the last Trigger.",
+        description: "Moves focus to the last Trigger or Link.",
     },
     KeyboardRow {
         key: "Enter / Space",
