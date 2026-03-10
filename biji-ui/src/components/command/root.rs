@@ -295,10 +295,15 @@ pub fn HighlightedText(
                     return view! { <span>{label.clone()}</span> }.into_any();
                 }
                 let lower = label.to_lowercase();
-                if let Some(pos) = lower.find(&q) {
-                    let before = label[..pos].to_string();
-                    let matched = label[pos..pos + q.len()].to_string();
-                    let after = label[pos + q.len()..].to_string();
+                if let Some(byte_pos) = lower.find(&q) {
+                    // Use char counts to slice `label` so Unicode chars that change
+                    // byte-length when lowercased don't produce invalid byte offsets.
+                    let char_pos = lower[..byte_pos].chars().count();
+                    let q_char_len = q.chars().count();
+                    let mut chars = label.chars();
+                    let before: String = chars.by_ref().take(char_pos).collect();
+                    let matched: String = chars.by_ref().take(q_char_len).collect();
+                    let after: String = chars.collect();
                     let cls = highlight_class.get_value();
                     view! {
                         <span>
