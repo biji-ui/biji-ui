@@ -56,6 +56,25 @@ pub fn Root(
         ..SelectContext::default()
     };
 
+    // Resolve the initial label once items mount. selected_label starts as None
+    // because Item children haven't registered yet at Root construction time.
+    // This effect tracks ctx.items and runs whenever items change; once the
+    // label is resolved it bails out immediately on subsequent runs.
+    Effect::new(move |_| {
+        if ctx.selected_label.get_untracked().is_some() {
+            return;
+        }
+        let Some(val) = ctx.value.get_untracked() else {
+            return;
+        };
+        ctx.items.with(|m| {
+            if let Some(item) = m.values().find(|i| i.value.with_value(|iv| *iv == val)) {
+                let lbl = item.label.with_value(|l| l.clone());
+                ctx.selected_label.set(Some(lbl));
+            }
+        });
+    });
+
     view! {
         <Provider value={ctx}>
             <RootEvents>
