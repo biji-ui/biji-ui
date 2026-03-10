@@ -35,6 +35,8 @@ pub struct TabsContext {
     pub activation_mode: ActivationMode,
     pub(crate) on_value_change: Option<Callback<String>>,
     pub(crate) next_id: StoredValue<AtomicUsize>,
+    /// Unique ID for this Root instance, used to namespace trigger/panel DOM IDs.
+    pub(crate) root_id: usize,
 }
 
 impl TabsContext {
