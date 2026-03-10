@@ -9,25 +9,28 @@ repository = "https://github.com/biji-ui/biji-ui"
 
 [features]
 default = []
-full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "dialog", "menu", "menubar", "popover", "progress", "radio_group", "select", "separator", "slider", "switch", "tabs", "tooltip"]
+full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "combobox", "context_menu", "dialog", "menu", "menubar", "popover", "progress", "radio_group", "select", "separator", "slider", "switch", "tabs", "toggle_group", "tooltip"]
 
 accordion    = []
 alert_dialog = []
 calendar     = ["dep:chrono"]
-checkbox    = []
-collapsible = []
-dialog      = []
-menu        = ["menubar"]
-menubar     = []
+checkbox     = []
+collapsible  = []
+combobox     = []
+context_menu = []
+dialog       = []
+menu         = ["menubar"]
+menubar      = []
 popover      = []
-progress    = []
-radio_group = []
-select      = []
-separator   = []
-slider      = []
-switch      = []
-tabs        = []
-tooltip     = []
+progress     = []
+radio_group  = []
+select       = []
+separator    = []
+slider       = []
+switch       = []
+tabs         = []
+toggle_group = []
+tooltip      = []
 
 [dependencies]
 leptos = { version = "0.8" }
@@ -48,6 +51,7 @@ features = [
     "HtmlCollection",
     "HtmlDivElement",
     "HtmlElement",
+    "HtmlInputElement",
     "KeyboardEvent",
     "MouseEvent",
     "Node",
