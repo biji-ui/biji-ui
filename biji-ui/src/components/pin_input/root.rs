@@ -35,7 +35,7 @@ pub fn Root(
     view! {
         <Provider value={ctx}>
             <div
-                data-disabled={disabled}
+                data-disabled={if disabled { Some("true") } else { None }}
                 class={class}
             >
                 {children()}

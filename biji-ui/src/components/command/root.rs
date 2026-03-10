@@ -239,8 +239,8 @@ pub fn Item(
             tabindex="-1"
             aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
             aria-selected={move || if ctx.item_in_focus(item_ctx.index) { "true" } else { "false" }}
-            data-disabled={item_ctx.disabled}
-            data-highlighted={move || ctx.item_in_focus(item_ctx.index)}
+            data-disabled={if item_ctx.disabled { Some("true") } else { None }}
+            data-highlighted={move || if ctx.item_in_focus(item_ctx.index) { Some("true") } else { None }}
             style={move || if is_visible.get() { "" } else { "display:none;" }}
             class={class}
         >
