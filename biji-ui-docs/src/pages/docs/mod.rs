@@ -15,9 +15,11 @@ pub mod menubar;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
+pub mod select;
 pub mod separator;
 pub mod slider;
 pub mod switch;
+pub mod tabs;
 pub mod tooltip;
 
 use biji_ui::components::{
@@ -212,9 +214,11 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
         ("/docs/popover", "Popover"),
         ("/docs/progress", "Progress"),
         ("/docs/radio-group", "Radio Group"),
+        ("/docs/select", "Select"),
         ("/docs/separator", "Separator"),
         ("/docs/slider", "Slider"),
         ("/docs/switch", "Switch"),
+        ("/docs/tabs", "Tabs"),
         ("/docs/tooltip", "Tooltip"),
     ];
 
