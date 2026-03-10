@@ -13,6 +13,12 @@ pub mod checkbox;
 #[cfg(feature = "collapsible")]
 pub mod collapsible;
 
+#[cfg(feature = "combobox")]
+pub mod combobox;
+
+#[cfg(feature = "context_menu")]
+pub mod context_menu;
+
 #[cfg(feature = "dialog")]
 pub mod dialog;
 
@@ -45,6 +51,9 @@ pub mod switch;
 
 #[cfg(feature = "tabs")]
 pub mod tabs;
+
+#[cfg(feature = "toggle_group")]
+pub mod toggle_group;
 
 #[cfg(feature = "tooltip")]
 pub mod tooltip;

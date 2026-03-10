@@ -8,6 +8,8 @@ pub mod alert_dialog;
 pub mod calendar;
 pub mod checkbox;
 pub mod collapsible;
+pub mod combobox;
+pub mod context_menu;
 pub mod dialog;
 pub mod dropdown_menu;
 pub mod getting_started;
@@ -20,6 +22,7 @@ pub mod separator;
 pub mod slider;
 pub mod switch;
 pub mod tabs;
+pub mod toggle_group;
 pub mod tooltip;
 
 use biji_ui::components::{
@@ -208,6 +211,8 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
         ("/docs/calendar", "Calendar"),
         ("/docs/checkbox", "Checkbox"),
         ("/docs/collapsible", "Collapsible"),
+        ("/docs/combobox", "Combobox"),
+        ("/docs/context-menu", "Context Menu"),
         ("/docs/dialog", "Dialog"),
         ("/docs/dropdown-menu", "Dropdown Menu"),
         ("/docs/menubar", "Menubar"),
@@ -219,6 +224,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
         ("/docs/slider", "Slider"),
         ("/docs/switch", "Switch"),
         ("/docs/tabs", "Tabs"),
+        ("/docs/toggle-group", "Toggle Group"),
         ("/docs/tooltip", "Tooltip"),
     ];
 

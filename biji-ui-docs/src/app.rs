@@ -25,11 +25,12 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 use crate::pages::docs::{
     DocsPage, accordion::AccordionDocPage, alert_dialog::AlertDialogDocPage,
     calendar::CalendarDocPage, checkbox::CheckboxDocPage, collapsible::CollapsibleDocPage,
-    dialog::DialogDocPage, dropdown_menu::DropdownMenuDocPage,
-    getting_started::GettingStartedPage, menubar::MenubarDocPage, popover::PopoverDocPage,
-    progress::ProgressDocPage, radio_group::RadioGroupDocPage, select::SelectDocPage,
-    separator::SeparatorDocPage, slider::SliderDocPage, switch::SwitchDocPage,
-    tabs::TabsDocPage, tooltip::TooltipDocPage,
+    combobox::ComboboxDocPage, context_menu::ContextMenuDocPage, dialog::DialogDocPage,
+    dropdown_menu::DropdownMenuDocPage, getting_started::GettingStartedPage,
+    menubar::MenubarDocPage, popover::PopoverDocPage, progress::ProgressDocPage,
+    radio_group::RadioGroupDocPage, select::SelectDocPage, separator::SeparatorDocPage,
+    slider::SliderDocPage, switch::SwitchDocPage, tabs::TabsDocPage,
+    toggle_group::ToggleGroupDocPage, tooltip::TooltipDocPage,
 };
 
 #[component]
@@ -53,6 +54,8 @@ pub fn App() -> impl IntoView {
                         <Route path={path!("calendar")} view={CalendarDocPage} />
                         <Route path={path!("checkbox")} view={CheckboxDocPage} />
                         <Route path={path!("collapsible")} view={CollapsibleDocPage} />
+                        <Route path={path!("combobox")} view={ComboboxDocPage} />
+                        <Route path={path!("context-menu")} view={ContextMenuDocPage} />
                         <Route path={path!("dialog")} view={DialogDocPage} />
                         <Route path={path!("dropdown-menu")} view={DropdownMenuDocPage} />
                         <Route path={path!("menubar")} view={MenubarDocPage} />
@@ -64,6 +67,7 @@ pub fn App() -> impl IntoView {
                         <Route path={path!("slider")} view={SliderDocPage} />
                         <Route path={path!("switch")} view={SwitchDocPage} />
                         <Route path={path!("tabs")} view={TabsDocPage} />
+                        <Route path={path!("toggle-group")} view={ToggleGroupDocPage} />
                         <Route path={path!("tooltip")} view={TooltipDocPage} />
                     </ParentRoute>
                 </Routes>
