@@ -9,18 +9,20 @@ repository = "https://github.com/biji-ui/biji-ui"
 
 [features]
 default = []
-full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "combobox", "context_menu", "dialog", "menu", "menubar", "popover", "progress", "radio_group", "select", "separator", "slider", "switch", "tabs", "toggle_group", "tooltip"]
+full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "command", "combobox", "context_menu", "dialog", "menu", "menubar", "pin_input", "popover", "progress", "radio_group", "select", "separator", "slider", "switch", "tabs", "toggle_group", "tooltip"]
 
 accordion    = []
 alert_dialog = []
 calendar     = ["dep:chrono"]
 checkbox     = []
 collapsible  = []
+command      = []
 combobox     = []
 context_menu = []
 dialog       = []
 menu         = ["menubar"]
 menubar      = []
+pin_input    = []
 popover      = []
 progress     = []
 radio_group  = []
@@ -41,7 +43,9 @@ chrono = { version = "0.4", features = ["wasmbind"], optional = true }
 [dependencies.web-sys]
 version = "0.3.69"
 features = [
+    "ClipboardEvent",
     "CssStyleDeclaration",
+    "DataTransfer",
     "DomRect",
     "Element",
     "Event",
