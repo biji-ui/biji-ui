@@ -172,7 +172,6 @@ pub fn Item(
         <button
             node_ref={item_ctx.trigger_ref}
             type="button"
-            role="switch"
             aria-pressed={move || if is_pressed.get() { "true" } else { "false" }}
             aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
             data-state={move || if is_pressed.get() { "on" } else { "off" }}
