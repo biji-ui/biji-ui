@@ -134,6 +134,61 @@ const ITEM_PROPS: &[PropRow] = &[
     },
 ];
 
+const HIGHLIGHTED_TEXT_PROPS: &[PropRow] = &[
+    PropRow {
+        name: "label",
+        prop_type: "String",
+        default: "",
+        description: "The full text string to display. The matched portion is wrapped in a highlighted span.",
+    },
+    PropRow {
+        name: "highlight_class",
+        prop_type: "String",
+        default: "\"\"",
+        description: "CSS class applied to the span wrapping the matched substring.",
+    },
+];
+
+const HIGHLIGHTED_USAGE_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::command;
+
+#[component]
+pub fn MyHighlightedCommand() -> impl IntoView {
+    view! {
+        <command::Root class="w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden">
+            <command::Input
+                placeholder="Search..."
+                class="w-full px-3 py-2 text-sm border-b border-border outline-none bg-background"
+            />
+            <command::List class="max-h-64 overflow-y-auto p-1">
+                <command::Empty>
+                    <div class="py-6 text-center text-sm text-muted-foreground">
+                        "No results found."
+                    </div>
+                </command::Empty>
+                <command::Item
+                    value="accordion"
+                    class="flex items-center px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent"
+                >
+                    <command::HighlightedText
+                        label="Accordion"
+                        highlight_class="bg-yellow-200/80 dark:bg-yellow-500/30 rounded"
+                    />
+                </command::Item>
+                <command::Item
+                    value="dialog"
+                    class="flex items-center px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent"
+                >
+                    <command::HighlightedText
+                        label="Dialog"
+                        highlight_class="bg-yellow-200/80 dark:bg-yellow-500/30 rounded"
+                    />
+                </command::Item>
+            </command::List>
+        </command::Root>
+    }
+}"#;
+
 const DATA_ATTRS: &[DataAttrRow] = &[
     DataAttrRow {
         name: "data-highlighted",
@@ -192,12 +247,27 @@ pub fn CommandDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="Text Highlighting" />
+            <p class="mb-4 text-sm text-muted-foreground">
+                "Use "
+                <code class="font-mono text-foreground">"command::HighlightedText"</code>
+                " inside an item to automatically highlight the portion of the label that matches the current search query."
+            </p>
+            <DocPreview>
+                <HighlightedCommandExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={HIGHLIGHTED_USAGE_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
             <PropsTable title="Root" rows={ROOT_PROPS} />
             <PropsTable title="Input" rows={INPUT_PROPS} />
             <PropsTable title="List" rows={LIST_PROPS} />
             <PropsTable title="Group" rows={GROUP_PROPS} />
             <PropsTable title="Item" rows={ITEM_PROPS} />
+            <PropsTable title="HighlightedText" rows={HIGHLIGHTED_TEXT_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
@@ -285,5 +355,58 @@ pub fn CommandExample() -> impl IntoView {
                 </p>
             </Show>
         </div>
+    }
+}
+
+#[component]
+pub fn HighlightedCommandExample() -> impl IntoView {
+    use biji_ui::components::command;
+
+    const ROOT_CLS: &str = "w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden bg-background";
+    const INPUT_CLS: &str = "w-full px-3 py-2 text-sm border-b border-border outline-none bg-background placeholder:text-muted-foreground";
+    const ITEM_CLS: &str = "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none \
+        data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground";
+    const HIGHLIGHT_CLS: &str = "bg-yellow-200/80 dark:bg-yellow-500/30 rounded";
+    const GROUP_LABEL_CLS: &str = "px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider";
+
+    let items = [
+        ("accordion", "Accordion"),
+        ("alert-dialog", "Alert Dialog"),
+        ("calendar", "Calendar"),
+        ("checkbox", "Checkbox"),
+        ("collapsible", "Collapsible"),
+        ("dialog", "Dialog"),
+        ("popover", "Popover"),
+        ("select", "Select"),
+        ("tabs", "Tabs"),
+        ("tooltip", "Tooltip"),
+    ];
+
+    view! {
+        <command::Root class={ROOT_CLS}>
+            <command::Input
+                placeholder="Search components..."
+                class={INPUT_CLS}
+            />
+            <command::List class="max-h-64 overflow-y-auto p-1">
+                <command::Empty>
+                    <div class="py-6 text-center text-sm text-muted-foreground">
+                        "No results found."
+                    </div>
+                </command::Empty>
+                <command::Group label="Components" label_class={GROUP_LABEL_CLS}>
+                    {items.into_iter().map(|(value, label)| {
+                        view! {
+                            <command::Item value={value} class={ITEM_CLS}>
+                                <command::HighlightedText
+                                    label={label.to_string()}
+                                    highlight_class={HIGHLIGHT_CLS}
+                                />
+                            </command::Item>
+                        }
+                    }).collect_view()}
+                </command::Group>
+            </command::List>
+        </command::Root>
     }
 }
