@@ -20,14 +20,9 @@ pub struct PinInputContext {
     pub root_id: StoredValue<String>,
     pub(crate) on_complete: Option<Callback<String>>,
     pub(crate) on_change: Option<Callback<String>>,
-    pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
 impl PinInputContext {
-    pub fn next_index(&self) -> usize {
-        self.next_id.with_value(|c| c.fetch_add(1, Ordering::Relaxed))
-    }
-
     pub fn current_value(&self) -> String {
         self.values.with(|v| v.join(""))
     }

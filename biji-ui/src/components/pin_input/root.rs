@@ -4,7 +4,6 @@ use leptos::{
     prelude::*,
 };
 use leptos_use::use_event_listener;
-use std::sync::atomic::AtomicUsize;
 
 use super::context::{PinInputContext, next_pin_input_id};
 
@@ -29,7 +28,6 @@ pub fn Root(
         root_id: StoredValue::new(next_pin_input_id()),
         on_complete,
         on_change,
-        next_id: StoredValue::new(AtomicUsize::new(0)),
     };
 
     view! {
