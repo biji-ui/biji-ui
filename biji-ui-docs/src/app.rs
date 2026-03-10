@@ -27,8 +27,9 @@ use crate::pages::docs::{
     calendar::CalendarDocPage, checkbox::CheckboxDocPage, collapsible::CollapsibleDocPage,
     dialog::DialogDocPage, dropdown_menu::DropdownMenuDocPage,
     getting_started::GettingStartedPage, menubar::MenubarDocPage, popover::PopoverDocPage,
-    progress::ProgressDocPage, radio_group::RadioGroupDocPage, separator::SeparatorDocPage,
-    slider::SliderDocPage, switch::SwitchDocPage, tooltip::TooltipDocPage,
+    progress::ProgressDocPage, radio_group::RadioGroupDocPage, select::SelectDocPage,
+    separator::SeparatorDocPage, slider::SliderDocPage, switch::SwitchDocPage,
+    tabs::TabsDocPage, tooltip::TooltipDocPage,
 };
 
 #[component]
@@ -58,9 +59,11 @@ pub fn App() -> impl IntoView {
                         <Route path={path!("popover")} view={PopoverDocPage} />
                         <Route path={path!("progress")} view={ProgressDocPage} />
                         <Route path={path!("radio-group")} view={RadioGroupDocPage} />
+                        <Route path={path!("select")} view={SelectDocPage} />
                         <Route path={path!("separator")} view={SeparatorDocPage} />
                         <Route path={path!("slider")} view={SliderDocPage} />
                         <Route path={path!("switch")} view={SwitchDocPage} />
+                        <Route path={path!("tabs")} view={TabsDocPage} />
                         <Route path={path!("tooltip")} view={TooltipDocPage} />
                     </ParentRoute>
                 </Routes>
