@@ -238,7 +238,7 @@ pub fn Item(
             role="option"
             tabindex="-1"
             aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
-            aria-selected={move || if ctx.item_in_focus(item_ctx.index) { "true" } else { "false" }}
+            aria-selected="false"
             data-disabled={if item_ctx.disabled { Some("true") } else { None }}
             data-highlighted={move || if ctx.item_in_focus(item_ctx.index) { Some("true") } else { None }}
             style={move || if is_visible.get() { "" } else { "display:none;" }}
@@ -258,5 +258,60 @@ pub fn Empty(children: ChildrenFn) -> impl IntoView {
         <Show when={move || !has_visible.get()} fallback={|| ()}>
             {children()}
         </Show>
+    }
+}
+
+/// Renders a text label with the current search query highlighted.
+///
+/// Must be used as a descendant of [`Root`] so it can access [`CommandContext`].
+/// The matched substring is wrapped in a `<span>` with `highlight_class` applied.
+///
+/// # Example
+/// ```rust,ignore
+/// <command::Item value="accordion" class={ITEM_CLS}>
+///     <command::HighlightedText
+///         label="Accordion"
+///         highlight_class="bg-yellow-200/80 dark:bg-yellow-500/30 rounded px-0.5"
+///     />
+/// </command::Item>
+/// ```
+#[component]
+pub fn HighlightedText(
+    /// The full label string to display.
+    label: String,
+    /// CSS class applied to the `<span>` wrapping the matched portion.
+    #[prop(into, optional)]
+    highlight_class: String,
+) -> impl IntoView {
+    let ctx = expect_context::<CommandContext>();
+    let label = StoredValue::new(label);
+    let highlight_class = StoredValue::new(highlight_class);
+
+    view! {
+        {move || {
+            let q = ctx.query.get().to_lowercase();
+            label.with_value(|label| {
+                if q.is_empty() {
+                    return view! { <span>{label.clone()}</span> }.into_any();
+                }
+                let lower = label.to_lowercase();
+                if let Some(pos) = lower.find(&q) {
+                    let before = label[..pos].to_string();
+                    let matched = label[pos..pos + q.len()].to_string();
+                    let after = label[pos + q.len()..].to_string();
+                    let cls = highlight_class.get_value();
+                    view! {
+                        <span>
+                            {before}
+                            <span class={cls}>{matched}</span>
+                            {after}
+                        </span>
+                    }
+                    .into_any()
+                } else {
+                    view! { <span>{label.clone()}</span> }.into_any()
+                }
+            })
+        }}
     }
 }
