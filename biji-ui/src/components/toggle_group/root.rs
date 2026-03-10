@@ -77,9 +77,11 @@ pub fn Item(
         ctx.remove_item(index);
     });
 
-    let fire_callbacks = move |val: String| {
+    let fire_callbacks = move || {
         if let Some(cb) = ctx.on_value_change {
-            cb.run(val);
+            // Fire with the current first selected value (empty string if nothing selected).
+            let current = ctx.value.with(|v| v.first().cloned().unwrap_or_default());
+            cb.run(current);
         }
         if let Some(cb) = ctx.on_values_change {
             let current = ctx.value.with(|v| v.clone());
@@ -92,8 +94,8 @@ pub fn Item(
             return;
         }
         let val = item_ctx.value.with_value(|v| v.clone());
-        ctx.toggle_value(val.clone());
-        fire_callbacks(val);
+        ctx.toggle_value(val);
+        fire_callbacks();
     });
 
     let _ = use_event_listener(item_ctx.trigger_ref, focus, move |_| {
@@ -132,14 +134,39 @@ pub fn Item(
             "Enter" | " " => {
                 evt.prevent_default();
                 let val = item_ctx.value.with_value(|v| v.clone());
-                ctx.toggle_value(val.clone());
-                fire_callbacks(val);
+                ctx.toggle_value(val);
+                fire_callbacks();
             }
             _ => {}
         }
     });
 
     let is_pressed = Memo::new(move |_| item_ctx.value.with_value(|v| ctx.is_pressed(v)));
+
+    // Roving tabindex: only the first pressed item (lowest index) holds the tab stop.
+    // If nothing is pressed, the first active item holds it.
+    let is_tab_stop = Memo::new(move |_| {
+        if item_ctx.disabled {
+            return false;
+        }
+        let first_pressed_idx = ctx.items.with(|m| {
+            ctx.value.with(|vals| {
+                m.values()
+                    .filter(|i| !i.disabled && i.value.with_value(|v| vals.contains(v)))
+                    .map(|i| i.index)
+                    .min()
+            })
+        });
+        if let Some(fp) = first_pressed_idx {
+            return fp == item_ctx.index;
+        }
+        // Nothing pressed: first active item is the tab stop.
+        ctx.filter_active_items()
+            .into_iter()
+            .next()
+            .map(|i| i.index)
+            == Some(item_ctx.index)
+    });
 
     view! {
         <button
@@ -150,28 +177,7 @@ pub fn Item(
             aria-disabled={if item_ctx.disabled { Some("true") } else { None }}
             data-state={move || if is_pressed.get() { "on" } else { "off" }}
             data-disabled={item_ctx.disabled}
-            tabindex={move || {
-                if item_ctx.disabled {
-                    return "-1";
-                }
-                // Roving tabindex: the pressed item holds the tab stop.
-                // If nothing is pressed, the first active item holds it.
-                let any_pressed = ctx.value.with(|v| !v.is_empty());
-                if is_pressed.get() {
-                    "0"
-                } else if !any_pressed
-                    && ctx
-                        .filter_active_items()
-                        .into_iter()
-                        .next()
-                        .map(|i| i.index)
-                        == Some(item_ctx.index)
-                {
-                    "0"
-                } else {
-                    "-1"
-                }
-            }}
+            tabindex={move || if is_tab_stop.get() { "0" } else { "-1" }}
             class={class}
         >
             {children()}
