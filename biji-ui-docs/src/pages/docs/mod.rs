@@ -49,8 +49,8 @@ pub const COMPONENT_PAGES: &[(&str, &str)] = &[
     ("/docs/calendar", "Calendar"),
     ("/docs/checkbox", "Checkbox"),
     ("/docs/collapsible", "Collapsible"),
-    ("/docs/command", "Command"),
     ("/docs/combobox", "Combobox"),
+    ("/docs/command", "Command"),
     ("/docs/context-menu", "Context Menu"),
     ("/docs/dialog", "Dialog"),
     ("/docs/dropdown-menu", "Dropdown Menu"),
@@ -588,6 +588,7 @@ fn PaletteAutoFocus() -> impl IntoView {
             set_timeout(
                 move || {
                     if let Some(el) = input_ref.get() {
+                        el.set_value("");
                         let _ = el.focus();
                     }
                 },
