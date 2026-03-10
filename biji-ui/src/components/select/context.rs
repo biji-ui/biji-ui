@@ -92,6 +92,7 @@ impl SelectContext {
 
     pub fn close(&self) {
         self.open.set(false);
+        self.item_focus.set(None);
     }
 
     pub fn toggle(&self) {
