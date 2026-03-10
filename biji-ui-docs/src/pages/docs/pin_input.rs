@@ -194,6 +194,11 @@ pub fn PinInputExample() -> impl IntoView {
                 <pin_input::Cell index=4 class={CELL_CLS} />
                 <pin_input::Cell index=5 class={CELL_CLS} />
             </pin_input::Root>
+            <Show when={move || !current.get().is_empty() && completed.get().is_empty()}>
+                <p class="text-sm text-muted-foreground">
+                    "Typing: " <span class="font-mono font-medium text-foreground">{move || current.get()}</span>
+                </p>
+            </Show>
             <Show when={move || !completed.get().is_empty()}>
                 <p class="text-sm text-muted-foreground">
                     "Code entered: " <span class="font-mono font-medium text-foreground">{move || completed.get()}</span>
