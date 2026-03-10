@@ -8,12 +8,14 @@ pub mod alert_dialog;
 pub mod calendar;
 pub mod checkbox;
 pub mod collapsible;
+pub mod command;
 pub mod combobox;
 pub mod context_menu;
 pub mod dialog;
 pub mod dropdown_menu;
 pub mod getting_started;
 pub mod menubar;
+pub mod pin_input;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
@@ -211,11 +213,13 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
         ("/docs/calendar", "Calendar"),
         ("/docs/checkbox", "Checkbox"),
         ("/docs/collapsible", "Collapsible"),
+        ("/docs/command", "Command"),
         ("/docs/combobox", "Combobox"),
         ("/docs/context-menu", "Context Menu"),
         ("/docs/dialog", "Dialog"),
         ("/docs/dropdown-menu", "Dropdown Menu"),
         ("/docs/menubar", "Menubar"),
+        ("/docs/pin-input", "PIN Input"),
         ("/docs/popover", "Popover"),
         ("/docs/progress", "Progress"),
         ("/docs/radio-group", "Radio Group"),
