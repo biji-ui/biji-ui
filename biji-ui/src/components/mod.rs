@@ -43,5 +43,8 @@ pub mod slider;
 #[cfg(feature = "switch")]
 pub mod switch;
 
+#[cfg(feature = "tabs")]
+pub mod tabs;
+
 #[cfg(feature = "tooltip")]
 pub mod tooltip;

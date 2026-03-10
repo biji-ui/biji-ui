@@ -26,6 +26,7 @@ select      = []
 separator   = []
 slider      = []
 switch      = []
+tabs        = []
 tooltip     = []
 
 [dependencies]
