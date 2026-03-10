@@ -13,6 +13,9 @@ pub mod checkbox;
 #[cfg(feature = "collapsible")]
 pub mod collapsible;
 
+#[cfg(feature = "command")]
+pub mod command;
+
 #[cfg(feature = "combobox")]
 pub mod combobox;
 
