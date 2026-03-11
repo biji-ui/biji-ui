@@ -558,19 +558,36 @@ pub fn Link(
     // When this link is a top-level nav item (directly inside `Item`, not inside
     // `Content`), attach it to the item's link_ref so Arrow-key navigation can
     // focus it.  Otherwise use a local throwaway ref.
+    let is_nav_link = item_ctx.is_some() && !in_content;
     let link_ref = item_ctx
-        .filter(|_| !in_content)
+        .filter(|_| is_nav_link)
         .map(|ic| ic.link_ref)
         .unwrap_or_else(NodeRef::new);
+
+    // Update roving-tabindex state when this top-level link receives focus,
+    // so Arrow-key navigation knows which item is current.
+    if is_nav_link {
+        if let (Some(ctx), Some(ic)) = (ctx, item_ctx) {
+            let _ = use_event_listener(link_ref, focus, move |_| {
+                ctx.set_focus(Some(ic.index));
+            });
+        }
+    }
 
     view! {
         <a
             node_ref={link_ref}
             href={href}
             class={class}
+            tabindex={if disabled { "-1" } else { "0" }}
             aria-disabled={if disabled { Some("true") } else { None }}
             data-disabled={disabled}
-            on:click={move |_| {
+            on:click={move |evt| {
+                if disabled {
+                    evt.prevent_default();
+                    evt.stop_propagation();
+                    return;
+                }
                 if close_on_click {
                     if let Some(ctx) = ctx {
                         ctx.close_immediate();
