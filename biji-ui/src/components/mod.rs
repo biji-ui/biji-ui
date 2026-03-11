@@ -31,6 +31,9 @@ pub mod menu;
 #[cfg(feature = "menubar")]
 pub mod menubar;
 
+#[cfg(feature = "navigation_menu")]
+pub mod navigation_menu;
+
 #[cfg(feature = "pin_input")]
 pub mod pin_input;
 

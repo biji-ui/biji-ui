@@ -28,6 +28,7 @@ use crate::pages::docs::{
     command::CommandDocPage, combobox::ComboboxDocPage, context_menu::ContextMenuDocPage,
     dialog::DialogDocPage, dropdown_menu::DropdownMenuDocPage,
     getting_started::GettingStartedPage, menubar::MenubarDocPage,
+    navigation_menu::NavigationMenuDocPage,
     pin_input::PinInputDocPage, popover::PopoverDocPage, progress::ProgressDocPage,
     radio_group::RadioGroupDocPage, select::SelectDocPage, separator::SeparatorDocPage,
     slider::SliderDocPage, switch::SwitchDocPage, tabs::TabsDocPage,
@@ -61,6 +62,7 @@ pub fn App() -> impl IntoView {
                         <Route path={path!("dialog")} view={DialogDocPage} />
                         <Route path={path!("dropdown-menu")} view={DropdownMenuDocPage} />
                         <Route path={path!("menubar")} view={MenubarDocPage} />
+                        <Route path={path!("navigation-menu")} view={NavigationMenuDocPage} />
                         <Route path={path!("pin-input")} view={PinInputDocPage} />
                         <Route path={path!("popover")} view={PopoverDocPage} />
                         <Route path={path!("progress")} view={ProgressDocPage} />
