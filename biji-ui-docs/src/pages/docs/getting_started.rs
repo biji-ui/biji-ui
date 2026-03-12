@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos_meta::*;
 
 use crate::components::code::Code;
 
@@ -53,6 +54,8 @@ pub fn AccordionExample() -> impl IntoView {
     );
 
     view! {
+        <Title text="Getting Started — Biji UI" />
+        <Meta name="description" content="Get started with Biji UI — a headless, accessible component library for Leptos. Install via Cargo and add components with feature flags." />
         <article class="flex flex-col pt-16 pb-10 h-full">
             <h1 class="mb-2 text-2xl font-bold">"Getting Started"</h1>
             <p class="my-5 text-base">"Add biji-ui to your Cargo.toml. Components are opt-in via feature flags."</p>

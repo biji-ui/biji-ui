@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use leptos::{portal::Portal, prelude::*};
+use leptos_meta::*;
 use leptos_router::{components::*, hooks::use_location};
 
 pub mod accordion;
@@ -417,7 +418,13 @@ pub fn DocsPage() -> impl IntoView {
 
 #[component]
 pub fn DocPage(#[prop(into)] title: String, children: Children) -> impl IntoView {
+    let page_title = format!("{title} — Biji UI");
+    let page_desc = format!(
+        "{title} component for Leptos. Headless, accessible, and unstyled — works with Tailwind CSS or any CSS framework."
+    );
     view! {
+        <Title text={page_title} />
+        <Meta name="description" content={page_desc} />
         <article class="flex flex-col pt-16 pb-10 h-full">
             <h1 class="mb-2 text-2xl font-bold">{title}</h1>
             {children()}
