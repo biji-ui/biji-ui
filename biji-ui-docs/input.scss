@@ -3,13 +3,13 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-brand: #00ff00;
-  --color-active: hsl(60 4.8% 95.9%);
-  --color-active-foreground: hsl(25 5.3% 44.7%);
-  --color-muted: hsl(60 4.8% 95.9%);
-  --color-muted-foreground: hsl(25 5.3% 44.7%);
-  --color-accent: hsl(60 4.8% 95.9%);
-  --color-accent-foreground: hsl(24 9.8% 10%);
+  --color-brand: #c49a1a;
+  --color-active: hsl(43 25% 94%);
+  --color-active-foreground: hsl(35 30% 20%);
+  --color-muted: hsl(43 25% 94%);
+  --color-muted-foreground: hsl(35 15% 42%);
+  --color-accent: hsl(43 25% 94%);
+  --color-accent-foreground: hsl(35 30% 15%);
   --color-header: #000000;
   --color-text: #52525c;
   --color-pane: #e7e7e7;
@@ -17,7 +17,7 @@
   --color-foreground: #18181b;
   --color-primary: #18181b;
   --color-primary-foreground: #ffffff;
-  --color-ring: #18181b;
+  --color-ring: #c49a1a;
   --color-border: #e7e7e7;
   --color-error: #ff0000;
   --color-error-foreground: #ffffff;
@@ -62,18 +62,18 @@
 .dark {
   --color-text: #9f9fa9;
   --color-header: #ffffff;
-  --color-active: hsl(12 6.5% 15.1%);
-  --color-active-foreground: hsl(24 5.4% 63.9%);
-  --color-muted: hsl(12 6.5% 15.1%);
-  --color-muted-foreground: hsl(24 5.4% 63.9%);
-  --color-accent: hsl(12 6.5% 15.1%);
-  --color-accent-foreground: hsl(0 0% 98%);
+  --color-active: hsl(43 12% 16%);
+  --color-active-foreground: hsl(40 35% 72%);
+  --color-muted: hsl(43 12% 16%);
+  --color-muted-foreground: hsl(40 20% 62%);
+  --color-accent: hsl(43 12% 16%);
+  --color-accent-foreground: hsl(40 40% 88%);
   --color-pane: #3b3b3b;
-  --color-brand: #377737;
+  --color-brand: #e6bf5a;
   --color-background: #18181b;
   --color-foreground: #ffffff;
   --color-primary: #ffffff;
   --color-primary-foreground: #18181b;
-  --color-ring: #ffffff;
+  --color-ring: #e6bf5a;
   --color-border: #3b3b3b;
 }

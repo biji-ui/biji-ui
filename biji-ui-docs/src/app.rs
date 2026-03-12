@@ -14,6 +14,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                 <HydrationScripts options=options.clone() />
                 <MetaTags/>
                 <Stylesheet id="leptos" href="/pkg/biji-ui-docs.css"/>
+                <link rel="icon" href="/logo.svg" type="image/svg+xml"/>
             </head>
             <body class="bg-background text-foreground">
                 <App/>

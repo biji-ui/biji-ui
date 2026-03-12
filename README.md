@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/biji-ui/biji-ui/main/biji-ui-docs/public/logo.svg" alt="Biji UI" height="60" />
+
 # Biji UI
 
 Effortless UI Components for Your Leptos Projects
