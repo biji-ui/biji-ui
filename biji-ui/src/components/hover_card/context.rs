@@ -67,9 +67,11 @@ impl HoverCardContext {
         let delay = self.open_delay;
         let handle = leptos::leptos_dom::helpers::set_timeout_with_handle(
             move || {
-                open_signal.set(true);
-                if let Some(cb) = on_change {
-                    cb.run(true);
+                if !open_signal.get_untracked() {
+                    open_signal.set(true);
+                    if let Some(cb) = on_change {
+                        cb.run(true);
+                    }
                 }
             },
             delay,
@@ -88,9 +90,11 @@ impl HoverCardContext {
         let delay = self.close_delay;
         let handle = leptos::leptos_dom::helpers::set_timeout_with_handle(
             move || {
-                open_signal.set(false);
-                if let Some(cb) = on_change {
-                    cb.run(false);
+                if open_signal.get_untracked() {
+                    open_signal.set(false);
+                    if let Some(cb) = on_change {
+                        cb.run(false);
+                    }
                 }
             },
             delay,
@@ -105,9 +109,11 @@ impl HoverCardContext {
     pub fn close_immediate(&self) {
         self.cancel_open_timer();
         self.cancel_close_timer();
-        self.open.set(false);
-        if let Some(cb) = self.on_open_change {
-            cb.run(false);
+        if self.open.get_untracked() {
+            self.open.set(false);
+            if let Some(cb) = self.on_open_change {
+                cb.run(false);
+            }
         }
     }
 
