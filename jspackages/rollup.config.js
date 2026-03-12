@@ -1,30 +1,26 @@
-import babel from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
 
-const config = [
-  {
-    input: "scripts/shiki.js",
-    output: [
-      {
-        // dir: "output",
-        file: "bundles/shiki.js",
-        format: "es",
-        plugins: [terser()],
-      },
-    ],
+export default {
+  input: "scripts/shiki.js",
+  output: {
+    file: "bundles/shiki.js",
+    format: "es",
     plugins: [
-      babel({
-        exclude: "node_modules/**",
-        presets: [["@babel/preset-env", { targets: "defaults" }]],
-        babelHelpers: "bundled",
+      terser({
+        compress: {
+          passes: 2,
+          drop_console: true,
+          pure_getters: true,
+        },
+        mangle: true,
       }),
-      resolve({
-        browser: true,
-      }),
-      // commonjs(),
     ],
   },
-];
-
-export default config;
+  plugins: [
+    resolve({
+      browser: true,
+      exportConditions: ["browser"],
+    }),
+  ],
+};
