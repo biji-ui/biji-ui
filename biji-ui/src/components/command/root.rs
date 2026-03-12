@@ -31,6 +31,19 @@ pub fn Root(
 fn RootEvents(children: Children) -> impl IntoView {
     let ctx = expect_context::<CommandContext>();
 
+    // Auto-highlight the first visible item when the query changes (always reset)
+    // or when the item list changes and nothing is focused yet (initial mount).
+    Effect::new(move |prev_query: Option<String>| {
+        let query = ctx.query.get();
+        ctx.items.with(|_| {}); // reactive dep without cloning
+        let query_changed = prev_query.as_deref() != Some(query.as_str());
+        if query_changed || ctx.item_focus.get_untracked().is_none() {
+            let first = ctx.navigate_first_item();
+            ctx.set_focus(first.map(|i| i.index));
+        }
+        query
+    });
+
     let _ = use_event_listener(ctx.root_ref, keydown, move |evt| {
         match evt.key().as_str() {
             "ArrowDown" => {
@@ -78,7 +91,24 @@ pub fn Input(
     let _ = use_event_listener(ctx.input_ref, leptos::ev::input, move |evt| {
         let val = event_target_value(&evt);
         ctx.query.set(val);
-        ctx.item_focus.set(None);
+        // RootEvents' Effect will reset item_focus to the first visible item when ctx.query changes.
+    });
+
+    // Enter on the input selects the currently highlighted item.
+    let _ = use_event_listener(ctx.input_ref, keydown, move |evt| {
+        if evt.key() == "Enter" {
+            evt.prevent_default();
+            let focused = ctx
+                .item_focus
+                .get_untracked()
+                .and_then(|idx| ctx.items.with_untracked(|m| m.get(&idx).copied()))
+                .or_else(|| ctx.navigate_first_item());
+            if let Some(item) = focused {
+                if let Some(el) = item.item_ref.get() {
+                    let _ = el.click();
+                }
+            }
+        }
     });
 
     view! {

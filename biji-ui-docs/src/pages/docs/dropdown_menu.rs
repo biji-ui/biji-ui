@@ -294,9 +294,9 @@ pub fn DropdownMenuExample() -> impl IntoView {
                 <icons::Ellipsis class="w-6 h-6 text-foreground"></icons::Ellipsis>
             </menu::Trigger>
             <menu::Content
-                class="flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
-                show_class="z-10 opacity-100 transition duration-150 ease-in"
-                hide_class="-z-10 opacity-0 transition duration-200 ease-out"
+                class="z-50 flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
+                show_class="opacity-100 transition duration-150 ease-in"
+                hide_class="opacity-0 transition duration-200 ease-out"
             >
                 <menu::Item class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none  hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
                     <button class="flex w-full h-full" on:click={|_| log!("Profile clicked")}>
@@ -322,9 +322,9 @@ pub fn DropdownMenuExample() -> impl IntoView {
                         "Sub menu" <icons::ChevronRight class="w-4"></icons::ChevronRight>
                     </menu::SubMenuTrigger>
                     <menu::Content
-                        class="flex absolute flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
-                        show_class="z-10 top-0 left-[105%] opacity-100 transition duration-150 ease-in"
-                        hide_class="-z-10 top-0 left-[105%] opacity-0 transition duration-200 ease-out"
+                        class="z-50 flex absolute flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
+                        show_class="top-0 left-[105%] opacity-100 transition duration-150 ease-in"
+                        hide_class="top-0 left-[105%] opacity-0 transition duration-200 ease-out"
                     >
                         <menu::Item class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[highlighted]:bg-muted">
                             <button

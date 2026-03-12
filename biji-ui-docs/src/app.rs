@@ -14,6 +14,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                 <HydrationScripts options=options.clone() />
                 <MetaTags/>
                 <Stylesheet id="leptos" href="/pkg/biji-ui-docs.css"/>
+                <link rel="icon" href="/logo.svg" type="image/svg+xml"/>
             </head>
             <body class="bg-background text-foreground">
                 <App/>
@@ -40,7 +41,17 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Title text="Biji UI" />
+        <Title text="Biji UI — Headless UI Components for Leptos" />
+        <Meta name="description" content="Biji UI is a headless, accessible UI component library for Leptos. Unstyled primitives that work with Tailwind CSS or any CSS framework." />
+        <Meta name="robots" content="index, follow" />
+        <Meta property="og:type" content="website" />
+        <Meta property="og:site_name" content="Biji UI" />
+        <Meta property="og:title" content="Biji UI — Headless UI Components for Leptos" />
+        <Meta property="og:description" content="Biji UI is a headless, accessible UI component library for Leptos. Unstyled primitives that work with Tailwind CSS or any CSS framework." />
+        <Meta property="og:image" content="https://raw.githubusercontent.com/biji-ui/biji-ui/main/biji-ui-docs/public/full-logo.svg" />
+        <Meta name="twitter:card" content="summary" />
+        <Meta name="twitter:title" content="Biji UI — Headless UI Components for Leptos" />
+        <Meta name="twitter:description" content="Biji UI is a headless, accessible UI component library for Leptos. Unstyled primitives that work with Tailwind CSS or any CSS framework." />
 
         <Router>
             <div class="w-full">

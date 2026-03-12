@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use leptos::{portal::Portal, prelude::*};
+use leptos_meta::*;
 use leptos_router::{components::*, hooks::use_location};
 
 pub mod accordion;
@@ -14,8 +15,8 @@ pub mod context_menu;
 pub mod dialog;
 pub mod drawer;
 pub mod dropdown_menu;
-pub mod hover_card;
 pub mod getting_started;
+pub mod hover_card;
 pub mod menubar;
 pub mod navigation_menu;
 pub mod pin_input;
@@ -105,7 +106,7 @@ pub fn ThemeMode() -> impl IntoView {
             </menu::Trigger>
             <Portal>
                 <menu::Content
-                    class="flex z-40 flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
+                    class="flex flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none z-[70] transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
                     show_class="opacity-100 duration-150 ease-in"
                     hide_class="opacity-0 duration-200 ease-out"
                 >
@@ -151,19 +152,23 @@ pub fn TopNav() -> impl IntoView {
     view! {
         <div
             style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2; --scrollbar-width-nav: var(--scrollbar-width, 0px);"
-            class="fixed inset-x-0 top-0 z-10 flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:z-30 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
+            class="fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
         >
             <div class="absolute inset-x-0 top-full h-px transition bg-zinc-900/10 dark:bg-white/10"></div>
             // Desktop center: full-width search input
             <div class="hidden lg:block lg:flex-auto lg:max-w-md">
                 <SearchButton />
             </div>
-            <div class="flex gap-5 items-center lg:hidden">
+            <div class="flex items-center lg:hidden">
                 <Sidebar />
-                <a aria-label="Home" href="/">
-                    <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
-                </a>
             </div>
+            <a
+                aria-label="Home"
+                href="/"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden"
+            >
+                <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
+            </a>
             <div class="flex gap-5 items-center">
                 <nav class="hidden md:block">
                     <ul role="list" class="flex gap-5 items-center">
@@ -392,7 +397,7 @@ pub fn DocsPage() -> impl IntoView {
     view! {
         <leptos::context::Provider value={palette_ctx}>
             <div class="h-full lg:ml-72 xl:ml-80">
-                <header class="contents lg:flex lg:fixed lg:inset-0 lg:z-40 lg:pointer-events-none">
+                <header class="contents lg:flex lg:fixed lg:inset-0 lg:pointer-events-none lg:z-[60]">
                     <div class="contents lg:block lg:overflow-y-auto lg:px-6 lg:pt-4 lg:pb-8 lg:w-72 lg:border-r lg:pointer-events-auto xl:w-80 lg:border-zinc-900/10 lg:dark:border-white/10">
                         <div class="hidden lg:flex">
                             <a aria-label="Home" href="/">
@@ -417,7 +422,13 @@ pub fn DocsPage() -> impl IntoView {
 
 #[component]
 pub fn DocPage(#[prop(into)] title: String, children: Children) -> impl IntoView {
+    let page_title = format!("{title} — Biji UI");
+    let page_desc = format!(
+        "{title} component for Leptos. Headless, accessible, and unstyled — works with Tailwind CSS or any CSS framework."
+    );
     view! {
+        <Title text={page_title} />
+        <Meta name="description" content={page_desc} />
         <article class="flex flex-col pt-16 pb-10 h-full">
             <h1 class="mb-2 text-2xl font-bold">{title}</h1>
             {children()}
@@ -452,14 +463,18 @@ pub fn SearchButton() -> impl IntoView {
     view! {
         <button
             type="button"
-            class="flex items-center w-full h-9 gap-2 px-3 rounded-lg border border-zinc-900/10 dark:border-white/10 bg-white/60 dark:bg-white/5 text-sm text-zinc-500 dark:text-zinc-400 transition hover:border-zinc-900/20 dark:hover:border-white/20 hover:bg-white dark:hover:bg-white/10 cursor-pointer"
-            on:click={move |_| { if let Some(c) = ctx { c.open(); } }}
+            class="flex gap-2 items-center px-3 w-full h-9 text-sm rounded-lg border transition cursor-pointer hover:bg-white border-zinc-900/10 bg-white/60 text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:border-white/20 dark:hover:bg-white/10 hover:border-zinc-900/20"
+            on:click={move |_| {
+                if let Some(c) = ctx {
+                    c.open();
+                }
+            }}
             aria-label="Search docs"
         >
             <icons::Search class="w-3.5 h-3.5 shrink-0 stroke-zinc-900 dark:stroke-white" />
             <span class="flex-1 text-left">"Search docs..."</span>
             <Show when={move || !is_touch.get()}>
-                <span class="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500">
+                <span class="flex gap-1 items-center text-xs text-zinc-400 dark:text-zinc-500">
                     <kbd class="font-sans">{move || if is_mac.get() { "⌘" } else { "Ctrl" }}</kbd>
                     <kbd class="font-sans">"K"</kbd>
                 </span>
@@ -476,7 +491,11 @@ pub fn SearchButtonCompact() -> impl IntoView {
         <button
             type="button"
             class="flex justify-center items-center w-6 h-6 rounded-md transition cursor-pointer dark:hover:bg-white/5 hover:bg-zinc-900/5"
-            on:click={move |_| { if let Some(c) = ctx { c.open(); } }}
+            on:click={move |_| {
+                if let Some(c) = ctx {
+                    c.open();
+                }
+            }}
             aria-label="Search docs"
         >
             <icons::Search class="w-4 h-4 stroke-zinc-900 dark:stroke-white"></icons::Search>
@@ -512,7 +531,7 @@ pub fn CommandPalette() -> impl IntoView {
             show_class="opacity-100"
             hide_class="opacity-0 pointer-events-none"
             hide_delay={Duration::from_millis(150)}
-            style="position: fixed; inset: 0; z-index: 9999; transition: opacity 150ms ease;"
+            style="position: fixed; inset: 0; z-index: 100; transition: opacity 150ms ease;"
         >
             <div
                 class="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -525,7 +544,7 @@ pub fn CommandPalette() -> impl IntoView {
                 <commandui::Root class="overflow-hidden rounded-xl border shadow-2xl border-border bg-background">
                     <PaletteAutoFocus />
                     <commandui::Input
-                        placeholder="Search components..."
+                        placeholder="Search docs..."
                         class="py-3 px-4 w-full text-sm border-b outline-none border-border bg-background placeholder:text-muted-foreground"
                     />
                     <commandui::List class="overflow-y-auto p-1 max-h-72">
@@ -554,9 +573,9 @@ pub fn CommandPalette() -> impl IntoView {
                                         })}
                                     >
                                         <HighlightedText
-                                        label={label}
-                                        highlight_class="bg-yellow-200/80 dark:bg-yellow-500/30 rounded"
-                                    />
+                                            label={label}
+                                            highlight_class="bg-yellow-200/80 dark:bg-yellow-500/30 rounded"
+                                        />
                                     </commandui::Item>
                                 }
                             })

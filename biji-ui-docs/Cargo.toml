@@ -51,6 +51,7 @@ ssr = [
 [package.metadata.leptos]
 output-name = "biji-ui-docs"
 site-root = "target/site"
+assets-dir = "public"
 site-pkg-dir = "pkg"
 tailwind-input-file = "input.scss"
 site-addr = "0.0.0.0:8080"

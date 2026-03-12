@@ -280,7 +280,7 @@ pub fn PopoverExample() -> impl IntoView {
                 </popover::Trigger>
                 <Portal>
                     <popover::Content
-                        class="p-4 w-72 text-sm rounded-lg border shadow-md transition z-5 border-border bg-background origin-[var(--biji-transform-origin)]"
+                        class="p-4 w-72 text-sm rounded-lg border shadow-md transition z-50 border-border bg-background origin-[var(--biji-transform-origin)]"
                         show_class="opacity-100 scale-100 duration-150 ease-out"
                         hide_class="opacity-0 scale-95 duration-100 ease-in"
                     >
