@@ -25,6 +25,9 @@ pub mod context_menu;
 #[cfg(feature = "dialog")]
 pub mod dialog;
 
+#[cfg(feature = "drawer")]
+pub mod drawer;
+
 #[cfg(feature = "menu")]
 pub mod menu;
 
