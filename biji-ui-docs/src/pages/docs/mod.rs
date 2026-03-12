@@ -106,7 +106,7 @@ pub fn ThemeMode() -> impl IntoView {
             </menu::Trigger>
             <Portal>
                 <menu::Content
-                    class="flex z-40 flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
+                    class="flex z-[70] flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
                     show_class="opacity-100 duration-150 ease-in"
                     hide_class="opacity-0 duration-200 ease-out"
                 >
@@ -152,7 +152,7 @@ pub fn TopNav() -> impl IntoView {
     view! {
         <div
             style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2; --scrollbar-width-nav: var(--scrollbar-width, 0px);"
-            class="fixed inset-x-0 top-0 z-10 flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:z-30 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
+            class="fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
         >
             <div class="absolute inset-x-0 top-full h-px transition bg-zinc-900/10 dark:bg-white/10"></div>
             // Desktop center: full-width search input
@@ -393,7 +393,7 @@ pub fn DocsPage() -> impl IntoView {
     view! {
         <leptos::context::Provider value={palette_ctx}>
             <div class="h-full lg:ml-72 xl:ml-80">
-                <header class="contents lg:flex lg:fixed lg:inset-0 lg:z-40 lg:pointer-events-none">
+                <header class="contents lg:flex lg:fixed lg:inset-0 lg:z-[60] lg:pointer-events-none">
                     <div class="contents lg:block lg:overflow-y-auto lg:px-6 lg:pt-4 lg:pb-8 lg:w-72 lg:border-r lg:pointer-events-auto xl:w-80 lg:border-zinc-900/10 lg:dark:border-white/10">
                         <div class="hidden lg:flex">
                             <a aria-label="Home" href="/">
@@ -519,7 +519,7 @@ pub fn CommandPalette() -> impl IntoView {
             show_class="opacity-100"
             hide_class="opacity-0 pointer-events-none"
             hide_delay={Duration::from_millis(150)}
-            style="position: fixed; inset: 0; z-index: 9999; transition: opacity 150ms ease;"
+            style="position: fixed; inset: 0; z-index: 100; transition: opacity 150ms ease;"
         >
             <div
                 class="absolute inset-0 bg-black/50 backdrop-blur-sm"
