@@ -5,7 +5,7 @@ use leptos::{
 };
 use leptos_use::use_event_listener;
 
-use crate::items::{Focus, ManageFocus, NavigateItems, FilterActiveItems};
+use crate::items::{Focus, ManageFocus, NavigateItems};
 
 use super::context::{CommandContext, CommandGroupContext, CommandItemContext};
 
@@ -31,12 +31,17 @@ pub fn Root(
 fn RootEvents(children: Children) -> impl IntoView {
     let ctx = expect_context::<CommandContext>();
 
-    // Auto-highlight the first visible item whenever the query or item list changes.
-    Effect::new(move |_| {
-        let _ = ctx.query.get();
-        let _ = ctx.items.get();
-        let first = ctx.navigate_first_item();
-        ctx.set_focus(first.map(|i| i.index));
+    // Auto-highlight the first visible item when the query changes (always reset)
+    // or when the item list changes and nothing is focused yet (initial mount).
+    Effect::new(move |prev_query: Option<String>| {
+        let query = ctx.query.get();
+        ctx.items.with(|_| {}); // reactive dep without cloning
+        let query_changed = prev_query.as_deref() != Some(query.as_str());
+        if query_changed || ctx.item_focus.get_untracked().is_none() {
+            let first = ctx.navigate_first_item();
+            ctx.set_focus(first.map(|i| i.index));
+        }
+        query
     });
 
     let _ = use_event_listener(ctx.root_ref, keydown, move |evt| {
@@ -86,7 +91,7 @@ pub fn Input(
     let _ = use_event_listener(ctx.input_ref, leptos::ev::input, move |evt| {
         let val = event_target_value(&evt);
         ctx.query.set(val);
-        // item_focus is reset by the RootEvents Effect that watches ctx.query
+        // RootEvents' Effect will reset item_focus to the first visible item when ctx.query changes.
     });
 
     // Enter on the input selects the currently highlighted item.
