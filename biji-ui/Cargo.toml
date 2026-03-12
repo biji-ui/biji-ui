@@ -9,7 +9,7 @@ repository = "https://github.com/biji-ui/biji-ui"
 
 [features]
 default = []
-full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "combobox", "command", "context_menu", "dialog", "menu", "menubar", "navigation_menu", "pin_input", "popover", "progress", "radio_group", "select", "separator", "slider", "switch", "tabs", "toggle_group", "tooltip"]
+full = ["accordion", "alert_dialog", "calendar", "checkbox", "collapsible", "combobox", "command", "context_menu", "dialog", "drawer", "hover_card", "menu", "menubar", "navigation_menu", "pin_input", "popover", "progress", "radio_group", "select", "separator", "slider", "switch", "tabs", "toggle_group", "tooltip"]
 
 accordion    = []
 alert_dialog = []
@@ -20,6 +20,8 @@ command      = []
 combobox     = []
 context_menu = []
 dialog       = []
+drawer       = []
+hover_card   = []
 menu             = ["menubar"]
 menubar          = []
 navigation_menu  = []
@@ -57,6 +59,7 @@ features = [
     "HtmlDivElement",
     "HtmlElement",
     "HtmlInputElement",
+    "HtmlSpanElement",
     "KeyboardEvent",
     "MouseEvent",
     "Node",
