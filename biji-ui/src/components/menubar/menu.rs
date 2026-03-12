@@ -17,7 +17,7 @@ use crate::{
     utils::{positioning::{AvoidCollisions, Positioning}, prevent_scroll::use_prevent_scroll},
 };
 
-use super::context::{ItemData, MenuContext, RootContext};
+use super::context::{ItemData, MenuContext, MenubarContext, RootContext};
 
 /// Walks the submenu tree rooted at `menu_context` and returns `true` if
 /// `target` is contained within any submenu trigger or content element.
@@ -87,9 +87,16 @@ pub fn Menu(
 }
 
 #[component]
-pub fn MenuTrigger(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
+pub fn MenuTrigger(
+    #[prop(into, optional)] class: String,
+    #[prop(into, optional)] aria_label: Option<String>,
+    children: Children,
+) -> impl IntoView {
     let root_ctx = expect_context::<RootContext>();
     let menu_ctx = expect_context::<MenuContext>();
+
+    let is_in_menubar = use_context::<MenubarContext>().is_some();
+    let role = if is_in_menubar { "menuitem" } else { "button" };
 
     let trigger_ref = menu_ctx.trigger_ref;
 
@@ -98,7 +105,8 @@ pub fn MenuTrigger(#[prop(into, optional)] class: String, children: Children) ->
             <div
                 node_ref={trigger_ref}
                 class={class}
-                role="menuitem"
+                role={role}
+                aria-label={aria_label}
                 aria-haspopup="menu"
                 aria-expanded={move || if menu_ctx.open.get() { "true" } else { "false" }}
                 aria-disabled={if menu_ctx.disabled { Some("true") } else { None }}
