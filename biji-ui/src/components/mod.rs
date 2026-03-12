@@ -28,6 +28,9 @@ pub mod dialog;
 #[cfg(feature = "drawer")]
 pub mod drawer;
 
+#[cfg(feature = "hover_card")]
+pub mod hover_card;
+
 #[cfg(feature = "menu")]
 pub mod menu;
 
