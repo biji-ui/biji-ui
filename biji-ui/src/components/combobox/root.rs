@@ -44,7 +44,8 @@ pub fn Root(
     #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
     #[prop(optional)] on_value_change: Option<Callback<String>>,
     /// Set to `true` when using `InputTrigger` (the inline Headless-UI-style combobox).
-    #[prop(default = false)] inline: bool,
+    #[prop(default = false)]
+    inline: bool,
 ) -> impl IntoView {
     let ctx = ComboboxContext {
         open: RwSignal::new(false),
@@ -89,6 +90,19 @@ pub fn Root(
 fn RootEvents(children: Children) -> impl IntoView {
     let ctx = expect_context::<ComboboxContext>();
 
+    // Auto-highlight the first visible item when the query changes (always reset)
+    // or when the item list changes and nothing is focused yet (initial mount / open).
+    Effect::new(move |prev_query: Option<String>| {
+        let query = ctx.query.get();
+        ctx.items.with(|_| {}); // reactive dep without cloning
+        let query_changed = prev_query.as_deref() != Some(query.as_str());
+        if query_changed || ctx.item_focus.get_untracked().is_none() {
+            let first = ctx.navigate_first_item();
+            ctx.set_focus(first.map(|i| i.index));
+        }
+        query
+    });
+
     let _ = use_event_listener(use_document(), keydown, move |evt| {
         if evt.key() == "Escape" && ctx.open.get() {
             ctx.close();
@@ -113,13 +127,14 @@ fn RootEvents(children: Children) -> impl IntoView {
             .and_then(|t| t.dyn_into::<web_sys::Element>().ok());
 
         // Filter out clicks on the button trigger (standard mode).
-        let is_trigger_click = target_el
-            .as_ref()
-            .zip(ctx.trigger_ref.get())
-            .is_some_and(|(el, trigger)| {
-                let trigger_node: &web_sys::Node = trigger.as_ref();
-                el.is_same_node(Some(trigger_node)) || trigger.contains(Some(el))
-            });
+        let is_trigger_click =
+            target_el
+                .as_ref()
+                .zip(ctx.trigger_ref.get())
+                .is_some_and(|(el, trigger)| {
+                    let trigger_node: &web_sys::Node = trigger.as_ref();
+                    el.is_same_node(Some(trigger_node)) || trigger.contains(Some(el))
+                });
 
         // Filter out clicks on the input trigger (inline mode).
         let is_input_click = ctx.inline_mode
@@ -202,11 +217,7 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 #[component]
 pub fn Value(#[prop(into, optional)] placeholder: String) -> impl IntoView {
     let ctx = expect_context::<ComboboxContext>();
-    view! {
-        <span>
-            {move || ctx.selected_label.get().unwrap_or_else(|| placeholder.clone())}
-        </span>
-    }
+    view! { <span>{move || ctx.selected_label.get().unwrap_or_else(|| placeholder.clone())}</span> }
 }
 
 #[component]
@@ -362,62 +373,60 @@ pub fn Content(
     });
 
     // Keyboard navigation — arrow keys bubble up from the input or items.
-    let _ = use_event_listener(content_ref, keydown, move |evt| {
-        match evt.key().as_str() {
-            "ArrowDown" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_next_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+    let _ = use_event_listener(content_ref, keydown, move |evt| match evt.key().as_str() {
+        "ArrowDown" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_next_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "ArrowUp" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_previous_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+        }
+        "ArrowUp" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_previous_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "Home" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_first_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+        }
+        "Home" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_first_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "End" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_last_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+        }
+        "End" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_last_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "Enter" => {
-                evt.prevent_default();
-                if let Some(focused_idx) = ctx.item_focus.get_untracked() {
-                    let item = ctx.items.with_untracked(|m| m.get(&focused_idx).copied());
-                    if let Some(item) = item {
-                        if !item.disabled {
-                            let val = item.value.with_value(|v| v.clone());
-                            let lbl = item.label.with_value(|l| l.clone());
-                            ctx.select(val, lbl);
-                            if ctx.inline_mode {
-                                ctx.suppress_next_open.set_value(true);
-                                if let Some(input) = ctx.input_ref.get() {
-                                    let _ = input.focus();
-                                }
-                            } else if let Some(trigger) = ctx.trigger_ref.get() {
-                                let _ = trigger.focus();
+        }
+        "Enter" => {
+            evt.prevent_default();
+            if let Some(focused_idx) = ctx.item_focus.get_untracked() {
+                let item = ctx.items.with_untracked(|m| m.get(&focused_idx).copied());
+                if let Some(item) = item {
+                    if !item.disabled {
+                        let val = item.value.with_value(|v| v.clone());
+                        let lbl = item.label.with_value(|l| l.clone());
+                        ctx.select(val, lbl);
+                        if ctx.inline_mode {
+                            ctx.suppress_next_open.set_value(true);
+                            if let Some(input) = ctx.input_ref.get() {
+                                let _ = input.focus();
                             }
+                        } else if let Some(trigger) = ctx.trigger_ref.get() {
+                            let _ = trigger.focus();
                         }
                     }
                 }
             }
-            "Tab" => {
-                ctx.close();
-            }
-            _ => {}
         }
+        "Tab" => {
+            ctx.close();
+        }
+        _ => {}
     });
 
     view! {
@@ -447,8 +456,7 @@ pub fn Input(
     let _ = use_event_listener(ctx.input_ref, leptos::ev::input, move |evt| {
         let val = event_target_value(&evt);
         ctx.query.set(val);
-        // Reset item focus so next arrow key starts from first visible item.
-        ctx.item_focus.set(None);
+        // RootEvents' Effect resets item_focus to first visible item when query changes.
     });
 
     view! {
@@ -491,11 +499,15 @@ pub fn InputTrigger(
         }
     });
 
-    // On input: update the query and reset item focus.
+    // On input: update the query. Re-open if the user types while the dropdown is closed
+    // (e.g. after selecting an item and then clearing/retyping without blurring the input).
+    // RootEvents' Effect resets item_focus to first visible item when query changes.
     let _ = use_event_listener(ctx.input_ref, leptos::ev::input, move |evt| {
         let val = event_target_value(&evt);
         ctx.query.set(val);
-        ctx.item_focus.set(None);
+        if !ctx.open.get_untracked() {
+            ctx.open.set(true);
+        }
     });
 
     // Keyboard navigation — input is outside Content so events won't bubble there.
@@ -657,7 +669,9 @@ pub fn Item(
     });
 
     let is_selected = Memo::new(move |_| {
-        ctx.value.get().is_some_and(|v| item_ctx.value.with_value(|iv| v == *iv))
+        ctx.value
+            .get()
+            .is_some_and(|v| item_ctx.value.with_value(|iv| v == *iv))
     });
 
     view! {
@@ -683,9 +697,7 @@ pub fn Item(
 
 #[component]
 pub fn ItemText(children: Children) -> impl IntoView {
-    view! {
-        <span>{children()}</span>
-    }
+    view! { <span>{children()}</span> }
 }
 
 #[component]
