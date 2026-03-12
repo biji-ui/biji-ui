@@ -38,7 +38,7 @@ pub fn MyMenubar() -> impl IntoView {
                 </menubar::Trigger>
                 <Portal>
                     <menubar::Content
-                        class="flex flex-col p-1 w-56 rounded-md border shadow-md bg-background"
+                        class="z-50 flex flex-col p-1 w-56 rounded-md border shadow-md bg-background"
                         show_class="opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out"
                     >
@@ -64,7 +64,7 @@ pub fn MyMenubar() -> impl IntoView {
                 </menubar::Trigger>
                 <Portal>
                     <menubar::Content
-                        class="flex flex-col p-1 w-56 rounded-md border shadow-md bg-background"
+                        class="z-50 flex flex-col p-1 w-56 rounded-md border shadow-md bg-background"
                         show_class="opacity-100 transition duration-150 ease-in"
                         hide_class="opacity-0 transition duration-200 ease-out"
                     >
@@ -365,8 +365,8 @@ pub fn MenubarExample() -> impl IntoView {
                             <Portal>
                                 <menubar::SubMenuContent
                                     class="z-50 inline-block flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
-                                    show_class="z-10 opacity-100 transition duration-150 ease-in"
-                                    hide_class="opacity-0 transition duration-200 ease-out -z-10"
+                                    show_class="opacity-100 transition duration-150 ease-in"
+                                    hide_class="opacity-0 transition duration-200 ease-out"
                                 >
                                     <menubar::Item class={ITEM_STYLE}>"Email"</menubar::Item>
                                     <menubar::Item class={ITEM_STYLE} disabled=true>
@@ -384,8 +384,8 @@ pub fn MenubarExample() -> impl IntoView {
                                         <Portal>
                                             <menubar::SubMenuContent
                                                 class="z-50 flex flex-col p-1 w-56 rounded-md border shadow-md focus:outline-none border-border min-w-[8rem] bg-background text-foreground"
-                                                show_class="z-10 opacity-100 transition duration-150 ease-in"
-                                                hide_class="opacity-0 transition duration-200 ease-out -z-10"
+                                                show_class="opacity-100 transition duration-150 ease-in"
+                                                hide_class="opacity-0 transition duration-200 ease-out"
                                             >
                                                 <menubar::Item class={ITEM_STYLE}>"Facebook"</menubar::Item>
                                                 <menubar::Item class={ITEM_STYLE}>"LinkedIn"</menubar::Item>

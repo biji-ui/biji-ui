@@ -100,7 +100,7 @@ pub fn ThemeMode() -> impl IntoView {
             positioning={menu::Positioning::BottomEnd}
             hide_delay={Duration::from_millis(200)}
         >
-            <menu::Trigger class="flex justify-center items-center w-6 h-6 rounded-md transition cursor-pointer dark:hover:bg-white/5 hover:bg-zinc-900/5">
+            <menu::Trigger aria_label="Toggle theme" class="flex justify-center items-center w-6 h-6 rounded-md transition cursor-pointer dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <icons::Sun class="w-5 h-5 dark:hidden stroke-zinc-900"></icons::Sun>
                 <icons::Moon class="hidden w-5 h-5 dark:block stroke-white"></icons::Moon>
             </menu::Trigger>
@@ -408,10 +408,10 @@ pub fn DocsPage() -> impl IntoView {
                         <SidebarNav class="hidden lg:block lg:mt-10" />
                     </div>
                 </header>
-                <div class="flex relative flex-col px-4 pt-14 h-full sm:px-6 lg:px-8">
+                <main class="flex relative flex-col px-4 pt-14 h-full sm:px-6 lg:px-8">
                     <Outlet />
                     <icons::HeroPattern></icons::HeroPattern>
-                </div>
+                </main>
             </div>
             <Portal>
                 <CommandPalette />

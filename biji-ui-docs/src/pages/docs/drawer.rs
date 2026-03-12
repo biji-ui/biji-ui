@@ -27,13 +27,13 @@ pub fn MyDrawer() -> impl IntoView {
             <Portal>
                 // Full-screen overlay
                 <drawer::Overlay
-                    class="fixed inset-0 z-40 bg-black/50 transition"
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
                     show_class="opacity-100 duration-300 ease-out"
                     hide_class="opacity-0 duration-200 ease-in"
                 />
                 // Sliding panel
                 <drawer::Content
-                    class="fixed inset-y-0 right-0 z-50 w-80 bg-background border-l \
+                    class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
                            border-border shadow-xl transition-transform"
                     show_class="translate-x-0 duration-300 ease-out"
                     hide_class="translate-x-full duration-200 ease-in"
@@ -263,12 +263,12 @@ pub fn DrawerExample() -> impl IntoView {
                 </drawer::Trigger>
                 <Portal>
                     <drawer::Overlay
-                        class="fixed inset-0 z-40 bg-black/50 transition"
+                        class="fixed inset-0 z-[80] bg-black/50 transition"
                         show_class="opacity-100 duration-300 ease-out"
                         hide_class="opacity-0 duration-200 ease-in"
                     />
                     <drawer::Content
-                        class="fixed inset-y-0 right-0 z-50 w-80 bg-background border-l \
+                        class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
                                border-border shadow-xl transition-transform"
                         show_class="translate-x-0 duration-300 ease-out"
                         hide_class="translate-x-full duration-200 ease-in"
@@ -334,12 +334,12 @@ pub fn DrawerSidesExample() -> impl IntoView {
                 </drawer::Trigger>
                 <Portal>
                     <drawer::Overlay
-                        class="fixed inset-0 z-40 bg-black/50 transition"
+                        class="fixed inset-0 z-[80] bg-black/50 transition"
                         show_class="opacity-100 duration-300 ease-out"
                         hide_class="opacity-0 duration-200 ease-in"
                     />
                     <drawer::Content
-                        class="fixed inset-x-0 top-0 z-50 h-48 bg-background border-b \
+                        class="fixed inset-x-0 top-0 z-[90] h-48 bg-background border-b \
                                border-border shadow-xl transition-transform"
                         show_class="translate-y-0 duration-300 ease-out"
                         hide_class="-translate-y-full duration-200 ease-in"
@@ -373,12 +373,12 @@ pub fn DrawerSidesExample() -> impl IntoView {
                 </drawer::Trigger>
                 <Portal>
                     <drawer::Overlay
-                        class="fixed inset-0 z-40 bg-black/50 transition"
+                        class="fixed inset-0 z-[80] bg-black/50 transition"
                         show_class="opacity-100 duration-300 ease-out"
                         hide_class="opacity-0 duration-200 ease-in"
                     />
                     <drawer::Content
-                        class="fixed inset-y-0 right-0 z-50 w-72 bg-background border-l \
+                        class="fixed inset-y-0 right-0 z-[90] w-72 bg-background border-l \
                                border-border shadow-xl transition-transform"
                         show_class="translate-x-0 duration-300 ease-out"
                         hide_class="translate-x-full duration-200 ease-in"
@@ -412,12 +412,12 @@ pub fn DrawerSidesExample() -> impl IntoView {
                 </drawer::Trigger>
                 <Portal>
                     <drawer::Overlay
-                        class="fixed inset-0 z-40 bg-black/50 transition"
+                        class="fixed inset-0 z-[80] bg-black/50 transition"
                         show_class="opacity-100 duration-300 ease-out"
                         hide_class="opacity-0 duration-200 ease-in"
                     />
                     <drawer::Content
-                        class="fixed inset-x-0 bottom-0 z-50 h-48 bg-background border-t \
+                        class="fixed inset-x-0 bottom-0 z-[90] h-48 bg-background border-t \
                                border-border shadow-xl transition-transform"
                         show_class="translate-y-0 duration-300 ease-out"
                         hide_class="translate-y-full duration-200 ease-in"
@@ -451,12 +451,12 @@ pub fn DrawerSidesExample() -> impl IntoView {
                 </drawer::Trigger>
                 <Portal>
                     <drawer::Overlay
-                        class="fixed inset-0 z-40 bg-black/50 transition"
+                        class="fixed inset-0 z-[80] bg-black/50 transition"
                         show_class="opacity-100 duration-300 ease-out"
                         hide_class="opacity-0 duration-200 ease-in"
                     />
                     <drawer::Content
-                        class="fixed inset-y-0 left-0 z-50 w-72 bg-background border-r \
+                        class="fixed inset-y-0 left-0 z-[90] w-72 bg-background border-r \
                                border-border shadow-xl transition-transform"
                         show_class="translate-x-0 duration-300 ease-out"
                         hide_class="-translate-x-full duration-200 ease-in"

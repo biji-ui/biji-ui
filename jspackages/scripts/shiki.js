@@ -10,8 +10,18 @@ import toml from "@shikijs/langs/toml";
 
 import wasm from "shiki/wasm";
 
+// Override vesper comment color: #8B8B8B94 (semi-transparent, fails WCAG AA) → #8B8B8B (opaque, ~6:1 on #101010)
+const darkAccessible = {
+  ...dark,
+  tokenColors: dark.tokenColors.map((tc) =>
+    Array.isArray(tc.scope) && tc.scope.includes("comment")
+      ? { ...tc, settings: { ...tc.settings, foreground: "#8b8b8b" } }
+      : tc
+  ),
+};
+
 const highlighter = await createHighlighterCore({
-  themes: [light, dark],
+  themes: [light, darkAccessible],
   langs: [rust, bash, toml],
   engine: createOnigurumaEngine(wasm),
 });

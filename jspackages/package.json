@@ -1,6 +1,7 @@
 {
   "name": "jspackages",
   "version": "1.0.0",
+  "type": "module",
   "main": "build.js",
   "scripts": {
     "build": "rollup -c"
@@ -11,10 +12,6 @@
     "shiki": "^3.13.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.4",
     "rollup": "^4.31.0"

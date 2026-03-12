@@ -30,7 +30,7 @@ pub fn MyDropdownMenu() -> impl IntoView {
             </menu::Trigger>
             <Portal>
                 <menu::Content
-                    class="flex flex-col p-1 w-48 rounded-md border shadow-md bg-background"
+                    class="z-50 flex flex-col p-1 w-48 rounded-md border shadow-md bg-background"
                     show_class="opacity-100 transition duration-150 ease-in"
                     hide_class="opacity-0 transition duration-200 ease-out"
                 >

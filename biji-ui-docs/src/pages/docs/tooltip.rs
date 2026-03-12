@@ -24,7 +24,7 @@ pub fn MyTooltip() -> impl IntoView {
             </tooltip::Trigger>
             <Portal>
                 <tooltip::Content
-                    class="rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
+                    class="z-50 rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
                     show_class="opacity-100"
                     hide_class="opacity-0"
                 >
@@ -159,7 +159,7 @@ pub fn Content() -> impl IntoView {
     use biji_ui::components::tooltip;
     view! {
         <tooltip::Content
-            class="inline-block w-max rounded-lg border border-slate-500 bg-gray-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-opacity duration-200 dark:bg-gray-700"
+            class="z-50 inline-block w-max rounded-lg border border-slate-500 bg-gray-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition-opacity duration-200 dark:bg-gray-700"
             hide_class="opacity-0"
             show_class="opacity-100"
         >
