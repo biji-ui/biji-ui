@@ -5,7 +5,7 @@ use leptos::{
 };
 use leptos_use::use_event_listener;
 
-use crate::items::{Focus, ManageFocus, NavigateItems};
+use crate::items::{Focus, ManageFocus, NavigateItems, FilterActiveItems};
 
 use super::context::{CommandContext, CommandGroupContext, CommandItemContext};
 
@@ -30,6 +30,14 @@ pub fn Root(
 #[component]
 fn RootEvents(children: Children) -> impl IntoView {
     let ctx = expect_context::<CommandContext>();
+
+    // Auto-highlight the first visible item whenever the query or item list changes.
+    Effect::new(move |_| {
+        let _ = ctx.query.get();
+        let _ = ctx.items.get();
+        let first = ctx.navigate_first_item();
+        ctx.set_focus(first.map(|i| i.index));
+    });
 
     let _ = use_event_listener(ctx.root_ref, keydown, move |evt| {
         match evt.key().as_str() {
@@ -78,7 +86,24 @@ pub fn Input(
     let _ = use_event_listener(ctx.input_ref, leptos::ev::input, move |evt| {
         let val = event_target_value(&evt);
         ctx.query.set(val);
-        ctx.item_focus.set(None);
+        // item_focus is reset by the RootEvents Effect that watches ctx.query
+    });
+
+    // Enter on the input selects the currently highlighted item.
+    let _ = use_event_listener(ctx.input_ref, keydown, move |evt| {
+        if evt.key() == "Enter" {
+            evt.prevent_default();
+            let focused = ctx
+                .item_focus
+                .get_untracked()
+                .and_then(|idx| ctx.items.with_untracked(|m| m.get(&idx).copied()))
+                .or_else(|| ctx.navigate_first_item());
+            if let Some(item) = focused {
+                if let Some(el) = item.item_ref.get() {
+                    let _ = el.click();
+                }
+            }
+        }
     });
 
     view! {
