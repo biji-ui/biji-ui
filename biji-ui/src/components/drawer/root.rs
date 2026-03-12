@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::{Arc, Mutex}, time::Duration};
 
 use leptos::{
     context::Provider,
@@ -158,9 +158,16 @@ pub fn Content(
     let content_ref = ctx.content_ref;
 
     // Focus the first focusable element when the drawer opens.
+    // Store the handle so rapid open/close doesn't fire a stale focus.
+    let focus_handle: Arc<Mutex<Option<leptos::leptos_dom::helpers::TimeoutHandle>>> =
+        Arc::new(Mutex::new(None));
+    let focus_handle_cleanup = Arc::clone(&focus_handle);
     let _focus_eff = RenderEffect::new(move |_| {
         if ctx.open.get() {
-            set_timeout(
+            if let Some(h) = focus_handle.lock().unwrap().take() {
+                h.clear();
+            }
+            let handle = leptos::leptos_dom::helpers::set_timeout_with_handle(
                 move || {
                     if let Some(el) = content_ref.get() {
                         focus_first_element(&el);
@@ -168,9 +175,17 @@ pub fn Content(
                 },
                 Duration::from_millis(10),
             );
+            if let Ok(h) = handle {
+                *focus_handle.lock().unwrap() = Some(h);
+            }
         }
     });
-    on_cleanup(move || drop(_focus_eff));
+    on_cleanup(move || {
+        drop(_focus_eff);
+        if let Some(h) = focus_handle_cleanup.lock().unwrap().take() {
+            h.clear();
+        }
+    });
 
     // Tab / Shift+Tab focus trap.
     let _ = use_event_listener(content_ref, keydown, move |evt| {
@@ -195,6 +210,7 @@ pub fn Content(
             attr:aria-describedby={ctx.description_id.get_value()}
             attr:data-state={move || ctx.data_state()}
             attr:data-side={ctx.side.as_str()}
+            attr:tabindex="-1"
         >
             {children()}
         </CustomAnimatedShow>
