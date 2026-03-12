@@ -12,7 +12,9 @@ pub mod combobox;
 pub mod command;
 pub mod context_menu;
 pub mod dialog;
+pub mod drawer;
 pub mod dropdown_menu;
+pub mod hover_card;
 pub mod getting_started;
 pub mod menubar;
 pub mod navigation_menu;
@@ -54,7 +56,9 @@ pub const COMPONENT_PAGES: &[(&str, &str)] = &[
     ("/docs/command", "Command"),
     ("/docs/context-menu", "Context Menu"),
     ("/docs/dialog", "Dialog"),
+    ("/docs/drawer", "Drawer"),
     ("/docs/dropdown-menu", "Dropdown Menu"),
+    ("/docs/hover-card", "Hover Card"),
     ("/docs/menubar", "Menubar"),
     ("/docs/navigation-menu", "Navigation Menu"),
     ("/docs/pin-input", "PIN Input"),
