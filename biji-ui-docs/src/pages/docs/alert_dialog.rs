@@ -27,12 +27,12 @@ pub fn MyAlertDialog() -> impl IntoView {
             </alert_dialog::Trigger>
             <Portal>
                 <alert_dialog::Overlay
-                    class="fixed inset-0 z-50 bg-black/40"
+                    class="fixed inset-0 z-[80] bg-black/40"
                     show_class="opacity-100 duration-300 ease-out"
                     hide_class="opacity-0 duration-200 ease-in"
                 />
                 <alert_dialog::Content
-                    class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-lg bg-background p-6 shadow-xl"
+                    class="fixed left-1/2 top-1/2 z-[90] -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-lg bg-background p-6 shadow-xl"
                     show_class="opacity-100 scale-100 duration-300 ease-out"
                     hide_class="opacity-0 scale-95 duration-200 ease-in"
                 >
@@ -236,12 +236,12 @@ pub fn AlertDialogExample() -> impl IntoView {
             </alert_dialog::Trigger>
             <Portal>
                 <alert_dialog::Overlay
-                    class="fixed inset-0 z-50 bg-zinc-400/20 backdrop-blur-sm transition-opacity duration-300 ease-linear dark:bg-black/40"
+                    class="fixed inset-0 z-[80] bg-zinc-400/20 backdrop-blur-sm transition-opacity duration-300 ease-linear dark:bg-black/40"
                     show_class="opacity-100"
                     hide_class="opacity-0"
                 />
                 <alert_dialog::Content
-                    class="fixed left-1/2 top-1/2 z-50 w-full max-w-[calc(100%-2rem)] sm:max-w-md rounded-lg bg-background p-6 shadow-xl transition-all"
+                    class="fixed left-1/2 top-1/2 z-[90] w-full max-w-[calc(100%-2rem)] sm:max-w-md rounded-lg bg-background p-6 shadow-xl transition-all"
                     show_class="opacity-100 scale-100 duration-300 ease-out translate-x-[-50%] translate-y-[-50%]"
                     hide_class="opacity-0 scale-95 duration-200 ease-in translate-x-[-50%] translate-y-[-50%]"
                 >

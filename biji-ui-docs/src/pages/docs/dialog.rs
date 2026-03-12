@@ -27,12 +27,12 @@ pub fn MyDialog() -> impl IntoView {
             </dialog::Trigger>
             <Portal>
                 <dialog::Overlay
-                    class="fixed inset-0 z-50 bg-black/40"
+                    class="fixed inset-0 z-[80] bg-black/40"
                     show_class="opacity-100 duration-300 ease-out"
                     hide_class="opacity-0 duration-200 ease-in"
                 />
                 <dialog::Content
-                    class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-background p-6 shadow-xl"
+                    class="fixed left-1/2 top-1/2 z-[90] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-background p-6 shadow-xl"
                     show_class="opacity-100 scale-100 duration-300 ease-out"
                     hide_class="opacity-0 scale-95 duration-200 ease-in"
                 >
@@ -185,12 +185,12 @@ pub fn DialogExample() -> impl IntoView {
             </dialog::Trigger>
             <Portal>
                 <dialog::Overlay
-                    class="fixed inset-0 z-50 bg-zinc-400/20 backdrop-blur-sm transition-opacity duration-300 ease-linear dark:bg-black/40"
+                    class="fixed inset-0 z-[80] bg-zinc-400/20 backdrop-blur-sm transition-opacity duration-300 ease-linear dark:bg-black/40"
                     show_class="opacity-100 duration-300 ease-out"
                     hide_class="opacity-0 duration-200 ease-in"
                 ></dialog::Overlay>
                 <dialog::Content
-                    class="z-50 fixed top-[calc(100%-1rem)] left-[50%] md:top-[50%] z-50 w-full max-w-[94%] translate-x-[-50%] translate-y-[-100%] md:translate-y-[-50%] bg-background p-5 sm:max-w-[490px] md:w-full rounded-lg shadow-xl transition-all"
+                    class="z-[90] fixed top-[calc(100%-1rem)] left-[50%] md:top-[50%] w-full max-w-[94%] translate-x-[-50%] translate-y-[-100%] md:translate-y-[-50%] bg-background p-5 sm:max-w-[490px] md:w-full rounded-lg shadow-xl transition-all"
                     show_class="translate-y-0 opacity-100 duration-300 ease-out sm:scale-100"
                     hide_class="translate-y-4 opacity-0 duration-200 ease-in sm:translate-y-0 sm:scale-95"
                 >
