@@ -20,28 +20,28 @@ use biji_ui::components::command;
 #[component]
 pub fn MyCommand() -> impl IntoView {
     view! {
-        <command::Root class="w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden">
+        <command::Root class="overflow-hidden w-full max-w-sm rounded-lg border shadow-md border-border">
             <command::Input
                 placeholder="Search..."
-                class="w-full px-3 py-2 text-sm border-b border-border outline-none bg-background"
+                class="py-2 px-3 w-full text-sm border-b outline-none border-border bg-background"
             />
-            <command::List class="max-h-64 overflow-y-auto p-1">
+            <command::List class="overflow-y-auto p-1 max-h-64">
                 <command::Empty>
-                    <div class="py-6 text-center text-sm text-muted-foreground">
+                    <div class="py-6 text-sm text-center text-muted-foreground">
                         "No results found."
                     </div>
                 </command::Empty>
                 <command::Group label="Actions" label_class="px-2 py-1 text-xs font-semibold text-muted-foreground">
                     <command::Item
                         value="new-file"
-                        class="flex items-center px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+                        class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                         on_select={Callback::new(|val| leptos::logging::log!("selected: {val}"))}
                     >
                         "New File"
                     </command::Item>
                     <command::Item
                         value="new-folder"
-                        class="flex items-center px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                        class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
                     >
                         "New Folder"
                     </command::Item>
@@ -155,20 +155,20 @@ use biji_ui::components::command;
 #[component]
 pub fn MyHighlightedCommand() -> impl IntoView {
     view! {
-        <command::Root class="w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden">
+        <command::Root class="overflow-hidden w-full max-w-sm rounded-lg border shadow-md border-border">
             <command::Input
                 placeholder="Search..."
-                class="w-full px-3 py-2 text-sm border-b border-border outline-none bg-background"
+                class="py-2 px-3 w-full text-sm border-b outline-none border-border bg-background"
             />
-            <command::List class="max-h-64 overflow-y-auto p-1">
+            <command::List class="overflow-y-auto p-1 max-h-64">
                 <command::Empty>
-                    <div class="py-6 text-center text-sm text-muted-foreground">
+                    <div class="py-6 text-sm text-center text-muted-foreground">
                         "No results found."
                     </div>
                 </command::Empty>
                 <command::Item
                     value="accordion"
-                    class="flex items-center px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent"
+                    class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent"
                 >
                     <command::HighlightedText
                         label="Accordion"
@@ -177,7 +177,7 @@ pub fn MyHighlightedCommand() -> impl IntoView {
                 </command::Item>
                 <command::Item
                     value="dialog"
-                    class="flex items-center px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent"
+                    class="flex items-center py-1.5 px-2 text-sm rounded-sm cursor-pointer outline-none data-[highlighted]:bg-accent"
                 >
                     <command::HighlightedText
                         label="Dialog"
@@ -249,8 +249,7 @@ pub fn CommandDocPage() -> impl IntoView {
             />
             <SectionHeading title="Text Highlighting" />
             <p class="mb-4 text-sm text-muted-foreground">
-                "Use "
-                <code class="font-mono text-foreground">"command::HighlightedText"</code>
+                "Use " <code class="font-mono text-foreground">"command::HighlightedText"</code>
                 " inside an item to automatically highlight the portion of the label that matches the current search query."
             </p>
             <DocPreview>
@@ -278,25 +277,24 @@ pub fn CommandDocPage() -> impl IntoView {
 pub fn CommandExample() -> impl IntoView {
     use biji_ui::components::command;
 
-    const ROOT_CLS: &str = "w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden bg-background";
+    const ROOT_CLS: &str =
+        "w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden bg-background";
     const INPUT_CLS: &str = "w-full px-3 py-2 text-sm border-b border-border outline-none bg-background placeholder:text-muted-foreground";
     const ITEM_CLS: &str = "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none \
         data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
         data-[disabled]:opacity-50 data-[disabled]:pointer-events-none";
-    const GROUP_LABEL_CLS: &str = "px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider";
+    const GROUP_LABEL_CLS: &str =
+        "px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider";
 
     let selected = RwSignal::new(String::new());
 
     view! {
         <div class="flex flex-col gap-4 w-full max-w-sm">
             <command::Root class={ROOT_CLS}>
-                <command::Input
-                    placeholder="Type to search..."
-                    class={INPUT_CLS}
-                />
-                <command::List class="max-h-64 overflow-y-auto p-1">
+                <command::Input placeholder="Type to search..." class={INPUT_CLS} />
+                <command::List class="overflow-y-auto p-1 max-h-64">
                     <command::Empty>
-                        <div class="py-6 text-center text-sm text-muted-foreground">
+                        <div class="py-6 text-sm text-center text-muted-foreground">
                             "No results found."
                         </div>
                     </command::Empty>
@@ -351,7 +349,8 @@ pub fn CommandExample() -> impl IntoView {
             </command::Root>
             <Show when={move || !selected.get().is_empty()}>
                 <p class="text-sm text-muted-foreground">
-                    "Selected: " <span class="font-medium text-foreground">{move || selected.get()}</span>
+                    "Selected: "
+                    <span class="font-medium text-foreground">{move || selected.get()}</span>
                 </p>
             </Show>
         </div>
@@ -362,12 +361,14 @@ pub fn CommandExample() -> impl IntoView {
 pub fn HighlightedCommandExample() -> impl IntoView {
     use biji_ui::components::command;
 
-    const ROOT_CLS: &str = "w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden bg-background";
+    const ROOT_CLS: &str =
+        "w-full max-w-sm rounded-lg border border-border shadow-md overflow-hidden bg-background";
     const INPUT_CLS: &str = "w-full px-3 py-2 text-sm border-b border-border outline-none bg-background placeholder:text-muted-foreground";
     const ITEM_CLS: &str = "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer outline-none \
         data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground";
     const HIGHLIGHT_CLS: &str = "bg-yellow-200/80 dark:bg-yellow-500/30 rounded";
-    const GROUP_LABEL_CLS: &str = "px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider";
+    const GROUP_LABEL_CLS: &str =
+        "px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider";
 
     let items = [
         ("accordion", "Accordion"),
@@ -384,27 +385,27 @@ pub fn HighlightedCommandExample() -> impl IntoView {
 
     view! {
         <command::Root class={ROOT_CLS}>
-            <command::Input
-                placeholder="Search components..."
-                class={INPUT_CLS}
-            />
-            <command::List class="max-h-64 overflow-y-auto p-1">
+            <command::Input placeholder="Search docs..." class={INPUT_CLS} />
+            <command::List class="overflow-y-auto p-1 max-h-64">
                 <command::Empty>
-                    <div class="py-6 text-center text-sm text-muted-foreground">
+                    <div class="py-6 text-sm text-center text-muted-foreground">
                         "No results found."
                     </div>
                 </command::Empty>
                 <command::Group label="Components" label_class={GROUP_LABEL_CLS}>
-                    {items.into_iter().map(|(value, label)| {
-                        view! {
-                            <command::Item value={value} class={ITEM_CLS}>
-                                <command::HighlightedText
-                                    label={label.to_string()}
-                                    highlight_class={HIGHLIGHT_CLS}
-                                />
-                            </command::Item>
-                        }
-                    }).collect_view()}
+                    {items
+                        .into_iter()
+                        .map(|(value, label)| {
+                            view! {
+                                <command::Item value={value} class={ITEM_CLS}>
+                                    <command::HighlightedText
+                                        label={label.to_string()}
+                                        highlight_class={HIGHLIGHT_CLS}
+                                    />
+                                </command::Item>
+                            }
+                        })
+                        .collect_view()}
                 </command::Group>
             </command::List>
         </command::Root>
