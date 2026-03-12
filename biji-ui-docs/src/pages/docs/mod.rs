@@ -158,12 +158,12 @@ pub fn TopNav() -> impl IntoView {
             <div class="hidden lg:block lg:flex-auto lg:max-w-md">
                 <SearchButton />
             </div>
-            <div class="flex gap-5 items-center lg:hidden">
+            <div class="flex items-center lg:hidden">
                 <Sidebar />
-                <a aria-label="Home" href="/">
-                    <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
-                </a>
             </div>
+            <a aria-label="Home" href="/" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden">
+                <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
+            </a>
             <div class="flex gap-5 items-center">
                 <nav class="hidden md:block">
                     <ul role="list" class="flex gap-5 items-center">
