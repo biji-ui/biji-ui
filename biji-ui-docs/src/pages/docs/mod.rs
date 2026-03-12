@@ -100,7 +100,10 @@ pub fn ThemeMode() -> impl IntoView {
             positioning={menu::Positioning::BottomEnd}
             hide_delay={Duration::from_millis(200)}
         >
-            <menu::Trigger aria_label="Toggle theme" class="flex justify-center items-center w-6 h-6 rounded-md transition cursor-pointer dark:hover:bg-white/5 hover:bg-zinc-900/5">
+            <menu::Trigger
+                aria_label="Toggle theme"
+                class="flex justify-center items-center w-6 h-6 rounded-md transition cursor-pointer dark:hover:bg-white/5 hover:bg-zinc-900/5"
+            >
                 <icons::Sun class="w-5 h-5 dark:hidden stroke-zinc-900"></icons::Sun>
                 <icons::Moon class="hidden w-5 h-5 dark:block stroke-white"></icons::Moon>
             </menu::Trigger>
@@ -545,7 +548,7 @@ pub fn CommandPalette() -> impl IntoView {
                     <PaletteAutoFocus />
                     <commandui::Input
                         placeholder="Search docs..."
-                        class="py-3 px-4 w-full text-sm border-b outline-none border-border bg-background placeholder:text-muted-foreground"
+                        class="py-3 px-4 w-full text-base border-b outline-none border-border bg-background placeholder:text-muted-foreground"
                     />
                     <commandui::List class="overflow-y-auto p-1 max-h-72">
                         <commandui::Empty>
