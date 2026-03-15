@@ -27,6 +27,7 @@ tokio = { version = "1", features = ["full"], optional = true }
 biji-ui = { path = "../biji-ui", features = ["full"] }
 chrono = { version = "0.4", features = ["wasmbind"] }
 jspackages = { path = "../jspackages" }
+serde = { version = "1", features = ["derive"] }
 
 [features]
 default = ["ssr"]
