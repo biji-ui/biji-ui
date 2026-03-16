@@ -123,8 +123,6 @@ pub fn Toaster(
             <div
                 style={position_style}
                 class={move || container_class.get_value()}
-                aria-live="polite"
-                aria-atomic="false"
             >
                 <For
                     each=move || ctx.toasts.get()
@@ -262,9 +260,24 @@ fn ToastItemView(
         }
     });
 
+    // ── Progress bar CSS transition ──────────────────────────────────────────
+    // Enter animation flips after 1 ms — this also kicks off the progress transition.
+    let entering = RwSignal::new(true);
+    let enter_handle = leptos::leptos_dom::helpers::set_timeout_with_handle(
+        move || entering.set(false),
+        Duration::from_millis(1),
+    )
+    .expect("set_timeout");
+    let enter_handle = StoredValue::new(Some(enter_handle));
+
     // ── Cleanup ──────────────────────────────────────────────────────────────
     on_cleanup(move || {
-        // Cancel any pending dismiss timeout.
+        // Cancel any pending enter / dismiss timeouts.
+        enter_handle.update_value(|h| {
+            if let Some(h) = h.take() {
+                h.clear();
+            }
+        });
         dismiss_handle.with_value(|arc| {
             if let Some(h) = arc.lock().unwrap().take() {
                 h.clear();
@@ -276,11 +289,6 @@ fn ToastItemView(
         }
         drop(pause_eff);
     });
-
-    // ── Progress bar CSS transition ──────────────────────────────────────────
-    // Enter animation flips after 1 ms — this also kicks off the progress transition.
-    let entering = RwSignal::new(true);
-    set_timeout(move || entering.set(false), Duration::from_millis(1));
 
     // Strategy: when `entering` flips we set "width:0%;transition:{total}ms linear"
     // so CSS animates from the current 100% (set at mount) to 0%.
