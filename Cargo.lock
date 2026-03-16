@@ -184,7 +184,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "biji-ui"
-version = "0.4.3"
+version = "0.4.4"
 dependencies = [
  "chrono",
  "leptos",
@@ -195,7 +195,7 @@ dependencies = [
 
 [[package]]
 name = "biji-ui-docs"
-version = "0.4.3"
+version = "0.4.4"
 dependencies = [
  "axum",
  "biji-ui",
@@ -1208,7 +1208,7 @@ dependencies = [
 
 [[package]]
 name = "jspackages"
-version = "0.4.3"
+version = "0.4.4"
 dependencies = [
  "wasm-bindgen",
  "web-sys",
