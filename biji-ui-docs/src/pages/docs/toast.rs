@@ -92,7 +92,7 @@ const TOASTER_PROPS: &[PropRow] = &[
         name: "max_toasts",
         prop_type: "usize",
         default: "5",
-        description: "Maximum number of toasts shown at once.",
+        description: "Maximum number of toasts shown at once. Toasts beyond this limit are immediately dismissed (and animate out).",
     },
     PropRow {
         name: "pause_on_hover",
@@ -172,10 +172,16 @@ const DATA_ATTRS: &[DataAttrRow] = &[
     },
 ];
 
-const KEYBOARD: &[KeyboardRow] = &[KeyboardRow {
-    key: "×",
-    description: "Clicking the dismiss button triggers the exit animation and removes the toast.",
-}];
+const KEYBOARD: &[KeyboardRow] = &[
+    KeyboardRow {
+        key: "Tab",
+        description: "Move focus to the dismiss button.",
+    },
+    KeyboardRow {
+        key: "Enter / Space",
+        description: "Activate the focused dismiss button, triggering the exit animation.",
+    },
+];
 
 #[component]
 pub fn ToastDocPage() -> impl IntoView {
