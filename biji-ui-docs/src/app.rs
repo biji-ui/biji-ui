@@ -32,7 +32,7 @@ use crate::pages::docs::{
     navigation_menu::NavigationMenuDocPage,
     pin_input::PinInputDocPage, popover::PopoverDocPage, progress::ProgressDocPage,
     radio_group::RadioGroupDocPage, select::SelectDocPage, separator::SeparatorDocPage,
-    slider::SliderDocPage, switch::SwitchDocPage, tabs::TabsDocPage,
+    slider::SliderDocPage, switch::SwitchDocPage, tabs::TabsDocPage, toast::ToastDocPage,
     toggle_group::ToggleGroupDocPage, tooltip::TooltipDocPage,
 };
 
@@ -85,6 +85,7 @@ pub fn App() -> impl IntoView {
                         <Route path={path!("slider")} view={SliderDocPage} />
                         <Route path={path!("switch")} view={SwitchDocPage} />
                         <Route path={path!("tabs")} view={TabsDocPage} />
+                        <Route path={path!("toast")} view={ToastDocPage} />
                         <Route path={path!("toggle-group")} view={ToggleGroupDocPage} />
                         <Route path={path!("tooltip")} view={TooltipDocPage} />
                     </ParentRoute>
