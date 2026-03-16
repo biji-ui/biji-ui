@@ -78,6 +78,18 @@ pub fn Toaster(
     let ctx = ToasterContext::new(default_duration, hide_delay, pause_on_hover);
     provide_context(ctx);
 
+    // Auto-dismiss toasts that overflow max_toasts so every toast always gets
+    // a dismissal scheduled, even those not rendered in the visible window.
+    Effect::new(move |_| {
+        let v = ctx.toasts.get();
+        if v.len() > max_toasts {
+            let overflow = v.len() - max_toasts;
+            for toast in &v[..overflow] {
+                ctx.dismiss(toast.id);
+            }
+        }
+    });
+
     let stored_toast_class = StoredValue::new(toast_class);
     let stored_progress_class = StoredValue::new(progress_class);
 
@@ -94,12 +106,13 @@ pub fn Toaster(
         ToastPosition::BottomRight => "position:fixed;bottom:1rem;right:1rem;z-index:9999;",
     };
 
-    // Bottom positions: reverse column so newest appears at the bottom visually.
+    // Bottom positions: use flex-col so the last (newest) item sits at the bottom
+    // nearest the anchor. Top positions: use flex-col-reverse so newest is at top.
     let is_bottom = matches!(
         position,
         ToastPosition::BottomLeft | ToastPosition::BottomCenter | ToastPosition::BottomRight
     );
-    let stack_dir = if is_bottom { "flex-col-reverse" } else { "flex-col" };
+    let stack_dir = if is_bottom { "flex-col" } else { "flex-col-reverse" };
     let container_class = StoredValue::new(format!(
         "flex gap-2 w-[356px] max-w-[calc(100vw-2rem)] {stack_dir} {class}"
     ));
@@ -114,11 +127,7 @@ pub fn Toaster(
                 aria-atomic="false"
             >
                 <For
-                    each=move || {
-                        let v = ctx.toasts.get();
-                        let start = v.len().saturating_sub(max_toasts);
-                        v[start..].to_vec()
-                    }
+                    each=move || ctx.toasts.get()
                     key=|t| t.id
                     children=move |toast| {
                         let toast_class = stored_toast_class.get_value();
@@ -235,16 +244,22 @@ fn ToastItemView(
     // ── Hover event wiring ───────────────────────────────────────────────────
     let toast_ref = NodeRef::<Div>::new();
 
-    let _ = use_event_listener(toast_ref, leptos::ev::pointerenter, move |_| match pause_mode {
-        PauseOnHover::Single => toast_hovered.set(true),
-        PauseOnHover::All => ctx.hover_count.update(|c| *c += 1),
-        PauseOnHover::Disable => {}
+    let _ = use_event_listener(toast_ref, leptos::ev::pointerenter, move |_| {
+        if !matches!(pause_mode, PauseOnHover::Disable) {
+            toast_hovered.set(true);
+        }
+        if matches!(pause_mode, PauseOnHover::All) {
+            ctx.hover_count.update(|c| *c += 1);
+        }
     });
 
-    let _ = use_event_listener(toast_ref, leptos::ev::pointerleave, move |_| match pause_mode {
-        PauseOnHover::Single => toast_hovered.set(false),
-        PauseOnHover::All => ctx.hover_count.update(|c| *c = c.saturating_sub(1)),
-        PauseOnHover::Disable => {}
+    let _ = use_event_listener(toast_ref, leptos::ev::pointerleave, move |_| {
+        if !matches!(pause_mode, PauseOnHover::Disable) {
+            toast_hovered.set(false);
+        }
+        if matches!(pause_mode, PauseOnHover::All) {
+            ctx.hover_count.update(|c| *c = c.saturating_sub(1));
+        }
     });
 
     // ── Cleanup ──────────────────────────────────────────────────────────────
@@ -272,6 +287,9 @@ fn ToastItemView(
     // On pause we snap to the computed current %, then on resume continue to 0%
     // over the remaining duration. All smooth, no rAF needed.
     let progress_style = Signal::derive(move || {
+        if total_ms <= 0.0 {
+            return "width:0%;transition:width 0ms;".to_string();
+        }
         let t = timing.get();
         if entering.get() {
             // Initial mount state: full bar, no transition.
