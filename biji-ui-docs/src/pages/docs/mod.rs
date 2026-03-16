@@ -28,6 +28,7 @@ pub mod separator;
 pub mod slider;
 pub mod switch;
 pub mod tabs;
+pub mod toast;
 pub mod toggle_group;
 pub mod tooltip;
 
@@ -71,6 +72,7 @@ pub const COMPONENT_PAGES: &[(&str, &str)] = &[
     ("/docs/slider", "Slider"),
     ("/docs/switch", "Switch"),
     ("/docs/tabs", "Tabs"),
+    ("/docs/toast", "Toast"),
     ("/docs/toggle-group", "Toggle Group"),
     ("/docs/tooltip", "Tooltip"),
 ];

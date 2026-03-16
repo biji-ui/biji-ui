@@ -5,7 +5,10 @@
     <title>Biji UI</title>
     <link rel="icon" href="/logo.svg" type="image/svg+xml" />
     <link data-trunk rel="tailwind-css" href="input.scss" />
-    <link data-trunk rel="rust" data-wasm-opt="z" data-cargo-no-default-features data-cargo-features="csr" />
+    <link data-trunk rel="copy-file" href="public/logo.svg" />
+    <link data-trunk rel="copy-file" href="public/text-logo.svg" />
+    <link data-trunk rel="copy-file" href="public/full-logo.svg" />
+    <link data-trunk rel="rust" data-wasm-opt="z" data-cargo-no-default-features data-cargo-features="csr" data-bin="biji-ui-docs" />
   </head>
   <body class="bg-background text-foreground"></body>
 </html>

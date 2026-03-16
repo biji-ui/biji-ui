@@ -26,7 +26,7 @@ biji-ui = { version = "0.4", features = ["accordion", "dialog"] }
 biji-ui = { version = "0.4", features = ["full"] }
 ```
 
-Available features: `accordion`, `calendar`, `dialog`, `menu`, `menubar`, `tooltip`, `full`
+Available features: `accordion`, `alert_dialog`, `calendar`, `checkbox`, `collapsible`, `combobox`, `command`, `context_menu`, `dialog`, `drawer`, `hover_card`, `menu`, `menubar`, `navigation_menu`, `pin_input`, `popover`, `progress`, `radio_group`, `select`, `separator`, `slider`, `switch`, `tabs`, `toast`, `toggle_group`, `tooltip`, `full`
 
 ### Example
 
