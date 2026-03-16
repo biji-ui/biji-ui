@@ -70,5 +70,8 @@ pub mod tabs;
 #[cfg(feature = "toggle_group")]
 pub mod toggle_group;
 
+#[cfg(feature = "toast")]
+pub mod toast;
+
 #[cfg(feature = "tooltip")]
 pub mod tooltip;
