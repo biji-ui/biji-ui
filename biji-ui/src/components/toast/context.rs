@@ -106,8 +106,12 @@ impl ToasterContext {
     }
 
     /// Dismiss a specific toast by id. Triggers the exit animation, then removes
-    /// the toast from the list after `hide_delay`.
+    /// the toast from the list after `hide_delay`. No-op if already dismissed.
     pub fn dismiss(&self, id: u32) {
+        let already = self.dismissed.with_untracked(|s| s.contains(&id));
+        if already {
+            return;
+        }
         self.dismissed.update(|s| {
             s.insert(id);
         });
