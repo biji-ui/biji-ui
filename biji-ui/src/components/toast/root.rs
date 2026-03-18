@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use leptos::{
     html::Div,
-    leptos_dom::helpers::{AnimationFrameRequestHandle, TimeoutHandle},
+    leptos_dom::helpers::TimeoutHandle,
     portal::Portal,
     prelude::*,
 };
