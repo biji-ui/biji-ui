@@ -15,37 +15,25 @@ use crate::{
     utils::positioning::{AvoidCollisions, Positioning},
 };
 
-use super::context::{HoverCardContext, next_hover_card_id};
+use super::context::{HoverCardState, next_hover_card_id};
 
-#[component]
-pub fn Root(
-    children: Children,
-    #[prop(into, optional)] class: String,
-    #[prop(default = Positioning::Bottom)] positioning: Positioning,
-    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
-    /// Delay before the card appears after the pointer enters the trigger.
-    #[prop(default = Duration::from_millis(700))]
+fn build_state(
+    open: Option<RwSignal<bool>>,
+    positioning: Positioning,
+    avoid_collisions: AvoidCollisions,
     open_delay: Duration,
-    /// Delay before the card hides after the pointer leaves.
-    #[prop(default = Duration::from_millis(300))]
     close_delay: Duration,
-    /// Animation unmount delay — should match your CSS transition duration.
-    #[prop(default = Duration::from_millis(200))]
     hide_delay: Duration,
-    #[prop(default = 8)] arrow_size: i32,
-    #[prop(default = false)] open: bool,
-    #[prop(optional)] on_open_change: Option<Callback<bool>>,
-) -> impl IntoView {
+    arrow_size: i32,
+) -> HoverCardState {
     let open_arc = Arc::new(Mutex::new(None));
     let close_arc = Arc::new(Mutex::new(None));
-
-    let cleanup_open = Arc::clone(&open_arc);
-    let cleanup_close = Arc::clone(&close_arc);
-
-    let ctx = HoverCardContext {
+    let open_sig = open.unwrap_or_else(|| RwSignal::new(false));
+    HoverCardState {
+        open: open_sig,
+        data_state: Signal::derive(move || if open_sig.get() { "open" } else { "closed" }),
         trigger_ref: NodeRef::new(),
         content_ref: NodeRef::new(),
-        open: RwSignal::new(open),
         open_delay,
         close_delay,
         hide_delay,
@@ -53,34 +41,87 @@ pub fn Root(
         avoid_collisions,
         arrow_size,
         hover_card_id: StoredValue::new(next_hover_card_id()),
-        on_open_change,
         open_timer: StoredValue::new(open_arc),
         close_timer: StoredValue::new(close_arc),
-    };
+    }
+}
 
+/// Returns the [`HoverCardState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+pub fn use_hover_card() -> HoverCardState {
+    expect_context::<HoverCardState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`HoverCardState`]
+/// directly inside the children via the `let:` binding.
+#[component]
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(HoverCardState) -> IV + Send + Sync + 'static,
+    #[prop(into, optional)] class: String,
+    #[prop(default = Positioning::Bottom)] positioning: Positioning,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+    #[prop(default = Duration::from_millis(700))] open_delay: Duration,
+    #[prop(default = Duration::from_millis(300))] close_delay: Duration,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = 8)] arrow_size: i32,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
+) -> impl IntoView {
+    let state = build_state(
+        open,
+        positioning,
+        avoid_collisions,
+        open_delay,
+        close_delay,
+        hide_delay,
+        arrow_size,
+    );
     on_cleanup(move || {
-        if let Some(h) = cleanup_open.lock().unwrap().take() {
-            h.clear();
-        }
-        if let Some(h) = cleanup_close.lock().unwrap().take() {
-            h.clear();
-        }
+        state.cancel_open_timer();
+        state.cancel_close_timer();
     });
-
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <RootEvents>
-                <span class={class}>{children()}</span>
+                <span class={class}>{children(state)}</span>
             </RootEvents>
         </Provider>
     }
 }
 
+/// The standard hover card root. Use [`RootWith`] instead when you need to access
+/// [`HoverCardState`] inline via `let:h`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(default = Positioning::Bottom)] positioning: Positioning,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+    #[prop(default = Duration::from_millis(700))] open_delay: Duration,
+    #[prop(default = Duration::from_millis(300))] close_delay: Duration,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = 8)] arrow_size: i32,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
+) -> impl IntoView {
+    view! {
+        <RootWith
+            positioning={positioning}
+            avoid_collisions={avoid_collisions}
+            open_delay={open_delay}
+            close_delay={close_delay}
+            hide_delay={hide_delay}
+            arrow_size={arrow_size}
+            open={open}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
+    }
+}
+
 #[component]
 fn RootEvents(children: Children) -> impl IntoView {
-    let ctx = expect_context::<HoverCardContext>();
+    let ctx = expect_context::<HoverCardState>();
 
-    // Escape: close immediately.
     let _ = use_event_listener(use_document(), keydown, move |evt| {
         if evt.key() == "Escape" && ctx.open.get() {
             ctx.close_immediate();
@@ -90,18 +131,16 @@ fn RootEvents(children: Children) -> impl IntoView {
     children()
 }
 
-/// Wraps children in a `<span>` that listens for hover events to show/hide
-/// the card.
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<HoverCardContext>();
+    let ctx = expect_context::<HoverCardState>();
 
     view! {
         <TriggerEvents>
             <span
                 node_ref={ctx.trigger_ref}
                 aria-describedby={move || ctx.open.get().then(|| ctx.hover_card_id.get_value())}
-                data-state={move || ctx.data_state()}
+                data-state={ctx.data_state}
                 class={class}
             >
                 {children()}
@@ -112,37 +151,31 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 
 #[component]
 fn TriggerEvents(children: Children) -> impl IntoView {
-    let ctx = expect_context::<HoverCardContext>();
+    let ctx = expect_context::<HoverCardState>();
 
-    // Trigger: pointer enters → cancel any pending close, schedule open.
     let _ = use_event_listener(ctx.trigger_ref, leptos::ev::pointerenter, move |_| {
         ctx.cancel_close_timer();
         ctx.schedule_open();
     });
 
-    // Trigger: pointer leaves → cancel any pending open, schedule close.
     let _ = use_event_listener(ctx.trigger_ref, leptos::ev::pointerleave, move |_| {
         ctx.cancel_open_timer();
         ctx.schedule_close();
     });
 
-    // Content: pointer enters → cancel pending close so the card stays open.
     let _ = use_event_listener(ctx.content_ref, leptos::ev::pointerenter, move |_| {
         ctx.cancel_close_timer();
     });
 
-    // Content: pointer leaves → schedule close.
     let _ = use_event_listener(ctx.content_ref, leptos::ev::pointerleave, move |_| {
         ctx.schedule_close();
     });
 
-    // Trigger: focus → schedule open (keyboard / touch accessibility).
     let _ = use_event_listener(ctx.trigger_ref, leptos::ev::focus, move |_| {
         ctx.cancel_close_timer();
         ctx.schedule_open();
     });
 
-    // Trigger: blur → schedule close.
     let _ = use_event_listener(ctx.trigger_ref, leptos::ev::blur, move |_| {
         ctx.cancel_open_timer();
         ctx.schedule_close();
@@ -151,8 +184,6 @@ fn TriggerEvents(children: Children) -> impl IntoView {
     children()
 }
 
-/// The positioned card panel.  Use inside a `<Portal>` and animate with
-/// `show_class` / `hide_class`.
 #[component]
 pub fn Content(
     children: ChildrenFn,
@@ -160,7 +191,7 @@ pub fn Content(
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<HoverCardContext>();
+    let ctx = expect_context::<HoverCardState>();
     let content_ref = ctx.content_ref;
 
     let UseElementBoundingReturn {
@@ -263,12 +294,9 @@ pub fn Content(
     }
 }
 
-/// An optional decorative arrow.  Position with CSS; the CSS custom properties
-/// `--biji-tooltip-arrow-top`, `--biji-tooltip-arrow-left`, and
-/// `--biji-tooltip-arrow-rotation` are set by the positioning engine.
 #[component]
 pub fn Arrow(#[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<HoverCardContext>();
+    let ctx = expect_context::<HoverCardState>();
     view! {
         <div
             class={class}
