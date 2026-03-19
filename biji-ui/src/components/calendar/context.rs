@@ -3,9 +3,12 @@ use leptos::prelude::*;
 
 use super::types::{CalendarValue, CalendarView, SelectionType, WeekStartsOn};
 
-/// Shared state for the entire calendar widget.
+/// Reactive state for a calendar. Available via [`use_calendar`](super::root::use_calendar)
+/// or the `let:` binding on [`RootWith`](super::root::RootWith).
+///
+/// All fields are `Copy`, so it is safe to pass this struct to child components as a prop.
 #[derive(Copy, Clone)]
-pub struct CalendarContext {
+pub struct CalendarState {
     /// First day of the first displayed month (anchor for navigation).
     pub placeholder: RwSignal<NaiveDate>,
     /// Current view mode.
@@ -18,20 +21,21 @@ pub struct CalendarContext {
     pub months: usize,
     pub min_date: Option<NaiveDate>,
     pub max_date: Option<NaiveDate>,
-    /// Optional user-supplied predicate. `Send + Sync` required by Leptos 0.8 arena allocator.
-    pub is_date_disabled: Option<StoredValue<Box<dyn Fn(NaiveDate) -> bool + Send + Sync>>>,
     pub week_starts_on: WeekStartsOn,
-    /// Hovered date for range selection preview.
+    /// Optional user-supplied predicate. `Send + Sync` required by Leptos 0.8 arena allocator.
+    pub(crate) is_date_disabled:
+        Option<StoredValue<Box<dyn Fn(NaiveDate) -> bool + Send + Sync>>>,
+    /// Hovered date — set while the pointer is over a day cell.
     pub hover_date: RwSignal<Option<NaiveDate>>,
     /// Currently keyboard-focused date.
-    pub focused_date: RwSignal<Option<NaiveDate>>,
+    pub(crate) focused_date: RwSignal<Option<NaiveDate>>,
     /// Called whenever the selection changes.
-    pub on_change: Option<Callback<CalendarValue>>,
+    pub(crate) on_change: Option<Callback<CalendarValue>>,
 }
 
-impl CalendarContext {
+impl CalendarState {
     /// Returns true if the given date should be rendered as disabled.
-    pub fn date_is_disabled(&self, date: NaiveDate) -> bool {
+    pub(crate) fn date_is_disabled(&self, date: NaiveDate) -> bool {
         if let Some(min) = self.min_date {
             if date < min {
                 return true;
@@ -49,7 +53,7 @@ impl CalendarContext {
     }
 
     /// Returns true if `date` falls in the hover-preview range (Range mode, start set, end not yet set).
-    pub fn date_in_hover_range(&self, date: NaiveDate) -> bool {
+    pub(crate) fn date_in_hover_range(&self, date: NaiveDate) -> bool {
         if self.selection_type != SelectionType::Range {
             return false;
         }
@@ -73,18 +77,7 @@ impl CalendarContext {
     }
 
     /// Update the selection value and fire the `on_change` callback.
-    ///
-    /// In **controlled mode** (`value` was passed as an external `RwSignal`),
-    /// `self.value` IS that external signal, so the `set` here mutates it
-    /// directly and immediately notifies any reactive subscriber. `on_change`
-    /// is then also fired. If the caller reacts to the signal *and* passes
-    /// `on_change`, it will observe the change twice — prefer reacting to the
-    /// signal alone in controlled mode; use `on_change` only for out-of-band
-    /// side effects (e.g. persisting to a server).
-    ///
-    /// In **uncontrolled mode** `self.value` is a private signal; `on_change`
-    /// is the only mechanism by which the parent can observe selection changes.
-    pub fn emit_change(&self, new_val: CalendarValue) {
+    pub(crate) fn emit_change(&self, new_val: CalendarValue) {
         self.value.set(new_val.clone());
         if let Some(cb) = self.on_change {
             cb.run(new_val);
@@ -93,7 +86,7 @@ impl CalendarContext {
 }
 
 /// Per-Grid context: holds the specific month this grid renders.
-/// Uses `RwSignal` so it stays reactive when `CalendarContext.placeholder` changes.
+/// Uses `RwSignal` so it stays reactive when `CalendarState.placeholder` changes.
 #[derive(Copy, Clone)]
 pub struct GridContext {
     pub month: RwSignal<NaiveDate>,

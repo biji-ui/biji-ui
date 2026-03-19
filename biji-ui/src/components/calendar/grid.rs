@@ -8,7 +8,7 @@ use leptos::{
 use leptos_use::use_event_listener;
 
 use super::{
-    context::{CalendarContext, GridContext},
+    context::{CalendarState, GridContext},
     types::{CalendarValue, CalendarView, SelectionType, WeekStartsOn},
 };
 
@@ -20,7 +20,7 @@ pub fn Grid(
     #[prop(into, optional)] class: String,
     children: Children,
 ) -> impl IntoView {
-    let cal_ctx = expect_context::<CalendarContext>();
+    let cal_ctx = expect_context::<CalendarState>();
 
     // Derive this grid's month reactively.
     let month_signal = RwSignal::new(compute_grid_month(
@@ -56,7 +56,7 @@ fn compute_grid_month(placeholder: NaiveDate, offset: usize) -> NaiveDate {
 /// Automatically hidden when the calendar is in Month or Year view.
 #[component]
 pub fn GridHead(#[prop(into, optional)] class: String) -> impl IntoView {
-    let cal_ctx = expect_context::<CalendarContext>();
+    let cal_ctx = expect_context::<CalendarState>();
     let labels = cal_ctx.week_starts_on.ordered_labels();
     let sv_class = StoredValue::new(class);
 
@@ -107,7 +107,7 @@ pub fn GridBody(
     #[prop(into, optional)]
     year_class: String,
 ) -> impl IntoView {
-    let cal_ctx = expect_context::<CalendarContext>();
+    let cal_ctx = expect_context::<CalendarState>();
     let grid_ctx = expect_context::<GridContext>();
 
     // Store strings as StoredValues so they can be used inside reactive closures.
@@ -151,7 +151,7 @@ pub fn GridBody(
     }
 }
 
-fn render_day_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl IntoView {
+fn render_day_grid(cal_ctx: CalendarState, grid_ctx: GridContext) -> impl IntoView {
     let today = chrono::Local::now().date_naive();
     // Untracked: the outer GridBody closure already subscribes to grid_ctx.month.
     let month = grid_ctx.month.get_untracked();
@@ -179,7 +179,7 @@ fn render_day_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl Into
 }
 
 fn render_day_cell(
-    cal_ctx: CalendarContext,
+    cal_ctx: CalendarState,
     grid_ctx: GridContext,
     date: NaiveDate,
     today: NaiveDate,
@@ -264,7 +264,7 @@ fn render_day_cell(
     }
 }
 
-fn handle_day_click(ctx: CalendarContext, date: NaiveDate) {
+fn handle_day_click(ctx: CalendarState, date: NaiveDate) {
     let new_val = match ctx.selection_type {
         SelectionType::Single => {
             if matches!(ctx.value.get(), CalendarValue::Single(Some(d)) if d == date) {
@@ -318,7 +318,7 @@ fn handle_day_click(ctx: CalendarContext, date: NaiveDate) {
 
 /// Walk from `start` by `step` days until a non-disabled date is found.
 /// Returns `None` if no such date is found within 62 steps (two months).
-fn step_to_non_disabled(ctx: CalendarContext, start: NaiveDate, step: i64) -> Option<NaiveDate> {
+fn step_to_non_disabled(ctx: CalendarState, start: NaiveDate, step: i64) -> Option<NaiveDate> {
     let mut d = start;
     for _ in 0..62 {
         if !ctx.date_is_disabled(d) {
@@ -329,7 +329,7 @@ fn step_to_non_disabled(ctx: CalendarContext, start: NaiveDate, step: i64) -> Op
     None
 }
 
-fn handle_day_keydown(ctx: CalendarContext, date: NaiveDate, evt: web_sys::KeyboardEvent) {
+fn handle_day_keydown(ctx: CalendarState, date: NaiveDate, evt: web_sys::KeyboardEvent) {
     let key = evt.key();
     let new_focus: Option<NaiveDate> = match key.as_str() {
         // Backward navigation: scan backward (-1) from the candidate.
@@ -394,7 +394,7 @@ fn handle_day_keydown(ctx: CalendarContext, date: NaiveDate, evt: web_sys::Keybo
     }
 }
 
-fn render_month_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl IntoView {
+fn render_month_grid(cal_ctx: CalendarState, grid_ctx: GridContext) -> impl IntoView {
     // Untracked: outer closure subscribes.
     let year = grid_ctx.month.get_untracked().year();
     let today = chrono::Local::now().date_naive();
@@ -475,7 +475,7 @@ fn render_month_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl In
         .collect_view()
 }
 
-fn handle_month_keydown(ctx: CalendarContext, month_date: NaiveDate, evt: web_sys::KeyboardEvent) {
+fn handle_month_keydown(ctx: CalendarState, month_date: NaiveDate, evt: web_sys::KeyboardEvent) {
     let key = evt.key();
     let new_focus: Option<NaiveDate> = match key.as_str() {
         // Left/Right: ±1 month; wraps into adjacent year.
@@ -512,7 +512,7 @@ fn handle_month_keydown(ctx: CalendarContext, month_date: NaiveDate, evt: web_sy
     }
 }
 
-fn render_year_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl IntoView {
+fn render_year_grid(cal_ctx: CalendarState, grid_ctx: GridContext) -> impl IntoView {
     let anchor_year = grid_ctx.month.get_untracked().year();
     let anchor_month = grid_ctx.month.get_untracked().month();
     let decade_start = (anchor_year / 10) * 10;
@@ -587,7 +587,7 @@ fn render_year_grid(cal_ctx: CalendarContext, grid_ctx: GridContext) -> impl Int
 }
 
 fn handle_year_keydown(
-    ctx: CalendarContext,
+    ctx: CalendarState,
     year: i32,
     anchor_month: u32,
     decade_start: i32,
