@@ -36,14 +36,17 @@ pub fn use_slider() -> SliderState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(SliderState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(default = 0.0)] value: f64,
+    /// Controlled signal. When provided, the slider reads and writes this signal directly.
+    #[prop(into, default = None)]
+    value: Option<RwSignal<f64>>,
+    #[prop(default = 0.0)] default_value: f64,
     #[prop(default = 0.0)] min: f64,
     #[prop(default = 100.0)] max: f64,
     #[prop(default = 1.0)] step: f64,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     let (min, max) = if min <= max { (min, max) } else { (max, min) };
-    let state = SliderState::new(value, min, max, step, disabled);
+    let state = SliderState::new(value, default_value, min, max, step, disabled);
 
     view! {
         <Provider value={state}>
@@ -67,14 +70,15 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
-    #[prop(default = 0.0)] value: f64,
+    #[prop(into, default = None)] value: Option<RwSignal<f64>>,
+    #[prop(default = 0.0)] default_value: f64,
     #[prop(default = 0.0)] min: f64,
     #[prop(default = 100.0)] max: f64,
     #[prop(default = 1.0)] step: f64,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     view! {
-        <RootWith value=value min=min max=max step=step disabled=disabled class=class let:_>
+        <RootWith value=value default_value=default_value min=min max=max step=step disabled=disabled class=class let:_>
             {children()}
         </RootWith>
     }
