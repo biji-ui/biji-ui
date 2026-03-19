@@ -23,6 +23,25 @@ pub fn MySwitch() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::switch;
+
+#[component]
+pub fn LabeledSwitch() -> impl IntoView {
+    let switch_class = "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background bg-zinc-300 dark:bg-zinc-600 data-[state=checked]:bg-primary";
+    let thumb_class = "pointer-events-none block h-5 w-5 rounded-full bg-white data-[state=checked]:bg-primary-foreground shadow-md ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0";
+
+    view! {
+        <label class="flex items-center gap-3 cursor-pointer select-none">
+            <switch::RootWith checked=false class={switch_class} let:s>
+                <switch::Thumb class={thumb_class} />
+                <span class="sr-only">{move || if s.checked.get() { "On" } else { "Off" }}</span>
+            </switch::RootWith>
+            <span class="text-sm font-medium">"Notifications"</span>
+        </label>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -41,12 +60,6 @@ const ROOT_PROPS: &[PropRow] = &[
         prop_type: "bool",
         default: "false",
         description: "When true, prevents the switch from being toggled.",
-    },
-    PropRow {
-        name: "on_checked_change",
-        prop_type: "Option<Callback<bool>>",
-        default: "None",
-        description: "Callback fired when the switch state changes. Receives true when on, false when off.",
     },
 ];
 
@@ -97,12 +110,52 @@ pub fn SwitchDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-4 text-sm text-muted-foreground">
+                "Use "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"<RootWith>"</code>
+                " when you need direct access to "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"SwitchState"</code>
+                " inside the children. The "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"let:s"</code>
+                " binding exposes "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"s.checked"</code>
+                " and "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"s.data_state"</code>
+                " as reactive signals for custom rendering."
+            </p>
+            <DocPreview>
+                <SwitchRootWithExample />
+            </DocPreview>
+            <Code
+                class="mt-4 [&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Thumb" rows={THUMB_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn SwitchRootWithExample() -> impl IntoView {
+    use biji_ui::components::switch;
+
+    let switch_class = "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background bg-zinc-300 dark:bg-zinc-600 data-[state=checked]:bg-primary";
+    let thumb_class = "pointer-events-none block h-5 w-5 rounded-full bg-white data-[state=checked]:bg-primary-foreground shadow-md ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0";
+
+    view! {
+        <label class="flex items-center gap-3 cursor-pointer select-none">
+            <switch::RootWith checked=false class={switch_class} let:s>
+                <switch::Thumb class={thumb_class} />
+                <span class="sr-only">{move || if s.checked.get() { "On" } else { "Off" }}</span>
+            </switch::RootWith>
+            <span class="text-sm font-medium">"Notifications"</span>
+        </label>
     }
 }
 
