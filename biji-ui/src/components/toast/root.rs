@@ -267,15 +267,23 @@ fn ToastItemView(
     // during entering — the browser skips painting and the transition has no
     // valid starting point, causing the bar to silently stay at 0%.
     let entering = RwSignal::new(true);
+    // Both rAF handles are stored so either can be cancelled on cleanup.
+    // The first fires and replaces itself with the second; on_cleanup cancels
+    // whichever handle is currently stored.
     let enter_handle: StoredValue<Option<AnimationFrameRequestHandle>> =
-        StoredValue::new(Some(
-            leptos::leptos_dom::helpers::request_animation_frame_with_handle(move || {
-                let _ = leptos::leptos_dom::helpers::request_animation_frame(
-                    move || entering.set(false),
-                );
-            })
-            .expect("rAF"),
-        ));
+        StoredValue::new(None);
+    enter_handle.set_value(Some(
+        leptos::leptos_dom::helpers::request_animation_frame_with_handle(move || {
+            if let Ok(h) =
+                leptos::leptos_dom::helpers::request_animation_frame_with_handle(move || {
+                    entering.set(false);
+                })
+            {
+                enter_handle.set_value(Some(h));
+            }
+        })
+        .expect("rAF"),
+    ));
 
     // ── Cleanup ──────────────────────────────────────────────────────────────
     on_cleanup(move || {
