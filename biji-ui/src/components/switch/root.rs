@@ -25,10 +25,13 @@ pub fn use_switch() -> SwitchState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(SwitchState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(default = false)] checked: bool,
+    /// Controlled signal. When provided, the switch reads and writes this signal directly.
+    #[prop(into, default = None)]
+    checked: Option<RwSignal<bool>>,
+    #[prop(default = false)] default_checked: bool,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let state = SwitchState::new(checked, disabled);
+    let state = SwitchState::new(checked, default_checked, disabled);
 
     let _ = use_event_listener(state.trigger_ref, click, move |_| {
         if state.disabled {
@@ -63,11 +66,12 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
-    #[prop(default = false)] checked: bool,
+    #[prop(into, default = None)] checked: Option<RwSignal<bool>>,
+    #[prop(default = false)] default_checked: bool,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     view! {
-        <RootWith checked=checked disabled=disabled class=class let:_>
+        <RootWith checked=checked default_checked=default_checked disabled=disabled class=class let:_>
             {children()}
         </RootWith>
     }
