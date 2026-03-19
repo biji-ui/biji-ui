@@ -7,6 +7,6 @@ pub use root::Cancel;
 pub use root::Content;
 pub use root::Description;
 pub use root::Overlay;
-pub use root::{Root, RootWith, use_alert_dialog};
 pub use root::Title;
 pub use root::Trigger;
+pub use root::{Root, RootWith, use_alert_dialog};

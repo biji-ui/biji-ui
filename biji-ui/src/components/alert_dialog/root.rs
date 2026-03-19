@@ -1,5 +1,8 @@
 use std::{
-    sync::{Arc, Mutex, atomic::{AtomicUsize, Ordering}},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicUsize, Ordering},
+    },
     time::Duration,
 };
 
@@ -24,12 +27,11 @@ fn next_alert_ids() -> (String, String) {
 }
 
 fn build_state(
-    open: bool,
+    open: Option<RwSignal<bool>>,
     prevent_scroll: bool,
     hide_delay: Duration,
-    on_open_change: Option<Callback<bool>>,
 ) -> AlertDialogState {
-    let open_sig = RwSignal::new(open);
+    let open_sig = open.unwrap_or_else(|| RwSignal::new(false));
     let (title_id, desc_id) = next_alert_ids();
     AlertDialogState {
         open: open_sig,
@@ -41,7 +43,6 @@ fn build_state(
         hide_delay,
         title_id: StoredValue::new(title_id),
         desc_id: StoredValue::new(desc_id),
-        on_open_change,
     }
 }
 
@@ -70,11 +71,9 @@ pub fn RootWith<IV: IntoView + 'static>(
     #[prop(into, optional)] class: String,
     #[prop(default = true)] prevent_scroll: bool,
     #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
-    #[prop(default = false)] open: bool,
-    #[prop(optional)] on_open_change: Option<Callback<bool>>,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
 ) -> impl IntoView {
-    let state = build_state(open, prevent_scroll, hide_delay, on_open_change);
-
+    let state = build_state(open, prevent_scroll, hide_delay);
     view! {
         <Provider value={state}>
             <RootEvents>
@@ -92,17 +91,18 @@ pub fn Root(
     #[prop(into, optional)] class: String,
     #[prop(default = true)] prevent_scroll: bool,
     #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
-    #[prop(default = false)] open: bool,
-    #[prop(optional)] on_open_change: Option<Callback<bool>>,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
 ) -> impl IntoView {
-    let state = build_state(open, prevent_scroll, hide_delay, on_open_change);
-
     view! {
-        <Provider value={state}>
-            <RootEvents>
-                <div class={class}>{children()}</div>
-            </RootEvents>
-        </Provider>
+        <RootWith
+            prevent_scroll={prevent_scroll}
+            hide_delay={hide_delay}
+            open={open}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
     }
 }
 
@@ -128,12 +128,7 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
     });
 
     view! {
-        <button
-            node_ref={ctx.trigger_ref}
-            type="button"
-            data-state={ctx.data_state}
-            class={class}
-        >
+        <button node_ref={ctx.trigger_ref} type="button" data-state={ctx.data_state} class={class}>
             {children()}
         </button>
     }

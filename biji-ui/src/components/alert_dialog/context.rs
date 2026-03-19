@@ -16,21 +16,14 @@ pub struct AlertDialogState {
     pub(crate) hide_delay: Duration,
     pub(crate) title_id: StoredValue<String>,
     pub(crate) desc_id: StoredValue<String>,
-    pub(crate) on_open_change: Option<Callback<bool>>,
 }
 
 impl AlertDialogState {
     pub(crate) fn open(&self) {
         self.open.set(true);
-        if let Some(cb) = self.on_open_change {
-            cb.run(true);
-        }
     }
 
     pub(crate) fn close(&self) {
         self.open.set(false);
-        if let Some(cb) = self.on_open_change {
-            cb.run(false);
-        }
     }
 }
