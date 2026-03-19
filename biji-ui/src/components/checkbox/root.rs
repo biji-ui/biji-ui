@@ -1,61 +1,84 @@
 use leptos::{context::Provider, ev::click, prelude::*};
 use leptos_use::use_event_listener;
 
-use super::context::{CheckboxContext, CheckedState};
+use super::context::{CheckboxState, CheckedState};
 
+/// Returns the [`CheckboxState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+///
+/// Call this inside any child component that needs access to checkbox state.
+pub fn use_checkbox() -> CheckboxState {
+    expect_context::<CheckboxState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`CheckboxState`]
+/// directly inside the children via the `let:` binding.
+///
+/// ```rust
+/// <checkbox::RootWith checked=false let:cb>
+///     <checkbox::Indicator>
+///         <Icon name="check" />
+///     </checkbox::Indicator>
+///     <span class="sr-only">{move || cb.data_state.get()}</span>
+/// </checkbox::RootWith>
+/// ```
+///
+/// The `cb: CheckboxState` binding is `Copy`, so it can be passed to child components as a prop.
 #[component]
-pub fn Root(
-    children: Children,
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(CheckboxState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
     #[prop(default = false)] checked: bool,
     #[prop(default = false)] indeterminate: bool,
     #[prop(default = false)] disabled: bool,
-    #[prop(optional)] on_checked_change: Option<Callback<bool>>,
 ) -> impl IntoView {
-    let initial = if indeterminate {
-        CheckedState::Indeterminate
-    } else if checked {
-        CheckedState::Checked
-    } else {
-        CheckedState::Unchecked
-    };
+    let state = CheckboxState::new(checked, indeterminate, disabled);
 
-    let ctx = CheckboxContext {
-        checked: RwSignal::new(initial),
-        disabled,
-        trigger_ref: NodeRef::new(),
-    };
-
-    let _ = use_event_listener(ctx.trigger_ref, click, move |_| {
-        if ctx.disabled {
+    let _ = use_event_listener(state.trigger_ref, click, move |_| {
+        if state.disabled {
             return;
         }
-        ctx.checked.update(|state| {
-            *state = match *state {
+        state.checked.update(|s| {
+            *s = match *s {
                 CheckedState::Checked => CheckedState::Unchecked,
                 CheckedState::Unchecked | CheckedState::Indeterminate => CheckedState::Checked,
             };
         });
-        if let Some(cb) = on_checked_change {
-            cb.run(ctx.checked.get() == CheckedState::Checked);
-        }
     });
 
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <button
-                node_ref={ctx.trigger_ref}
+                node_ref={state.trigger_ref}
                 type="button"
                 role="checkbox"
-                aria-checked={move || ctx.checked.get().aria_checked()}
-                aria-disabled={if ctx.disabled { Some("true") } else { None }}
-                data-state={move || ctx.checked.get().as_str()}
-                data-disabled={ctx.disabled}
+                aria-checked={move || state.checked.get().aria_checked()}
+                aria-disabled={if state.disabled { Some("true") } else { None }}
+                data-state={move || state.data_state.get()}
+                data-disabled={state.disabled}
                 class={class}
             >
-                {children()}
+                {children(state)}
             </button>
         </Provider>
+    }
+}
+
+/// The standard checkbox root. Renders a `<button role="checkbox">` with ARIA attributes
+/// and provides [`CheckboxState`] to all descendants via context.
+///
+/// Use [`RootWith`] instead when you need to access [`CheckboxState`] inline via `let:cb`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(default = false)] checked: bool,
+    #[prop(default = false)] indeterminate: bool,
+    #[prop(default = false)] disabled: bool,
+) -> impl IntoView {
+    view! {
+        <RootWith checked=checked indeterminate=indeterminate disabled=disabled class=class let:_>
+            {children()}
+        </RootWith>
     }
 }
 
@@ -64,13 +87,13 @@ pub fn Indicator(
     children: Children,
     #[prop(into, optional)] class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<CheckboxContext>();
+    let state = expect_context::<CheckboxState>();
 
     view! {
         <span
             aria-hidden="true"
-            data-state={move || ctx.checked.get().as_str()}
-            data-disabled={ctx.disabled}
+            data-state={move || state.data_state.get()}
+            data-disabled={state.disabled}
             class={class}
         >
             {children()}
