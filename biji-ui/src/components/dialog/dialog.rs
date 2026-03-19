@@ -3,14 +3,14 @@ use leptos_use::use_event_listener;
 use wasm_bindgen::JsCast;
 
 use crate::{
-    cn, components::dialog::context::DialogContext, custom_animated_show::CustomAnimatedShow,
+    cn, components::dialog::context::DialogState, custom_animated_show::CustomAnimatedShow,
 };
 
 use super::context::RootContext;
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let dialog_ctx = expect_context::<DialogContext>();
+    let dialog_ctx = expect_context::<DialogState>();
 
     let trigger_ref = dialog_ctx.trigger_ref;
 
@@ -25,7 +25,7 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 
 #[component]
 pub fn TriggerEvents(children: Children) -> impl IntoView {
-    let dialog_ctx = expect_context::<DialogContext>();
+    let dialog_ctx = expect_context::<DialogState>();
 
     let _ = use_event_listener(dialog_ctx.trigger_ref, click, move |_| {
         dialog_ctx.toggle();
@@ -50,7 +50,7 @@ pub fn Content(
     #[prop(into, optional)]
     hide_class: String,
 ) -> impl IntoView {
-    let dialog_ctx = expect_context::<DialogContext>();
+    let dialog_ctx = expect_context::<DialogState>();
     let root_ctx = expect_context::<RootContext>();
 
     let content_ref = root_ctx.content_ref;
@@ -208,7 +208,7 @@ pub fn Overlay(
     #[prop(into, optional)]
     hide_class: String,
 ) -> impl IntoView {
-    let dialog_ctx = expect_context::<DialogContext>();
+    let dialog_ctx = expect_context::<DialogState>();
     let root_ctx = expect_context::<RootContext>();
 
     let overlay_ref = root_ctx.overlay_ref;
@@ -229,7 +229,7 @@ pub fn Overlay(
 
 #[component]
 pub fn OverlayEvents(children: Children) -> impl IntoView {
-    let dialog_ctx = expect_context::<DialogContext>();
+    let dialog_ctx = expect_context::<DialogState>();
     let root_ctx = expect_context::<RootContext>();
 
     let _ = use_event_listener(root_ctx.overlay_ref, click, move |_| {
@@ -256,7 +256,7 @@ pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl 
 
 #[component]
 pub fn CloseEvents(children: Children) -> impl IntoView {
-    let dialog_ctx = expect_context::<DialogContext>();
+    let dialog_ctx = expect_context::<DialogState>();
     let root_ctx = expect_context::<RootContext>();
 
     let _ = use_event_listener(root_ctx.close_ref, click, move |_| {
