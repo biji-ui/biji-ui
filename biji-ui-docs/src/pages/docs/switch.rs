@@ -33,7 +33,7 @@ pub fn LabeledSwitch() -> impl IntoView {
 
     view! {
         <label class="flex items-center gap-3 cursor-pointer select-none">
-            <switch::RootWith checked=false class={switch_class} let:s>
+            <switch::RootWith default_checked=false class={switch_class} let:s>
                 <switch::Thumb class={thumb_class} />
                 <span class="sr-only">{move || if s.checked.get() { "On" } else { "Off" }}</span>
             </switch::RootWith>
@@ -150,7 +150,7 @@ pub fn SwitchRootWithExample() -> impl IntoView {
 
     view! {
         <label class="flex items-center gap-3 cursor-pointer select-none">
-            <switch::RootWith checked=false class={switch_class} let:s>
+            <switch::RootWith default_checked=false class={switch_class} let:s>
                 <switch::Thumb class={thumb_class} />
                 <span class="sr-only">{move || if s.checked.get() { "On" } else { "Off" }}</span>
             </switch::RootWith>
@@ -173,7 +173,7 @@ pub fn SwitchExample() -> impl IntoView {
             </label>
             <label class="flex items-center gap-3 cursor-pointer select-none">
                 <switch::Root
-                    checked=true
+                    default_checked=true
                     class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background bg-zinc-300 dark:bg-zinc-600 data-[state=checked]:bg-primary data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50"
                 >
                     <switch::Thumb class="pointer-events-none block h-5 w-5 rounded-full bg-white data-[state=checked]:bg-primary-foreground shadow-md ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" />

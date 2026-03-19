@@ -50,7 +50,7 @@ pub fn PlanSelector() -> impl IntoView {
     let indicator_class = "w-2.5 h-2.5 rounded-full bg-primary hidden data-[state=checked]:block";
 
     view! {
-        <radio_group::RootWith value="pro" class="flex flex-col gap-3" let:rg>
+        <radio_group::RootWith default_value="pro".to_string() class="flex flex-col gap-3" let:rg>
             {["Free", "Pro", "Enterprise"].into_iter().map(|label| {
                 let value = label.to_lowercase();
                 view! {
@@ -205,7 +205,7 @@ pub fn RadioGroupRootWithExample() -> impl IntoView {
     let indicator_class = "block w-2.5 h-2.5 rounded-full bg-primary hidden data-[state=checked]:block";
 
     view! {
-        <radio_group::RootWith value="pro" class="flex flex-col gap-3" let:rg>
+        <radio_group::RootWith default_value="pro".to_string() class="flex flex-col gap-3" let:rg>
             {["Free", "Pro", "Enterprise"].into_iter().map(|label| {
                 let value = label.to_lowercase();
                 view! {
@@ -233,7 +233,7 @@ pub fn RadioGroupExample() -> impl IntoView {
 
     view! {
         <radio_group::Root
-            value="comfortable"
+            default_value="comfortable".to_string()
             class="flex flex-col gap-3"
         >
             {["Default", "Comfortable", "Compact"]

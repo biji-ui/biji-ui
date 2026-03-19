@@ -49,7 +49,7 @@ pub fn AlignmentPicker() -> impl IntoView {
     view! {
         <toggle_group::RootWith
             group_type={ToggleGroupType::Single}
-            value="center"
+            default_value="center"
             class="inline-flex rounded-md border border-border"
             let:tg
         >
@@ -237,7 +237,7 @@ pub fn ToggleGroupRootWithExample() -> impl IntoView {
                 <p class="text-xs text-muted-foreground">"Alignment (single)"</p>
                 <toggle_group::RootWith
                     group_type={ToggleGroupType::Single}
-                    value="center"
+                    default_value="center".to_string()
                     class="flex flex-col items-center gap-2"
                     let:tg
                 >
@@ -271,7 +271,7 @@ pub fn ToggleGroupRootWithExample() -> impl IntoView {
                 <p class="text-xs text-muted-foreground">"Formatting (multiple)"</p>
                 <toggle_group::RootWith
                     group_type={ToggleGroupType::Multiple}
-                    values={vec!["bold".to_string()]}
+                    default_values={vec!["bold".to_string()]}
                     class="flex flex-col items-center gap-2"
                     let:tg
                 >
@@ -312,7 +312,7 @@ pub fn ToggleGroupExample() -> impl IntoView {
                 <p class="text-xs text-muted-foreground">"Alignment (single)"</p>
                 <toggle_group::Root
                     group_type={ToggleGroupType::Single}
-                    value="center"
+                    default_value="center".to_string()
                     class="inline-flex rounded-md border border-border"
                 >
                     <toggle_group::Item value="left" class={ITEM_CLS}>
@@ -340,7 +340,7 @@ pub fn ToggleGroupExample() -> impl IntoView {
                 <p class="text-xs text-muted-foreground">"Formatting (multiple)"</p>
                 <toggle_group::Root
                     group_type={ToggleGroupType::Multiple}
-                    values={vec!["bold".to_string()]}
+                    default_values={vec!["bold".to_string()]}
                     class="inline-flex rounded-md border border-border"
                 >
                     <toggle_group::Item value="bold" class={ITEM_CLS}>

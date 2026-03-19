@@ -224,7 +224,7 @@ pub fn CheckboxExample() -> impl IntoView {
                 <span class="text-sm font-medium">"Accept terms and conditions"</span>
             </label>
             <label class="flex gap-3 items-center cursor-pointer select-none">
-                <checkbox::Root checked=true class={root_class}>
+                <checkbox::Root default_checked=true class={root_class}>
                     <checkbox::Indicator class={indicator_class}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

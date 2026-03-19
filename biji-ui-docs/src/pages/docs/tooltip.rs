@@ -36,6 +36,32 @@ pub fn MyTooltip() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+use biji_ui::components::tooltip;
+
+#[component]
+pub fn MyTooltip() -> impl IntoView {
+    view! {
+        <tooltip::RootWith positioning={tooltip::Positioning::Top} let:t>
+            <p class="text-sm text-muted-foreground">
+                {move || if t.open.get() { "Tooltip is open" } else { "Tooltip is closed" }}
+            </p>
+            <tooltip::Trigger class="rounded border px-3 py-1.5 text-sm">
+                "Hover me"
+            </tooltip::Trigger>
+            <Portal>
+                <tooltip::Content
+                    class="z-50 rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
+                    show_class="opacity-100"
+                    hide_class="opacity-0"
+                >
+                    "Tooltip content"
+                </tooltip::Content>
+            </Portal>
+        </tooltip::RootWith>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -143,8 +169,28 @@ pub fn TooltipDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"TooltipState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The state is "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"Copy"</code>
+                " and safe to pass as a prop."
+            </p>
+            <DocPreview>
+                <TooltipRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
             <PropsTable title="Arrow" rows={ARROW_PROPS} />
@@ -172,6 +218,30 @@ pub fn Content() -> impl IntoView {
 }
 
 pub const BUTTON_BASE_STYLE: &str = btn(Variant::Default);
+
+#[component]
+pub fn TooltipRootWithExample() -> impl IntoView {
+    use biji_ui::components::tooltip;
+    view! {
+        <div class="flex flex-col items-center gap-3 p-8">
+            <tooltip::RootWith positioning={tooltip::Positioning::Top} let:t>
+                <p class="text-sm text-muted-foreground">
+                    {move || if t.open.get() { "Tooltip is open" } else { "Tooltip is closed" }}
+                </p>
+                <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Hover or focus me"</tooltip::Trigger>
+                <Portal>
+                    <tooltip::Content
+                        class="z-50 inline-block w-max rounded-lg border border-slate-500 bg-gray-900 px-3 py-2 text-sm font-medium text-white shadow-sm dark:bg-gray-700"
+                        show_class="opacity-100"
+                        hide_class="opacity-0"
+                    >
+                        "Tooltip content"
+                    </tooltip::Content>
+                </Portal>
+            </tooltip::RootWith>
+        </div>
+    }
+}
 
 #[component]
 pub fn TooltipExample() -> impl IntoView {

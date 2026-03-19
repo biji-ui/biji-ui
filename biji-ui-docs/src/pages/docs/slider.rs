@@ -20,7 +20,7 @@ pub fn LabeledSlider() -> impl IntoView {
 
     view! {
         <slider::RootWith
-            value=50.0
+            default_value=50.0
             min=0.0
             max=100.0
             class="flex flex-col gap-2 w-full"
@@ -47,7 +47,7 @@ use biji_ui::components::slider;
 pub fn MySlider() -> impl IntoView {
     view! {
         <slider::Root
-            value=50.0
+            default_value=50.0
             class="relative flex items-center w-full h-5 touch-none select-none"
         >
             <slider::Track class="relative flex-1 h-2 overflow-hidden rounded-full bg-secondary">
@@ -226,7 +226,7 @@ pub fn SliderRootWithExample() -> impl IntoView {
     view! {
         <div class="w-full max-w-sm">
             <slider::RootWith
-                value=50.0
+                default_value=50.0
                 min=0.0
                 max=100.0
                 class="flex flex-col gap-2 w-full"
@@ -258,7 +258,7 @@ pub fn SliderExample() -> impl IntoView {
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium">"Volume"</span>
                 <slider::Root
-                    value=60.0
+                    default_value=60.0
                     class="relative flex items-center w-full h-5 touch-none select-none"
                 >
                     <slider::Track class="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
@@ -270,7 +270,7 @@ pub fn SliderExample() -> impl IntoView {
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium">"Temperature (step: 5)"</span>
                 <slider::Root
-                    value=20.0
+                    default_value=20.0
                     min=0.0
                     max=100.0
                     step=5.0
@@ -285,7 +285,7 @@ pub fn SliderExample() -> impl IntoView {
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium text-muted-foreground">"Disabled"</span>
                 <slider::Root
-                    value=40.0
+                    default_value=40.0
                     disabled=true
                     class="relative flex items-center w-full h-5 touch-none select-none"
                 >
