@@ -33,17 +33,21 @@ pub struct ToggleGroupState {
 
 impl ToggleGroupState {
     pub(crate) fn new(
-        value: Option<String>,
-        values: Option<Vec<String>>,
+        value: Option<RwSignal<Vec<String>>>,
+        default_value: Option<String>,
+        default_values: Option<Vec<String>>,
         group_type: ToggleGroupType,
         disabled: bool,
     ) -> Self {
-        let initial = match group_type {
-            ToggleGroupType::Single => value.map(|v| vec![v]).unwrap_or_default(),
-            ToggleGroupType::Multiple => values.unwrap_or_default(),
-        };
+        let value_sig = value.unwrap_or_else(|| {
+            let initial = match group_type {
+                ToggleGroupType::Single => default_value.map(|v| vec![v]).unwrap_or_default(),
+                ToggleGroupType::Multiple => default_values.unwrap_or_default(),
+            };
+            RwSignal::new(initial)
+        });
         Self {
-            value: RwSignal::new(initial),
+            value: value_sig,
             group_type,
             disabled,
             item_focus: RwSignal::new(None),

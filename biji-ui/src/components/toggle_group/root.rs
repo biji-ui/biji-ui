@@ -29,12 +29,15 @@ pub fn use_toggle_group() -> ToggleGroupState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(ToggleGroupState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
-    #[prop(optional)] values: Option<Vec<String>>,
+    /// Controlled signal. When provided, the toggle group reads and writes this signal directly.
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Vec<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(into, default = None)] default_values: Option<Vec<String>>,
     #[prop(default = ToggleGroupType::Single)] group_type: ToggleGroupType,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let state = ToggleGroupState::new(value, values, group_type, disabled);
+    let state = ToggleGroupState::new(value, default_value, default_values, group_type, disabled);
 
     view! {
         <Provider value={state}>
@@ -58,24 +61,16 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
-    #[prop(optional)] values: Option<Vec<String>>,
+    #[prop(into, default = None)] value: Option<RwSignal<Vec<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(into, default = None)] default_values: Option<Vec<String>>,
     #[prop(default = ToggleGroupType::Single)] group_type: ToggleGroupType,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let state = ToggleGroupState::new(value, values, group_type, disabled);
-
     view! {
-        <Provider value={state}>
-            <div
-                role="group"
-                aria-disabled={if state.disabled { Some("true") } else { None }}
-                data-disabled={state.disabled}
-                class={class}
-            >
-                {children()}
-            </div>
-        </Provider>
+        <RootWith value=value default_value=default_value default_values=default_values group_type=group_type disabled=disabled class=class let:_>
+            {children()}
+        </RootWith>
     }
 }
 
