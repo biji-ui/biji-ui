@@ -40,6 +40,35 @@ pub fn MyRadioGroup() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::radio_group;
+
+#[component]
+pub fn PlanSelector() -> impl IntoView {
+    let item_class = "flex items-center justify-center w-5 h-5 rounded-full border-2 \
+        border-border data-[state=checked]:border-primary";
+    let indicator_class = "w-2.5 h-2.5 rounded-full bg-primary hidden data-[state=checked]:block";
+
+    view! {
+        <radio_group::RootWith value="pro" class="flex flex-col gap-3" let:rg>
+            {["Free", "Pro", "Enterprise"].into_iter().map(|label| {
+                let value = label.to_lowercase();
+                view! {
+                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                        <radio_group::Item value={value} class={item_class}>
+                            <radio_group::Indicator class={indicator_class} />
+                        </radio_group::Item>
+                        <span class="text-sm font-medium">{label}</span>
+                    </label>
+                }
+            }).collect_view()}
+            <p class="text-xs text-muted-foreground mt-1">
+                "Selected: " {move || rg.value.get().unwrap_or_default()}
+            </p>
+        </radio_group::RootWith>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -58,12 +87,6 @@ const ROOT_PROPS: &[PropRow] = &[
         prop_type: "bool",
         default: "false",
         description: "When true, disables all radio items in the group.",
-    },
-    PropRow {
-        name: "on_value_change",
-        prop_type: "Option<Callback<String>>",
-        default: "None",
-        description: "Callback fired when the selected value changes. Receives the new value.",
     },
 ];
 
@@ -141,13 +164,63 @@ pub fn RadioGroupDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-4 text-sm text-muted-foreground">
+                "Use "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"<RootWith>"</code>
+                " when you need direct access to "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"RadioGroupState"</code>
+                " inside the children. The "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"let:rg"</code>
+                " binding exposes "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"rg.value"</code>
+                " as a reactive signal for reading the current selection without callbacks."
+            </p>
+            <DocPreview>
+                <RadioGroupRootWithExample />
+            </DocPreview>
+            <Code
+                class="mt-4 [&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Item" rows={ITEM_PROPS} />
             <PropsTable title="Indicator" rows={INDICATOR_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn RadioGroupRootWithExample() -> impl IntoView {
+    use biji_ui::components::radio_group;
+
+    let item_class = "flex items-center justify-center w-5 h-5 rounded-full border-2 border-border \
+        transition-colors outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 \
+        focus:ring-offset-background data-[state=checked]:border-primary \
+        data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50";
+    let indicator_class = "block w-2.5 h-2.5 rounded-full bg-primary hidden data-[state=checked]:block";
+
+    view! {
+        <radio_group::RootWith value="pro" class="flex flex-col gap-3" let:rg>
+            {["Free", "Pro", "Enterprise"].into_iter().map(|label| {
+                let value = label.to_lowercase();
+                view! {
+                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                        <radio_group::Item value={value} class={item_class}>
+                            <radio_group::Indicator class={indicator_class} />
+                        </radio_group::Item>
+                        <span class="text-sm font-medium">{label}</span>
+                    </label>
+                }
+            }).collect_view()}
+            <p class="text-xs text-muted-foreground mt-1">
+                "Selected: " {move || rg.value.get().unwrap_or_default()}
+            </p>
+        </radio_group::RootWith>
     }
 }
 
