@@ -14,10 +14,14 @@ pub struct SwitchState {
 }
 
 impl SwitchState {
-    pub(crate) fn new(checked: bool, disabled: bool) -> Self {
-        let checked = RwSignal::new(checked);
+    pub(crate) fn new(
+        checked: Option<RwSignal<bool>>,
+        default_checked: bool,
+        disabled: bool,
+    ) -> Self {
+        let checked_sig = checked.unwrap_or_else(|| RwSignal::new(default_checked));
         let data_state =
-            Signal::derive(move || if checked.get() { "checked" } else { "unchecked" });
-        Self { checked, disabled, data_state, trigger_ref: NodeRef::new() }
+            Signal::derive(move || if checked_sig.get() { "checked" } else { "unchecked" });
+        Self { checked: checked_sig, disabled, data_state, trigger_ref: NodeRef::new() }
     }
 }
