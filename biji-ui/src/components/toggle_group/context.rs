@@ -17,41 +17,62 @@ pub enum ToggleGroupType {
     Multiple,
 }
 
+/// Reactive state for a toggle group. Available via [`use_toggle_group`](super::root::use_toggle_group)
+/// or the `let:` binding on [`RootWith`](super::root::RootWith).
+///
+/// All fields are `Copy`, so it is safe to pass this struct to child components as a prop.
 #[derive(Copy, Clone)]
-pub struct ToggleGroupContext {
-    /// Current selected value(s). Always a Vec; Single mode keeps at most one entry.
+pub struct ToggleGroupState {
     pub value: RwSignal<Vec<String>>,
     pub group_type: ToggleGroupType,
     pub disabled: bool,
-    pub item_focus: RwSignal<Option<usize>>,
-    pub items: RwSignal<HashMap<usize, ToggleItemContext>>,
+    pub(crate) item_focus: RwSignal<Option<usize>>,
+    pub(crate) items: RwSignal<HashMap<usize, ToggleItemContext>>,
     pub(crate) next_id: StoredValue<AtomicUsize>,
-    pub(crate) on_value_change: Option<Callback<String>>,
-    pub(crate) on_values_change: Option<Callback<Vec<String>>>,
 }
 
-impl ToggleGroupContext {
-    pub fn next_index(&self) -> usize {
+impl ToggleGroupState {
+    pub(crate) fn new(
+        value: Option<String>,
+        values: Option<Vec<String>>,
+        group_type: ToggleGroupType,
+        disabled: bool,
+    ) -> Self {
+        let initial = match group_type {
+            ToggleGroupType::Single => value.map(|v| vec![v]).unwrap_or_default(),
+            ToggleGroupType::Multiple => values.unwrap_or_default(),
+        };
+        Self {
+            value: RwSignal::new(initial),
+            group_type,
+            disabled,
+            item_focus: RwSignal::new(None),
+            items: RwSignal::new(Default::default()),
+            next_id: StoredValue::new(AtomicUsize::new(0)),
+        }
+    }
+
+    pub(crate) fn next_index(&self) -> usize {
         self.next_id.with_value(|c| c.fetch_add(1, Ordering::Relaxed))
     }
 
-    pub fn upsert_item(&self, index: usize, item: ToggleItemContext) {
+    pub(crate) fn upsert_item(&self, index: usize, item: ToggleItemContext) {
         self.items.update(|m| {
             *m.entry(index).or_insert(item) = item;
         });
     }
 
-    pub fn remove_item(&self, index: usize) {
+    pub(crate) fn remove_item(&self, index: usize) {
         self.items.update(|m| {
             m.remove(&index);
         });
     }
 
-    pub fn is_pressed(&self, val: &str) -> bool {
+    pub(crate) fn is_pressed(&self, val: &str) -> bool {
         self.value.with(|v| v.iter().any(|x| x == val))
     }
 
-    pub fn toggle_value(&self, val: String) {
+    pub(crate) fn toggle_value(&self, val: String) {
         match self.group_type {
             ToggleGroupType::Single => {
                 self.value.update(|v| {
@@ -75,13 +96,13 @@ impl ToggleGroupContext {
     }
 }
 
-impl FilterActiveItems<ToggleItemContext> for ToggleGroupContext {
+impl FilterActiveItems<ToggleItemContext> for ToggleGroupState {
     fn filter_active_items(&self) -> Vec<ToggleItemContext> {
         filter_active(self.items.get())
     }
 }
 
-impl ManageFocus for ToggleGroupContext {
+impl ManageFocus for ToggleGroupState {
     fn set_focus(&self, index: Option<usize>) {
         self.item_focus.set(index);
     }
@@ -91,7 +112,7 @@ impl ManageFocus for ToggleGroupContext {
     }
 }
 
-impl NavigateItems<ToggleItemContext> for ToggleGroupContext {
+impl NavigateItems<ToggleItemContext> for ToggleGroupState {
     fn navigate_first_item(&self) -> Option<ToggleItemContext> {
         self.filter_active_items().into_iter().next()
     }
