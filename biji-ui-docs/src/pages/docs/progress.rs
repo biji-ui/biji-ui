@@ -71,19 +71,24 @@ pub fn LabeledProgress() -> impl IntoView {
 
     view! {
         <progress::RootWith
-            class="overflow-hidden relative w-full h-6 rounded-full bg-secondary text-xs"
+            class="w-full"
             value=value
             max=100.0
             let:p
         >
-            <progress::Indicator class="h-full transition-all duration-500 ease-in-out bg-primary" />
-            <span class="absolute inset-0 flex items-center justify-center font-medium">
-                {move || {
-                    p.percentage.get()
-                        .map(|pct| format!("{}%", pct as u32))
-                        .unwrap_or_else(|| "Loading…".to_string())
-                }}
-            </span>
+            <div class="flex justify-between items-center mb-1.5 text-xs">
+                <span class="text-muted-foreground">"Progress"</span>
+                <span class="font-medium tabular-nums">
+                    {move || {
+                        p.percentage.get()
+                            .map(|pct| format!("{}%", pct as u32))
+                            .unwrap_or_else(|| "–".to_string())
+                    }}
+                </span>
+            </div>
+            <div class="overflow-hidden w-full h-3 rounded-full bg-secondary">
+                <progress::Indicator class="h-full transition-all duration-500 ease-in-out bg-primary" />
+            </div>
         </progress::RootWith>
     }
 }"#;
@@ -249,19 +254,24 @@ pub fn RootWithExample() -> impl IntoView {
     view! {
         <div class="w-full sm:max-w-[70%] space-y-6">
             <progress::RootWith
-                class="overflow-hidden relative w-full h-6 rounded-full bg-secondary text-xs"
+                class="w-full"
                 value={value}
                 max=100.0
                 let:p
             >
-                <progress::Indicator class="h-full transition-all duration-500 ease-in-out bg-primary" />
-                <span class="absolute inset-0 flex items-center justify-center font-medium">
-                    {move || {
-                        p.percentage.get()
-                            .map(|pct| format!("{}%", pct as u32))
-                            .unwrap_or_else(|| "Loading…".to_string())
-                    }}
-                </span>
+                <div class="flex justify-between items-center mb-1.5 text-xs">
+                    <span class="text-muted-foreground">"Progress"</span>
+                    <span class="font-medium tabular-nums">
+                        {move || {
+                            p.percentage.get()
+                                .map(|pct| format!("{}%", pct as u32))
+                                .unwrap_or_else(|| "–".to_string())
+                        }}
+                    </span>
+                </div>
+                <div class="overflow-hidden w-full h-3 rounded-full bg-secondary">
+                    <progress::Indicator class="h-full transition-all duration-500 ease-in-out bg-primary" />
+                </div>
             </progress::RootWith>
             <div class="flex gap-2 justify-between">
                 {steps
