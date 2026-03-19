@@ -14,10 +14,15 @@ pub struct CollapsibleState {
 }
 
 impl CollapsibleState {
-    pub(crate) fn new(open: bool, disabled: bool) -> Self {
-        let open = RwSignal::new(open);
+    pub(crate) fn new(open: Option<RwSignal<bool>>, disabled: bool) -> Self {
+        let open = open.unwrap_or_else(|| RwSignal::new(false));
         let data_state = Signal::derive(move || if open.get() { "open" } else { "closed" });
-        Self { open, disabled, data_state, trigger_ref: NodeRef::new() }
+        Self {
+            open,
+            disabled,
+            data_state,
+            trigger_ref: NodeRef::new(),
+        }
     }
 
     pub fn toggle(&self) {

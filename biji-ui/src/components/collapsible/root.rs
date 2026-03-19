@@ -21,7 +21,7 @@ pub fn use_collapsible() -> CollapsibleState {
 /// <collapsible::RootWith class="w-full" let:c>
 ///     <div class="flex justify-between items-center">
 ///         <span class="text-sm font-semibold">"Starred repositories"</span>
-///         <div class="flex items-center gap-2">
+///         <div class="flex gap-2 items-center">
 ///             <span class="text-xs text-muted-foreground">
 ///                 {move || if c.open.get() { "Hide" } else { "Show" }}
 ///             </span>
@@ -37,7 +37,7 @@ pub fn use_collapsible() -> CollapsibleState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(CollapsibleState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(default = false)] open: bool,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     let state = CollapsibleState::new(open, disabled);
@@ -63,21 +63,18 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
-    #[prop(default = false)] open: bool,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     view! {
-        <RootWith open=open disabled=disabled class=class let:_>
+        <RootWith open={open} disabled={disabled} class={class} let:_>
             {children()}
         </RootWith>
     }
 }
 
 #[component]
-pub fn Trigger(
-    children: Children,
-    #[prop(into, optional)] class: String,
-) -> impl IntoView {
+pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
     let state = expect_context::<CollapsibleState>();
 
     let _ = use_event_listener(state.trigger_ref, click, move |_| {
