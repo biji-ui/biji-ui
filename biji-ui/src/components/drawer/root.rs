@@ -1,4 +1,7 @@
-use std::{sync::{Arc, Mutex}, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 use leptos::{
     context::Provider,
@@ -9,21 +12,18 @@ use leptos_use::{on_click_outside, use_document, use_event_listener};
 use wasm_bindgen::JsCast;
 
 use crate::{
-    cn,
-    custom_animated_show::CustomAnimatedShow,
-    utils::prevent_scroll::use_prevent_scroll,
+    cn, custom_animated_show::CustomAnimatedShow, utils::prevent_scroll::use_prevent_scroll,
 };
 
-use super::context::{DrawerState, DrawerSide, next_drawer_id};
+use super::context::{DrawerSide, DrawerState, next_drawer_id};
 
 fn build_state(
-    open: bool,
+    open: Option<RwSignal<bool>>,
     side: DrawerSide,
     prevent_scroll: bool,
     hide_delay: Duration,
-    on_open_change: Option<Callback<bool>>,
 ) -> DrawerState {
-    let open_sig = RwSignal::new(open);
+    let open_sig = open.unwrap_or_else(|| RwSignal::new(false));
     let base_id = next_drawer_id();
     DrawerState {
         open: open_sig,
@@ -37,7 +37,6 @@ fn build_state(
         title_id: StoredValue::new(format!("{base_id}-title")),
         description_id: StoredValue::new(format!("{base_id}-description")),
         drawer_id: StoredValue::new(base_id),
-        on_open_change,
     }
 }
 
@@ -67,11 +66,9 @@ pub fn RootWith<IV: IntoView + 'static>(
     /// Animation unmount delay — should match your CSS transition duration.
     #[prop(default = Duration::from_millis(300))]
     hide_delay: Duration,
-    #[prop(default = false)] open: bool,
-    #[prop(optional)] on_open_change: Option<Callback<bool>>,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
 ) -> impl IntoView {
-    let state = build_state(open, side, prevent_scroll, hide_delay, on_open_change);
-
+    let state = build_state(open, side, prevent_scroll, hide_delay);
     view! {
         <Provider value={state}>
             <RootEvents>
@@ -92,17 +89,19 @@ pub fn Root(
     /// Animation unmount delay — should match your CSS transition duration.
     #[prop(default = Duration::from_millis(300))]
     hide_delay: Duration,
-    #[prop(default = false)] open: bool,
-    #[prop(optional)] on_open_change: Option<Callback<bool>>,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
 ) -> impl IntoView {
-    let state = build_state(open, side, prevent_scroll, hide_delay, on_open_change);
-
     view! {
-        <Provider value={state}>
-            <RootEvents>
-                <div class={class}>{children()}</div>
-            </RootEvents>
-        </Provider>
+        <RootWith
+            side={side}
+            prevent_scroll={prevent_scroll}
+            hide_delay={hide_delay}
+            open={open}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
     }
 }
 
@@ -110,10 +109,7 @@ pub fn Root(
 fn RootEvents(children: Children) -> impl IntoView {
     let ctx = expect_context::<DrawerState>();
 
-    let eff = use_prevent_scroll(
-        move || ctx.prevent_scroll && ctx.open.get(),
-        ctx.hide_delay,
-    );
+    let eff = use_prevent_scroll(move || ctx.prevent_scroll && ctx.open.get(), ctx.hide_delay);
     on_cleanup(move || drop(eff));
 
     // Escape: close and return focus to the trigger.
@@ -189,12 +185,15 @@ pub fn Overlay(
             hide_delay={ctx.hide_delay}
             node_ref={ctx.overlay_ref}
         >
-            <div on:click={move |_| {
-                ctx.close();
-                if let Some(trigger) = ctx.trigger_ref.get() {
-                    let _ = trigger.focus();
-                }
-            }} style="position: absolute; inset: 0;"></div>
+            <div
+                on:click={move |_| {
+                    ctx.close();
+                    if let Some(trigger) = ctx.trigger_ref.get() {
+                        let _ = trigger.focus();
+                    }
+                }}
+                style="position: absolute; inset: 0;"
+            ></div>
         </CustomAnimatedShow>
     }
 }
@@ -277,12 +276,16 @@ pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl 
     let ctx = expect_context::<DrawerState>();
 
     view! {
-        <button type="button" class={class} on:click={move |_| {
-            ctx.close();
-            if let Some(trigger) = ctx.trigger_ref.get() {
-                let _ = trigger.focus();
-            }
-        }}>
+        <button
+            type="button"
+            class={class}
+            on:click={move |_| {
+                ctx.close();
+                if let Some(trigger) = ctx.trigger_ref.get() {
+                    let _ = trigger.focus();
+                }
+            }}
+        >
             {children()}
         </button>
     }
@@ -293,7 +296,11 @@ pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl 
 #[component]
 pub fn Title(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
     let ctx = expect_context::<DrawerState>();
-    view! { <h2 id={ctx.title_id.get_value()} class={class}>{children()}</h2> }
+    view! {
+        <h2 id={ctx.title_id.get_value()} class={class}>
+            {children()}
+        </h2>
+    }
 }
 
 /// Supplementary description for the drawer panel — renders as `<p>`.
@@ -301,7 +308,11 @@ pub fn Title(children: Children, #[prop(into, optional)] class: String) -> impl 
 #[component]
 pub fn Description(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
     let ctx = expect_context::<DrawerState>();
-    view! { <p id={ctx.description_id.get_value()} class={class}>{children()}</p> }
+    view! {
+        <p id={ctx.description_id.get_value()} class={class}>
+            {children()}
+        </p>
+    }
 }
 
 // ── Focus helpers ─────────────────────────────────────────────────────────────
@@ -331,11 +342,7 @@ fn focus_first_element(container: &web_sys::HtmlElement) {
     }
 }
 
-fn trap_tab_focus(
-    container: &web_sys::HtmlElement,
-    shift_key: bool,
-    evt: &web_sys::KeyboardEvent,
-) {
+fn trap_tab_focus(container: &web_sys::HtmlElement, shift_key: bool, evt: &web_sys::KeyboardEvent) {
     let focusable = get_focusable_elements(container);
     if focusable.is_empty() {
         evt.prevent_default();
@@ -347,11 +354,14 @@ fn trap_tab_focus(
             .as_ref()
             .and_then(|a| a.dyn_ref::<web_sys::HtmlElement>())
             .map(|a| {
-                focusable.first().map(|f| {
-                    let a_node: &web_sys::Node = a.as_ref();
-                    let f_node: &web_sys::Node = f.as_ref();
-                    a_node.is_same_node(Some(f_node))
-                }).unwrap_or(false)
+                focusable
+                    .first()
+                    .map(|f| {
+                        let a_node: &web_sys::Node = a.as_ref();
+                        let f_node: &web_sys::Node = f.as_ref();
+                        a_node.is_same_node(Some(f_node))
+                    })
+                    .unwrap_or(false)
             })
             .unwrap_or(true);
         if is_first {
@@ -365,11 +375,14 @@ fn trap_tab_focus(
             .as_ref()
             .and_then(|a| a.dyn_ref::<web_sys::HtmlElement>())
             .map(|a| {
-                focusable.last().map(|f| {
-                    let a_node: &web_sys::Node = a.as_ref();
-                    let f_node: &web_sys::Node = f.as_ref();
-                    a_node.is_same_node(Some(f_node))
-                }).unwrap_or(false)
+                focusable
+                    .last()
+                    .map(|f| {
+                        let a_node: &web_sys::Node = a.as_ref();
+                        let f_node: &web_sys::Node = f.as_ref();
+                        a_node.is_same_node(Some(f_node))
+                    })
+                    .unwrap_or(false)
             })
             .unwrap_or(true);
         if is_last {

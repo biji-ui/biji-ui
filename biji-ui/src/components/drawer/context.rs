@@ -49,22 +49,15 @@ pub struct DrawerState {
     pub(crate) drawer_id: StoredValue<String>,
     pub(crate) title_id: StoredValue<String>,
     pub(crate) description_id: StoredValue<String>,
-    pub(crate) on_open_change: Option<Callback<bool>>,
 }
 
 impl DrawerState {
     pub(crate) fn open(&self) {
         self.open.set(true);
-        if let Some(cb) = self.on_open_change {
-            cb.run(true);
-        }
     }
 
     pub(crate) fn close(&self) {
         self.open.set(false);
-        if let Some(cb) = self.on_open_change {
-            cb.run(false);
-        }
     }
 
     pub(crate) fn toggle(&self) {
