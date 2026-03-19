@@ -29,8 +29,6 @@ pub struct CalendarState {
     pub hover_date: RwSignal<Option<NaiveDate>>,
     /// Currently keyboard-focused date.
     pub(crate) focused_date: RwSignal<Option<NaiveDate>>,
-    /// Called whenever the selection changes.
-    pub(crate) on_change: Option<Callback<CalendarValue>>,
 }
 
 impl CalendarState {
@@ -76,12 +74,9 @@ impl CalendarState {
         date > lo && date < hi
     }
 
-    /// Update the selection value and fire the `on_change` callback.
+    /// Update the selection value.
     pub(crate) fn emit_change(&self, new_val: CalendarValue) {
-        self.value.set(new_val.clone());
-        if let Some(cb) = self.on_change {
-            cb.run(new_val);
-        }
+        self.value.set(new_val);
     }
 }
 

@@ -20,7 +20,6 @@ fn build_state(
     max_date: Option<NaiveDate>,
     is_date_disabled: Option<Box<dyn Fn(NaiveDate) -> bool + Send + Sync>>,
     week_starts_on: WeekStartsOn,
-    on_change: Option<Callback<CalendarValue>>,
 ) -> CalendarState {
     let value_signal = value.unwrap_or_else(|| {
         let init = default_value.unwrap_or_else(|| CalendarValue::default_for(selection_type));
@@ -42,7 +41,6 @@ fn build_state(
         week_starts_on,
         hover_date: RwSignal::new(None),
         focused_date: RwSignal::new(None),
-        on_change,
     }
 }
 
@@ -74,24 +72,23 @@ pub fn use_calendar() -> CalendarState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(CalendarState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    /// Controlled external signal. When provided, the calendar mirrors its initial value and
-    /// calls `on_change` on every mutation so the caller can sync it back.
-    #[prop(optional)]
+    /// Controlled external signal. When provided, the calendar writes into this signal on every
+    /// selection change so the caller can react via effects or `RootWith let:`.
+    #[prop(into, default = None)]
     value: Option<RwSignal<CalendarValue>>,
     /// Initial value for uncontrolled mode.
-    #[prop(optional)]
+    #[prop(into, default = None)]
     default_value: Option<CalendarValue>,
     #[prop(default = SelectionType::Single)] selection_type: SelectionType,
     /// The month to display initially. Defaults to the current month.
-    #[prop(optional)]
+    #[prop(into, default = None)]
     placeholder: Option<NaiveDate>,
     #[prop(default = 1usize)] months: usize,
-    #[prop(optional)] min_date: Option<NaiveDate>,
-    #[prop(optional)] max_date: Option<NaiveDate>,
-    #[prop(optional)]
+    #[prop(into, default = None)] min_date: Option<NaiveDate>,
+    #[prop(into, default = None)] max_date: Option<NaiveDate>,
+    #[prop(into, default = None)]
     is_date_disabled: Option<Box<dyn Fn(NaiveDate) -> bool + Send + Sync>>,
     #[prop(default = WeekStartsOn::Sunday)] week_starts_on: WeekStartsOn,
-    #[prop(optional)] on_change: Option<Callback<CalendarValue>>,
 ) -> impl IntoView {
     let state = build_state(
         value,
@@ -103,7 +100,6 @@ pub fn RootWith<IV: IntoView + 'static>(
         max_date,
         is_date_disabled,
         week_starts_on,
-        on_change,
     );
 
     view! {
@@ -130,42 +126,31 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
-    #[prop(optional)] value: Option<RwSignal<CalendarValue>>,
-    #[prop(optional)] default_value: Option<CalendarValue>,
+    #[prop(into, default = None)] value: Option<RwSignal<CalendarValue>>,
+    #[prop(into, default = None)] default_value: Option<CalendarValue>,
     #[prop(default = SelectionType::Single)] selection_type: SelectionType,
-    #[prop(optional)] placeholder: Option<NaiveDate>,
+    #[prop(into, default = None)] placeholder: Option<NaiveDate>,
     #[prop(default = 1usize)] months: usize,
-    #[prop(optional)] min_date: Option<NaiveDate>,
-    #[prop(optional)] max_date: Option<NaiveDate>,
+    #[prop(into, default = None)] min_date: Option<NaiveDate>,
+    #[prop(into, default = None)] max_date: Option<NaiveDate>,
     #[prop(optional)] is_date_disabled: Option<Box<dyn Fn(NaiveDate) -> bool + Send + Sync>>,
     #[prop(default = WeekStartsOn::Sunday)] week_starts_on: WeekStartsOn,
-    #[prop(optional)] on_change: Option<Callback<CalendarValue>>,
 ) -> impl IntoView {
-    let state = build_state(
-        value,
-        default_value,
-        selection_type,
-        placeholder,
-        months,
-        min_date,
-        max_date,
-        is_date_disabled,
-        week_starts_on,
-        on_change,
-    );
-
     view! {
-        <Provider value={state}>
-            <div
-                class={class}
-                data-view={move || match state.view.get() {
-                    CalendarView::Day   => "day",
-                    CalendarView::Month => "month",
-                    CalendarView::Year  => "year",
-                }}
-            >
-                {children()}
-            </div>
-        </Provider>
+        <RootWith
+            value={value}
+            default_value={default_value}
+            selection_type={selection_type}
+            placeholder={placeholder}
+            months={months}
+            min_date={min_date}
+            max_date={max_date}
+            is_date_disabled={is_date_disabled}
+            week_starts_on={week_starts_on}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
     }
 }
