@@ -57,6 +57,42 @@ pub fn MyDrawer() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+use biji_ui::components::drawer;
+
+#[component]
+pub fn MyDrawer() -> impl IntoView {
+    view! {
+        <drawer::RootWith let:d>
+            <p class="mb-2 text-sm text-muted-foreground">
+                {move || if d.open.get() { "Drawer is open" } else { "Drawer is closed" }}
+            </p>
+            <drawer::Trigger class="px-4 py-2 rounded-md bg-primary text-primary-foreground">
+                "Open Drawer"
+            </drawer::Trigger>
+            <Portal>
+                <drawer::Overlay
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <drawer::Content
+                    class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l border-border shadow-xl transition-transform"
+                    show_class="translate-x-0 duration-300 ease-out"
+                    hide_class="translate-x-full duration-200 ease-in"
+                >
+                    <div class="flex flex-col h-full p-6">
+                        <drawer::Title class="text-lg font-semibold">"Settings"</drawer::Title>
+                        <drawer::Close class="mt-auto w-full px-4 py-2 rounded-md border">
+                            "Close"
+                        </drawer::Close>
+                    </div>
+                </drawer::Content>
+            </Portal>
+        </drawer::RootWith>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -202,6 +238,26 @@ pub fn DrawerDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"DrawerState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The state is "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"Copy"</code>
+                " and safe to pass as a prop."
+            </p>
+            <DocPreview>
+                <DrawerRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="Examples" />
             <h3 class="mt-8 mb-2 text-base font-semibold">"Side"</h3>
             <p class="mb-5 text-sm text-muted-foreground">
@@ -215,7 +271,7 @@ pub fn DrawerDocPage() -> impl IntoView {
                 <DrawerSidesExample />
             </DocPreview>
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Overlay" rows={OVERLAY_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
@@ -241,6 +297,53 @@ pub fn DrawerDocPage() -> impl IntoView {
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn DrawerRootWithExample() -> impl IntoView {
+    use biji_ui::components::drawer;
+
+    view! {
+        <div class="flex flex-col items-center gap-3 p-8">
+            <drawer::RootWith let:d>
+                <p class="text-sm text-muted-foreground">
+                    {move || if d.open.get() { "Drawer is open" } else { "Drawer is closed" }}
+                </p>
+                <drawer::Trigger class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium \
+                                        rounded-md border border-border bg-background \
+                                        hover:bg-accent transition-colors">
+                    "Open Drawer"
+                </drawer::Trigger>
+                <Portal>
+                    <drawer::Overlay
+                        class="fixed inset-0 z-[80] bg-black/50 transition"
+                        show_class="opacity-100 duration-300 ease-out"
+                        hide_class="opacity-0 duration-200 ease-in"
+                    />
+                    <drawer::Content
+                        class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
+                               border-border shadow-xl transition-transform"
+                        show_class="translate-x-0 duration-300 ease-out"
+                        hide_class="translate-x-full duration-200 ease-in"
+                    >
+                        <div class="flex flex-col h-full p-6">
+                            <drawer::Title class="text-lg font-semibold">"Settings"</drawer::Title>
+                            <drawer::Description class="mt-1 text-sm text-muted-foreground">
+                                "Manage your preferences."
+                            </drawer::Description>
+                            <div class="mt-auto">
+                                <drawer::Close class="w-full px-4 py-2 text-sm font-medium rounded-md \
+                                                      bg-primary text-primary-foreground \
+                                                      hover:bg-primary/90 transition-colors">
+                                    "Save Changes"
+                                </drawer::Close>
+                            </div>
+                        </div>
+                    </drawer::Content>
+                </Portal>
+            </drawer::RootWith>
+        </div>
     }
 }
 

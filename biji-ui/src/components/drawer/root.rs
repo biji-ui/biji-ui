@@ -14,11 +14,53 @@ use crate::{
     utils::prevent_scroll::use_prevent_scroll,
 };
 
-use super::context::{DrawerContext, DrawerSide, next_drawer_id};
+use super::context::{DrawerState, DrawerSide, next_drawer_id};
 
+fn build_state(
+    open: bool,
+    side: DrawerSide,
+    prevent_scroll: bool,
+    hide_delay: Duration,
+    on_open_change: Option<Callback<bool>>,
+) -> DrawerState {
+    let open_sig = RwSignal::new(open);
+    let base_id = next_drawer_id();
+    DrawerState {
+        open: open_sig,
+        data_state: Signal::derive(move || if open_sig.get() { "open" } else { "closed" }),
+        side,
+        trigger_ref: NodeRef::new(),
+        overlay_ref: NodeRef::new(),
+        content_ref: NodeRef::new(),
+        prevent_scroll,
+        hide_delay,
+        title_id: StoredValue::new(format!("{base_id}-title")),
+        description_id: StoredValue::new(format!("{base_id}-description")),
+        drawer_id: StoredValue::new(base_id),
+        on_open_change,
+    }
+}
+
+/// Returns the [`DrawerState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+pub fn use_drawer() -> DrawerState {
+    expect_context::<DrawerState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`DrawerState`]
+/// directly inside the children via the `let:` binding.
+///
+/// ```rust
+/// <drawer::RootWith let:d>
+///     <p>{move || if d.open.get() { "Drawer open" } else { "Drawer closed" }}</p>
+///     <drawer::Trigger>"Open"</drawer::Trigger>
+///     <drawer::Content>
+///         <drawer::Close>"Close"</drawer::Close>
+///     </drawer::Content>
+/// </drawer::RootWith>
+/// ```
 #[component]
-pub fn Root(
-    children: Children,
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(DrawerState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
     #[prop(default = DrawerSide::Right)] side: DrawerSide,
     #[prop(default = true)] prevent_scroll: bool,
@@ -28,23 +70,35 @@ pub fn Root(
     #[prop(default = false)] open: bool,
     #[prop(optional)] on_open_change: Option<Callback<bool>>,
 ) -> impl IntoView {
-    let base_id = next_drawer_id();
-    let ctx = DrawerContext {
-        trigger_ref: NodeRef::new(),
-        overlay_ref: NodeRef::new(),
-        content_ref: NodeRef::new(),
-        open: RwSignal::new(open),
-        prevent_scroll,
-        hide_delay,
-        side,
-        title_id: StoredValue::new(format!("{base_id}-title")),
-        description_id: StoredValue::new(format!("{base_id}-description")),
-        drawer_id: StoredValue::new(base_id),
-        on_open_change,
-    };
+    let state = build_state(open, side, prevent_scroll, hide_delay, on_open_change);
 
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
+            <RootEvents>
+                <div class={class}>{children(state)}</div>
+            </RootEvents>
+        </Provider>
+    }
+}
+
+/// The standard drawer root. Use [`RootWith`] instead when you need to access
+/// [`DrawerState`] inline via `let:d`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(default = DrawerSide::Right)] side: DrawerSide,
+    #[prop(default = true)] prevent_scroll: bool,
+    /// Animation unmount delay — should match your CSS transition duration.
+    #[prop(default = Duration::from_millis(300))]
+    hide_delay: Duration,
+    #[prop(default = false)] open: bool,
+    #[prop(optional)] on_open_change: Option<Callback<bool>>,
+) -> impl IntoView {
+    let state = build_state(open, side, prevent_scroll, hide_delay, on_open_change);
+
+    view! {
+        <Provider value={state}>
             <RootEvents>
                 <div class={class}>{children()}</div>
             </RootEvents>
@@ -54,7 +108,7 @@ pub fn Root(
 
 #[component]
 fn RootEvents(children: Children) -> impl IntoView {
-    let ctx = expect_context::<DrawerContext>();
+    let ctx = expect_context::<DrawerState>();
 
     let eff = use_prevent_scroll(
         move || ctx.prevent_scroll && ctx.open.get(),
@@ -96,7 +150,7 @@ fn RootEvents(children: Children) -> impl IntoView {
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<DrawerContext>();
+    let ctx = expect_context::<DrawerState>();
 
     let _ = use_event_listener(ctx.trigger_ref, click, move |_| {
         ctx.toggle();
@@ -108,7 +162,7 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
             type="button"
             aria-expanded={move || if ctx.open.get() { "true" } else { "false" }}
             aria-controls={ctx.drawer_id.get_value()}
-            data-state={move || ctx.data_state()}
+            data-state={ctx.data_state}
             class={class}
         >
             {children()}
@@ -125,7 +179,7 @@ pub fn Overlay(
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<DrawerContext>();
+    let ctx = expect_context::<DrawerState>();
 
     view! {
         <CustomAnimatedShow
@@ -154,7 +208,7 @@ pub fn Content(
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<DrawerContext>();
+    let ctx = expect_context::<DrawerState>();
     let content_ref = ctx.content_ref;
 
     // Focus the first focusable element when the drawer opens.
@@ -208,7 +262,7 @@ pub fn Content(
             attr:aria-modal="true"
             attr:aria-labelledby={ctx.title_id.get_value()}
             attr:aria-describedby={ctx.description_id.get_value()}
-            attr:data-state={move || ctx.data_state()}
+            attr:data-state={ctx.data_state}
             attr:data-side={ctx.side.as_str()}
             attr:tabindex="-1"
         >
@@ -220,7 +274,7 @@ pub fn Content(
 /// A button that closes the drawer when clicked.
 #[component]
 pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<DrawerContext>();
+    let ctx = expect_context::<DrawerState>();
 
     view! {
         <button type="button" class={class} on:click={move |_| {
@@ -238,7 +292,7 @@ pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl 
 /// Its `id` is automatically wired to `aria-labelledby` on `Content`.
 #[component]
 pub fn Title(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<DrawerContext>();
+    let ctx = expect_context::<DrawerState>();
     view! { <h2 id={ctx.title_id.get_value()} class={class}>{children()}</h2> }
 }
 
@@ -246,11 +300,11 @@ pub fn Title(children: Children, #[prop(into, optional)] class: String) -> impl 
 /// Its `id` is automatically wired to `aria-describedby` on `Content`.
 #[component]
 pub fn Description(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<DrawerContext>();
+    let ctx = expect_context::<DrawerState>();
     view! { <p id={ctx.description_id.get_value()} class={class}>{children()}</p> }
 }
 
-// ── Focus helpers (mirrored from dialog) ─────────────────────────────────────
+// ── Focus helpers ─────────────────────────────────────────────────────────────
 
 fn get_focusable_elements(container: &web_sys::HtmlElement) -> Vec<web_sys::HtmlElement> {
     let selector = r#"a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])"#;
