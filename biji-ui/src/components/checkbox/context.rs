@@ -39,16 +39,23 @@ pub struct CheckboxState {
 }
 
 impl CheckboxState {
-    pub(crate) fn new(checked: bool, indeterminate: bool, disabled: bool) -> Self {
-        let initial = if indeterminate {
-            CheckedState::Indeterminate
-        } else if checked {
-            CheckedState::Checked
-        } else {
-            CheckedState::Unchecked
-        };
-        let checked = RwSignal::new(initial);
-        let data_state = Signal::derive(move || checked.get().as_str());
-        Self { checked, disabled, data_state, trigger_ref: NodeRef::new() }
+    pub(crate) fn new(
+        checked: Option<RwSignal<CheckedState>>,
+        default_checked: bool,
+        indeterminate: bool,
+        disabled: bool,
+    ) -> Self {
+        let checked_sig = checked.unwrap_or_else(|| {
+            let initial = if indeterminate {
+                CheckedState::Indeterminate
+            } else if default_checked {
+                CheckedState::Checked
+            } else {
+                CheckedState::Unchecked
+            };
+            RwSignal::new(initial)
+        });
+        let data_state = Signal::derive(move || checked_sig.get().as_str());
+        Self { checked: checked_sig, disabled, data_state, trigger_ref: NodeRef::new() }
     }
 }

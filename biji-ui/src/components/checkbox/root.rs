@@ -27,11 +27,14 @@ pub fn use_checkbox() -> CheckboxState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(CheckboxState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(default = false)] checked: bool,
+    /// Controlled signal. When provided, the checkbox reads and writes this signal directly.
+    #[prop(into, default = None)]
+    checked: Option<RwSignal<CheckedState>>,
+    #[prop(default = false)] default_checked: bool,
     #[prop(default = false)] indeterminate: bool,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let state = CheckboxState::new(checked, indeterminate, disabled);
+    let state = CheckboxState::new(checked, default_checked, indeterminate, disabled);
 
     let _ = use_event_listener(state.trigger_ref, click, move |_| {
         if state.disabled {
@@ -71,12 +74,13 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
-    #[prop(default = false)] checked: bool,
+    #[prop(into, default = None)] checked: Option<RwSignal<CheckedState>>,
+    #[prop(default = false)] default_checked: bool,
     #[prop(default = false)] indeterminate: bool,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     view! {
-        <RootWith checked=checked indeterminate=indeterminate disabled=disabled class=class let:_>
+        <RootWith checked=checked default_checked=default_checked indeterminate=indeterminate disabled=disabled class=class let:_>
             {children()}
         </RootWith>
     }
