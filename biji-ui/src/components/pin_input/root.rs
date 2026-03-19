@@ -40,12 +40,16 @@ pub fn use_pin_input() -> PinInputState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(PinInputState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
+    /// Controlled signal for the per-cell values. When provided, the PIN input reads and writes
+    /// this signal directly (the `Vec` must have at least `length` elements).
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Vec<String>>>,
     #[prop(default = 4)] length: usize,
     #[prop(default = false)] disabled: bool,
     #[prop(into, default = String::from("○"))] placeholder: String,
     #[prop(into, default = None)] on_complete: Option<Callback<String>>,
 ) -> impl IntoView {
-    let state = PinInputState::new(length, disabled, placeholder, on_complete);
+    let state = PinInputState::new(value, length, disabled, placeholder, on_complete);
 
     view! {
         <Provider value={state}>
@@ -67,6 +71,7 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
+    #[prop(into, default = None)] value: Option<RwSignal<Vec<String>>>,
     #[prop(default = 4)] length: usize,
     #[prop(default = false)] disabled: bool,
     #[prop(into, default = String::from("○"))] placeholder: String,
@@ -74,7 +79,7 @@ pub fn Root(
 ) -> impl IntoView {
     view! {
         <RootWith
-            length=length disabled=disabled placeholder=placeholder
+            value=value length=length disabled=disabled placeholder=placeholder
             on_complete=on_complete class=class
             let:_
         >

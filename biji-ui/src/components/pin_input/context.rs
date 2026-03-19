@@ -30,13 +30,14 @@ pub struct PinInputState {
 
 impl PinInputState {
     pub(crate) fn new(
+        values_signal: Option<RwSignal<Vec<String>>>,
         length: usize,
         disabled: bool,
         placeholder: String,
         on_complete: Option<Callback<String>>,
     ) -> Self {
         let cell_refs: Vec<NodeRef<Input>> = (0..length).map(|_| NodeRef::new()).collect();
-        let values = RwSignal::new(vec![String::new(); length]);
+        let values = values_signal.unwrap_or_else(|| RwSignal::new(vec![String::new(); length]));
         let value = Signal::derive(move || values.with(|v| v.join("")));
         let is_complete =
             Signal::derive(move || values.with(|v| v.iter().all(|s| !s.is_empty())));
