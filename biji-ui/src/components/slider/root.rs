@@ -6,7 +6,7 @@ use leptos::{
 };
 use leptos_use::use_event_listener;
 
-use super::context::{SliderContext, SliderState};
+use super::context::SliderState;
 
 /// Returns the [`SliderState`] from the nearest [`Root`] or [`RootWith`] ancestor.
 ///
@@ -43,34 +43,24 @@ pub fn RootWith<IV: IntoView + 'static>(
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     let (min, max) = if min <= max { (min, max) } else { (max, min) };
-    let ctx = SliderContext {
-        value: RwSignal::new(value.clamp(min, max)),
-        min,
-        max,
-        step,
-        disabled,
-        track_ref: NodeRef::new(),
-    };
-    let state = SliderState::new(ctx);
+    let state = SliderState::new(value, min, max, step, disabled);
 
     view! {
-        <Provider value={ctx}>
-            <Provider value={state}>
-                <div
-                    data-orientation="horizontal"
-                    data-disabled={ctx.disabled}
-                    data-state={ctx.data_state()}
-                    class={class}
-                >
-                    {children(state)}
-                </div>
-            </Provider>
+        <Provider value={state}>
+            <div
+                data-orientation="horizontal"
+                data-disabled={state.disabled}
+                data-state={state.data_state()}
+                class={class}
+            >
+                {children(state)}
+            </div>
         </Provider>
     }
 }
 
 /// The standard slider root. Renders a wrapper `<div>` with data attributes and provides
-/// [`SliderContext`] and [`SliderState`] to all descendants via context.
+/// [`SliderState`] to all descendants via context.
 ///
 /// Use [`RootWith`] instead when you need to access [`SliderState`] inline via `let:s`.
 #[component]
@@ -84,12 +74,7 @@ pub fn Root(
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     view! {
-        <RootWith
-            value=value min=min max=max step=step
-            disabled=disabled
-            class=class
-            let:_
-        >
+        <RootWith value=value min=min max=max step=step disabled=disabled class=class let:_>
             {children()}
         </RootWith>
     }
@@ -100,13 +85,13 @@ pub fn Track(
     children: Children,
     #[prop(into, optional)] class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<SliderContext>();
+    let state = expect_context::<SliderState>();
 
     view! {
         <div
-            node_ref={ctx.track_ref}
+            node_ref={state.track_ref}
             data-orientation="horizontal"
-            data-disabled={ctx.disabled}
+            data-disabled={state.disabled}
             class={class}
         >
             {children()}
@@ -116,26 +101,26 @@ pub fn Track(
 
 #[component]
 pub fn Range(#[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<SliderContext>();
+    let state = expect_context::<SliderState>();
 
     view! {
         <div
             data-orientation="horizontal"
-            data-disabled={ctx.disabled}
+            data-disabled={state.disabled}
             class={class}
-            style={move || format!("left: 0%; right: {}%", 100.0 - ctx.percentage())}
+            style={move || format!("left: 0%; right: {}%", 100.0 - state.percentage.get())}
         />
     }
 }
 
 #[component]
 pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<SliderContext>();
+    let state = expect_context::<SliderState>();
     let thumb_ref: NodeRef<Div> = NodeRef::new();
     let is_dragging = RwSignal::new(false);
 
     let _ = use_event_listener(thumb_ref, pointerdown, move |evt| {
-        if ctx.disabled {
+        if state.disabled {
             return;
         }
         evt.prevent_default();
@@ -147,13 +132,13 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
     });
 
     let _ = use_event_listener(thumb_ref, pointermove, move |evt| {
-        if !is_dragging.get() || ctx.disabled {
+        if !is_dragging.get() || state.disabled {
             return;
         }
-        if let Some(track) = ctx.track_ref.get() {
+        if let Some(track) = state.track_ref.get() {
             let rect = track.get_bounding_client_rect();
             let pct = (evt.client_x() as f64 - rect.left()) / rect.width();
-            ctx.set_value_from_pct(pct);
+            state.set_value_from_pct(pct);
         }
     });
 
@@ -166,35 +151,35 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
     });
 
     let _ = use_event_listener(thumb_ref, keydown, move |evt| {
-        if ctx.disabled {
+        if state.disabled {
             return;
         }
-        let step = if ctx.step.is_finite() && ctx.step > 0.0 { ctx.step } else { 1.0 };
-        let current = ctx.value.get();
+        let step = if state.step.is_finite() && state.step > 0.0 { state.step } else { 1.0 };
+        let current = state.value.get();
         let new_value = match evt.key().as_str() {
             "ArrowRight" | "ArrowUp" => current + step,
             "ArrowLeft" | "ArrowDown" => current - step,
             "PageUp" => current + step * 10.0,
             "PageDown" => current - step * 10.0,
-            "Home" => ctx.min,
-            "End" => ctx.max,
+            "Home" => state.min,
+            "End" => state.max,
             _ => return,
         };
         evt.prevent_default();
-        ctx.value.set(new_value.clamp(ctx.min, ctx.max));
+        state.value.set(new_value.clamp(state.min, state.max));
     });
 
     view! {
         <div
             node_ref={thumb_ref}
             role="slider"
-            tabindex={if ctx.disabled { "-1" } else { "0" }}
-            aria-valuemin={ctx.min.to_string()}
-            aria-valuemax={ctx.max.to_string()}
-            aria-valuenow={move || ctx.value.get().to_string()}
-            aria-disabled={if ctx.disabled { Some("true") } else { None }}
-            data-disabled={ctx.disabled}
-            style={move || format!("left: {}%", ctx.percentage())}
+            tabindex={if state.disabled { "-1" } else { "0" }}
+            aria-valuemin={state.min.to_string()}
+            aria-valuemax={state.max.to_string()}
+            aria-valuenow={move || state.value.get().to_string()}
+            aria-disabled={if state.disabled { Some("true") } else { None }}
+            data-disabled={state.disabled}
+            style={move || format!("left: {}%", state.percentage.get())}
             class={class}
         />
     }
