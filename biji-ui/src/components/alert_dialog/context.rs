@@ -6,50 +6,31 @@ use leptos::{
 };
 
 #[derive(Copy, Clone)]
-pub struct AlertDialogContext {
+pub struct AlertDialogState {
     pub open: RwSignal<bool>,
-    pub trigger_ref: NodeRef<Button>,
-    pub content_ref: NodeRef<Div>,
-    pub cancel_ref: NodeRef<Button>,
-    pub prevent_scroll: bool,
-    pub hide_delay: Duration,
-    pub title_id: StoredValue<String>,
-    pub desc_id: StoredValue<String>,
+    pub data_state: Signal<&'static str>,
+    pub(crate) trigger_ref: NodeRef<Button>,
+    pub(crate) content_ref: NodeRef<Div>,
+    pub(crate) cancel_ref: NodeRef<Button>,
+    pub(crate) prevent_scroll: bool,
+    pub(crate) hide_delay: Duration,
+    pub(crate) title_id: StoredValue<String>,
+    pub(crate) desc_id: StoredValue<String>,
     pub(crate) on_open_change: Option<Callback<bool>>,
 }
 
-impl Default for AlertDialogContext {
-    fn default() -> Self {
-        Self {
-            open: RwSignal::new(false),
-            trigger_ref: NodeRef::default(),
-            content_ref: NodeRef::default(),
-            cancel_ref: NodeRef::default(),
-            prevent_scroll: true,
-            hide_delay: Duration::from_millis(200),
-            title_id: StoredValue::new(String::new()),
-            desc_id: StoredValue::new(String::new()),
-            on_open_change: None,
-        }
-    }
-}
-
-impl AlertDialogContext {
-    pub fn open(&self) {
+impl AlertDialogState {
+    pub(crate) fn open(&self) {
         self.open.set(true);
         if let Some(cb) = self.on_open_change {
             cb.run(true);
         }
     }
 
-    pub fn close(&self) {
+    pub(crate) fn close(&self) {
         self.open.set(false);
         if let Some(cb) = self.on_open_change {
             cb.run(false);
         }
-    }
-
-    pub fn data_state(&self) -> &'static str {
-        if self.open.get() { "open" } else { "closed" }
     }
 }

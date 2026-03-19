@@ -56,6 +56,51 @@ pub fn MyAlertDialog() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use std::time::Duration;
+use leptos::{portal::Portal, prelude::*};
+use biji_ui::components::alert_dialog;
+
+#[component]
+pub fn MyAlertDialog() -> impl IntoView {
+    view! {
+        <alert_dialog::RootWith hide_delay={Duration::from_millis(200)} let:d>
+            <p class="mb-2 text-sm text-muted-foreground">
+                {move || if d.open.get() { "Alert is open" } else { "Alert is closed" }}
+            </p>
+            <alert_dialog::Trigger class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-500">
+                "Delete account"
+            </alert_dialog::Trigger>
+            <Portal>
+                <alert_dialog::Overlay
+                    class="fixed inset-0 z-[80] bg-black/40"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <alert_dialog::Content
+                    class="fixed left-1/2 top-1/2 z-[90] w-full max-w-md rounded-lg bg-background p-6 shadow-xl"
+                    show_class="opacity-100 scale-100 duration-300 ease-out translate-x-[-50%] translate-y-[-50%]"
+                    hide_class="opacity-0 scale-95 duration-200 ease-in translate-x-[-50%] translate-y-[-50%]"
+                >
+                    <alert_dialog::Title class="text-lg font-semibold">
+                        "Are you absolutely sure?"
+                    </alert_dialog::Title>
+                    <alert_dialog::Description class="mt-2 text-sm text-muted-foreground">
+                        "This action cannot be undone."
+                    </alert_dialog::Description>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <alert_dialog::Cancel class="rounded-md border px-4 py-2 text-sm font-medium">
+                            "Cancel"
+                        </alert_dialog::Cancel>
+                        <alert_dialog::Action class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500">
+                            "Confirm"
+                        </alert_dialog::Action>
+                    </div>
+                </alert_dialog::Content>
+            </Portal>
+        </alert_dialog::RootWith>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -210,8 +255,28 @@ pub fn AlertDialogDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"AlertDialogState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The state is "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"Copy"</code>
+                " and safe to pass as a prop."
+            </p>
+            <DocPreview>
+                <AlertDialogRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Overlay" rows={OVERLAY_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
@@ -222,6 +287,51 @@ pub fn AlertDialogDocPage() -> impl IntoView {
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn AlertDialogRootWithExample() -> impl IntoView {
+    use biji_ui::components::alert_dialog;
+
+    view! {
+        <div class="flex flex-col items-center gap-3 p-8">
+            <alert_dialog::RootWith hide_delay={Duration::from_millis(200)} let:d>
+                <p class="text-sm text-muted-foreground">
+                    {move || if d.open.get() { "Alert is open" } else { "Alert is closed" }}
+                </p>
+                <alert_dialog::Trigger class={btn(Variant::Destructive)}>
+                    "Delete account"
+                </alert_dialog::Trigger>
+                <Portal>
+                    <alert_dialog::Overlay
+                        class="fixed inset-0 z-[80] bg-zinc-400/20 backdrop-blur-sm transition-opacity duration-300 ease-linear dark:bg-black/40"
+                        show_class="opacity-100"
+                        hide_class="opacity-0"
+                    />
+                    <alert_dialog::Content
+                        class="fixed left-1/2 top-1/2 z-[90] w-full max-w-[calc(100%-2rem)] sm:max-w-md rounded-lg bg-background p-6 shadow-xl transition-all"
+                        show_class="opacity-100 scale-100 duration-300 ease-out translate-x-[-50%] translate-y-[-50%]"
+                        hide_class="opacity-0 scale-95 duration-200 ease-in translate-x-[-50%] translate-y-[-50%]"
+                    >
+                        <alert_dialog::Title class="text-lg font-semibold text-foreground">
+                            "Are you absolutely sure?"
+                        </alert_dialog::Title>
+                        <alert_dialog::Description class="mt-2 text-sm text-muted-foreground">
+                            "This action cannot be undone. This will permanently delete your account."
+                        </alert_dialog::Description>
+                        <div class="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
+                            <alert_dialog::Cancel class={btn(Variant::Outline)}>
+                                "Cancel"
+                            </alert_dialog::Cancel>
+                            <alert_dialog::Action class={btn(Variant::Destructive)}>
+                                "Yes, delete account"
+                            </alert_dialog::Action>
+                        </div>
+                    </alert_dialog::Content>
+                </Portal>
+            </alert_dialog::RootWith>
+        </div>
     }
 }
 
