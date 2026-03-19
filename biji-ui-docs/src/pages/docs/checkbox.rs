@@ -1,7 +1,10 @@
 use leptos::prelude::*;
 
 use crate::components::{
-    api_table::{DataAttrRow, DataAttrsTable, KeyboardRow, KeyboardTable, PropRow, PropsTable, SectionHeading},
+    api_table::{
+        DataAttrRow, DataAttrsTable, KeyboardRow, KeyboardTable, PropRow, PropsTable,
+        SectionHeading,
+    },
     code::Code,
 };
 
@@ -35,7 +38,7 @@ pub fn LabeledCheckbox() -> impl IntoView {
     let indicator_class = "hidden data-[state=checked]:flex text-primary-foreground";
 
     view! {
-        <label class="flex items-center gap-3 cursor-pointer select-none">
+        <label class="flex gap-3 items-center cursor-pointer select-none">
             <checkbox::RootWith class={root_class} let:cb>
                 <checkbox::Indicator class={indicator_class}>
                     // Checkmark icon
@@ -154,8 +157,6 @@ pub fn CheckboxDocPage() -> impl IntoView {
     }
 }
 
-const CHECKMARK: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>"#;
-
 #[component]
 pub fn CheckboxRootWithExample() -> impl IntoView {
     use biji_ui::components::checkbox;
@@ -166,18 +167,26 @@ pub fn CheckboxRootWithExample() -> impl IntoView {
     let indicator_class = "hidden data-[state=checked]:flex text-primary-foreground";
 
     view! {
-        <div class="flex items-center gap-3">
+        <div class="flex gap-3 items-center">
             <checkbox::RootWith class={root_class} let:cb>
                 <checkbox::Indicator class={indicator_class}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                 </checkbox::Indicator>
                 <span class="sr-only">{move || cb.data_state.get()}</span>
             </checkbox::RootWith>
-            <span class="text-sm font-medium select-none">
-                "Subscribe to newsletter"
-            </span>
+            <span class="text-sm font-medium select-none">"Subscribe to newsletter"</span>
         </div>
     }
 }
@@ -194,30 +203,60 @@ pub fn CheckboxExample() -> impl IntoView {
 
     view! {
         <div class="flex flex-col gap-4">
-            <label class="flex items-center gap-3 cursor-pointer select-none">
+            <label class="flex gap-3 items-center cursor-pointer select-none">
                 <checkbox::Root class={root_class}>
                     <checkbox::Indicator class={indicator_class}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </checkbox::Indicator>
                 </checkbox::Root>
                 <span class="text-sm font-medium">"Accept terms and conditions"</span>
             </label>
-            <label class="flex items-center gap-3 cursor-pointer select-none">
+            <label class="flex gap-3 items-center cursor-pointer select-none">
                 <checkbox::Root checked=true class={root_class}>
                     <checkbox::Indicator class={indicator_class}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </checkbox::Indicator>
                 </checkbox::Root>
                 <span class="text-sm font-medium">"Subscribe to newsletter"</span>
             </label>
-            <label class="flex items-center gap-3 cursor-not-allowed select-none">
+            <label class="flex gap-3 items-center cursor-not-allowed select-none">
                 <checkbox::Root disabled=true class={root_class}>
                     <checkbox::Indicator class={indicator_class}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </checkbox::Indicator>
