@@ -24,9 +24,14 @@ pub struct RadioGroupState {
 }
 
 impl RadioGroupState {
-    pub(crate) fn new(value: Option<String>, disabled: bool) -> Self {
+    pub(crate) fn new(
+        value: Option<RwSignal<Option<String>>>,
+        default_value: Option<String>,
+        disabled: bool,
+    ) -> Self {
+        let value_sig = value.unwrap_or_else(|| RwSignal::new(default_value));
         Self {
-            value: RwSignal::new(value),
+            value: value_sig,
             disabled,
             item_focus: RwSignal::new(None),
             items: RwSignal::new(Default::default()),

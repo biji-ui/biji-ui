@@ -25,10 +25,13 @@ pub fn use_radio_group() -> RadioGroupState {
 pub fn RootWith<IV: IntoView + 'static>(
     children: impl Fn(RadioGroupState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
+    /// Controlled signal. When provided, the radio group reads and writes this signal directly.
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let state = RadioGroupState::new(value, disabled);
+    let state = RadioGroupState::new(value, default_value, disabled);
 
     view! {
         <Provider value={state}>
@@ -52,22 +55,14 @@ pub fn RootWith<IV: IntoView + 'static>(
 pub fn Root(
     children: ChildrenFn,
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
+    #[prop(into, default = None)] value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let state = RadioGroupState::new(value, disabled);
-
     view! {
-        <Provider value={state}>
-            <div
-                role="radiogroup"
-                aria-disabled={if state.disabled { Some("true") } else { None }}
-                data-disabled={state.disabled}
-                class={class}
-            >
-                {children()}
-            </div>
-        </Provider>
+        <RootWith value=value default_value=default_value disabled=disabled class=class let:_>
+            {children()}
+        </RootWith>
     }
 }
 
