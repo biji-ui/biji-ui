@@ -305,8 +305,7 @@ pub fn ComboboxDocPage() -> impl IntoView {
                             ". The component owns pagination state and wires infinite scroll itself."
                         </p>
                         <p class="mb-3 text-sm text-muted-foreground">
-                            "The query is debounced 300 ms before triggering a new call. "
-                            "An "
+                            "The query is debounced 300 ms before triggering a new call. " "An "
                             <code class="font-mono text-foreground">{"on_loading_change"}</code>
                             " callback fires "
                             <code class="font-mono text-foreground">{"true"}</code>
@@ -327,10 +326,10 @@ pub fn ComboboxDocPage() -> impl IntoView {
                         <DocPreview>
                             <ComboboxAsyncExample />
                         </DocPreview>
-                    }.into_any()
+                    }
+                        .into_any()
                 }
-                #[cfg(feature = "csr")]
-                { ().into_any() }
+                #[cfg(feature = "csr")] { ().into_any() }
             }
             <SectionHeading title="API Reference" />
             <PropsTable title="Root" rows={ROOT_PROPS} />
@@ -583,9 +582,6 @@ pub fn MyAsyncCombobox() -> impl IntoView {
 #[allow(dead_code)]
 const ASYNC_EXAMPLE_CODE: &str = ASYNC_SSR_CODE;
 
-// ── Server function (SSR / hydrate only) ────────────────────────────────────
-
-#[cfg(not(feature = "csr"))]
 #[server]
 pub async fn search_countries(
     query: String,
@@ -787,7 +783,11 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
     // transition without needing to be re-created.
     let sentinel_ref = NodeRef::<html::Div>::new();
     use_intersection_observer(sentinel_ref, move |entries, _| {
-        if entries.first().map(|e| e.is_intersecting()).unwrap_or(false) {
+        if entries
+            .first()
+            .map(|e| e.is_intersecting())
+            .unwrap_or(false)
+        {
             load_more();
         }
     });
@@ -799,12 +799,12 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
 
     view! {
         <div class="overflow-y-auto py-1 max-h-60">
-            <Show when=move || is_loading.get() && items.with(|v| v.is_empty())>
+            <Show when={move || is_loading.get() && items.with(|v| v.is_empty())}>
                 <div class="flex justify-center py-4">
-                    <div class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                    <div class="w-4 h-4 rounded-full border-2 animate-spin border-muted-foreground border-t-transparent" />
                 </div>
             </Show>
-            <Show when=move || fetch_error.with(|e| e.is_some())>
+            <Show when={move || fetch_error.with(|e| e.is_some())}>
                 <div class="flex flex-col gap-1 items-center py-4 px-3 text-sm">
                     <span class="font-medium text-destructive">"Server error"</span>
                     <span class="text-xs text-muted-foreground">
@@ -812,15 +812,15 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
                     </span>
                 </div>
             </Show>
-            <Show when=move || show_empty.get()>
+            <Show when={move || show_empty.get()}>
                 <div class="py-4 px-3 text-sm text-center text-muted-foreground">
                     "No countries found."
                 </div>
             </Show>
             <For
-                each=move || items.get()
-                key=|(value, _)| value.clone()
-                children=move |(value, label)| {
+                each={move || items.get()}
+                key={|(value, _)| value.clone()}
+                children={move |(value, label)| {
                     view! {
                         <combobox::Item value={value} label={label.clone()} class={ITEM_CLS}>
                             <span class="flex-1">{label}</span>
@@ -841,22 +841,22 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
                             </combobox::ItemIndicator>
                         </combobox::Item>
                     }
-                }
+                }}
             />
             // Sentinel: always in DOM, hidden when no more pages exist.
             // The IntersectionObserver detects the hidden→visible transition
             // and fires load_more when the user scrolls near the bottom.
             <div
                 node_ref={sentinel_ref}
-                class=move || {
+                class={move || {
                     if has_more.get() {
                         "py-2 flex justify-center text-muted-foreground"
                     } else {
                         "hidden"
                     }
-                }
+                }}
             >
-                <div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <div class="w-4 h-4 rounded-full border-2 border-current animate-spin border-t-transparent" />
             </div>
         </div>
     }
@@ -894,9 +894,9 @@ pub fn ComboboxAsyncExample() -> impl IntoView {
                         class={INPUT_TRIGGER_CLS}
                         placeholder="Search countries\u{2026}"
                     />
-                    <Show when=move || is_loading.get()>
+                    <Show when={move || is_loading.get()}>
                         <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <div class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                            <div class="w-4 h-4 rounded-full border-2 animate-spin border-muted-foreground border-t-transparent" />
                         </div>
                     </Show>
                 </div>
@@ -905,9 +905,7 @@ pub fn ComboboxAsyncExample() -> impl IntoView {
                     show_class="opacity-100 scale-100"
                     hide_class="opacity-0 scale-95"
                 >
-                    <AsyncItems
-                        on_loading_change={Callback::new(move |v| is_loading.set(v))}
-                    />
+                    <AsyncItems on_loading_change={Callback::new(move |v| is_loading.set(v))} />
                 </combobox::Content>
             </combobox::Root>
             <p class="text-xs text-muted-foreground">

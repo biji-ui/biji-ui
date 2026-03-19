@@ -261,21 +261,36 @@ fn ToastItemView(
     });
 
     // ── Progress bar CSS transition ──────────────────────────────────────────
-    // Enter animation flips after 1 ms — this also kicks off the progress transition.
+    // Two-rAF delay: guarantees the browser paints the initial width:100% state
+    // before entering flips false and the shrink transition begins.
+    // A single rAF (or 1 ms timeout) is not enough when opacity:0 is applied
+    // during entering — the browser skips painting and the transition has no
+    // valid starting point, causing the bar to silently stay at 0%.
     let entering = RwSignal::new(true);
-    let enter_handle = leptos::leptos_dom::helpers::set_timeout_with_handle(
-        move || entering.set(false),
-        Duration::from_millis(1),
-    )
-    .expect("set_timeout");
-    let enter_handle = StoredValue::new(Some(enter_handle));
+    // Both rAF handles are stored so either can be cancelled on cleanup.
+    // The first fires and replaces itself with the second; on_cleanup cancels
+    // whichever handle is currently stored.
+    let enter_handle: StoredValue<Option<AnimationFrameRequestHandle>> =
+        StoredValue::new(None);
+    enter_handle.set_value(Some(
+        leptos::leptos_dom::helpers::request_animation_frame_with_handle(move || {
+            if let Ok(h) =
+                leptos::leptos_dom::helpers::request_animation_frame_with_handle(move || {
+                    entering.set(false);
+                })
+            {
+                enter_handle.set_value(Some(h));
+            }
+        })
+        .expect("rAF"),
+    ));
 
     // ── Cleanup ──────────────────────────────────────────────────────────────
     on_cleanup(move || {
         // Cancel any pending enter / dismiss timeouts.
         enter_handle.update_value(|h| {
             if let Some(h) = h.take() {
-                h.clear();
+                h.cancel();
             }
         });
         dismiss_handle.with_value(|arc| {
