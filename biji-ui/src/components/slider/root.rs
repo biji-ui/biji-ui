@@ -6,18 +6,41 @@ use leptos::{
 };
 use leptos_use::use_event_listener;
 
-use super::context::SliderContext;
+use super::context::{SliderContext, SliderState};
 
+/// Returns the [`SliderState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+///
+/// Call this inside any child component that needs access to slider state.
+pub fn use_slider() -> SliderState {
+    expect_context::<SliderState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`SliderState`]
+/// directly inside the children via the `let:` binding.
+///
+/// ```rust
+/// <slider::RootWith value=50.0 let:s>
+///     <div class="flex justify-between text-sm mb-1">
+///         <span>"Volume"</span>
+///         <span>{move || s.value.get() as u32}</span>
+///     </div>
+///     <slider::Track ...>
+///         <slider::Range ... />
+///     </slider::Track>
+///     <slider::Thumb ... />
+/// </slider::RootWith>
+/// ```
+///
+/// The `s: SliderState` binding is `Copy`, so it can be passed to child components as a prop.
 #[component]
-pub fn Root(
-    children: Children,
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(SliderState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
     #[prop(default = 0.0)] value: f64,
     #[prop(default = 0.0)] min: f64,
     #[prop(default = 100.0)] max: f64,
     #[prop(default = 1.0)] step: f64,
     #[prop(default = false)] disabled: bool,
-    #[prop(optional)] on_value_change: Option<Callback<f64>>,
 ) -> impl IntoView {
     let (min, max) = if min <= max { (min, max) } else { (max, min) };
     let ctx = SliderContext {
@@ -27,20 +50,48 @@ pub fn Root(
         step,
         disabled,
         track_ref: NodeRef::new(),
-        on_value_change,
     };
+    let state = SliderState::new(ctx);
 
     view! {
         <Provider value={ctx}>
-            <div
-                data-orientation="horizontal"
-                data-disabled={ctx.disabled}
-                data-state={ctx.data_state()}
-                class={class}
-            >
-                {children()}
-            </div>
+            <Provider value={state}>
+                <div
+                    data-orientation="horizontal"
+                    data-disabled={ctx.disabled}
+                    data-state={ctx.data_state()}
+                    class={class}
+                >
+                    {children(state)}
+                </div>
+            </Provider>
         </Provider>
+    }
+}
+
+/// The standard slider root. Renders a wrapper `<div>` with data attributes and provides
+/// [`SliderContext`] and [`SliderState`] to all descendants via context.
+///
+/// Use [`RootWith`] instead when you need to access [`SliderState`] inline via `let:s`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(default = 0.0)] value: f64,
+    #[prop(default = 0.0)] min: f64,
+    #[prop(default = 100.0)] max: f64,
+    #[prop(default = 1.0)] step: f64,
+    #[prop(default = false)] disabled: bool,
+) -> impl IntoView {
+    view! {
+        <RootWith
+            value=value min=min max=max step=step
+            disabled=disabled
+            class=class
+            let:_
+        >
+            {children()}
+        </RootWith>
     }
 }
 
@@ -103,9 +154,6 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
             let rect = track.get_bounding_client_rect();
             let pct = (evt.client_x() as f64 - rect.left()) / rect.width();
             ctx.set_value_from_pct(pct);
-            if let Some(cb) = ctx.on_value_change {
-                cb.run(ctx.value.get());
-            }
         }
     });
 
@@ -134,9 +182,6 @@ pub fn Thumb(#[prop(into, optional)] class: String) -> impl IntoView {
         };
         evt.prevent_default();
         ctx.value.set(new_value.clamp(ctx.min, ctx.max));
-        if let Some(cb) = ctx.on_value_change {
-            cb.run(ctx.value.get());
-        }
     });
 
     view! {
