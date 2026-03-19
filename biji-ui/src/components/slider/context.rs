@@ -17,16 +17,23 @@ pub struct SliderState {
 }
 
 impl SliderState {
-    pub(crate) fn new(value: f64, min: f64, max: f64, step: f64, disabled: bool) -> Self {
-        let value = RwSignal::new(value.clamp(min, max));
+    pub(crate) fn new(
+        value: Option<RwSignal<f64>>,
+        default_value: f64,
+        min: f64,
+        max: f64,
+        step: f64,
+        disabled: bool,
+    ) -> Self {
+        let value_sig = value.unwrap_or_else(|| RwSignal::new(default_value.clamp(min, max)));
         let percentage = Signal::derive(move || {
-            let v = value.get();
+            let v = value_sig.get();
             if !v.is_finite() || !min.is_finite() || !max.is_finite() || max <= min {
                 return 0.0;
             }
             ((v - min) / (max - min) * 100.0).clamp(0.0, 100.0)
         });
-        Self { value, min, max, step, disabled, percentage, track_ref: NodeRef::new() }
+        Self { value: value_sig, min, max, step, disabled, percentage, track_ref: NodeRef::new() }
     }
 
     pub fn data_state(&self) -> &'static str {
