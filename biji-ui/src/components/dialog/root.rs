@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::{context::Provider, prelude::*};
 
-use crate::components::dialog::context::DialogState;
+use crate::components::dialog::context::{DialogState, RootContext};
 use crate::utils::prevent_scroll::use_prevent_scroll;
 
 fn build_state(prevent_scroll: bool, hide_delay: Duration) -> DialogState {
