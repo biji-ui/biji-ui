@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use leptos::{context::Provider, prelude::*};
 
-use crate::components::dialog::context::{DialogState, RootContext};
+use crate::components::dialog::context::DialogState;
 use crate::utils::prevent_scroll::use_prevent_scroll;
 
 fn build_state(prevent_scroll: bool, hide_delay: Duration) -> DialogState {
@@ -48,18 +48,15 @@ pub fn RootWith<IV: IntoView + 'static>(
     #[prop(default = Duration::from_millis(200))]
     hide_delay: Duration,
 ) -> impl IntoView {
-    let root_ctx = RootContext::default();
     let state = build_state(prevent_scroll, hide_delay);
 
     view! {
         <Provider value={state}>
-            <Provider value={root_ctx}>
-                <RootEvents>
-                    <div class={class}>
-                        {children(state)}
-                    </div>
-                </RootEvents>
-            </Provider>
+            <RootEvents>
+                <div class={class}>
+                    {children(state)}
+                </div>
+            </RootEvents>
         </Provider>
     }
 }

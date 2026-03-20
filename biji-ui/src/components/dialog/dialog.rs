@@ -6,7 +6,6 @@ use crate::{
     cn, components::dialog::context::DialogState, custom_animated_show::CustomAnimatedShow,
 };
 
-use super::context::RootContext;
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
@@ -51,7 +50,7 @@ pub fn Content(
     hide_class: String,
 ) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogState>();
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<DialogState>().root.get_untracked();
 
     let content_ref = root_ctx.content_ref;
 
@@ -209,7 +208,7 @@ pub fn Overlay(
     hide_class: String,
 ) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogState>();
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<DialogState>().root.get_untracked();
 
     let overlay_ref = root_ctx.overlay_ref;
 
@@ -230,7 +229,7 @@ pub fn Overlay(
 #[component]
 pub fn OverlayEvents(children: Children) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogState>();
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<DialogState>().root.get_untracked();
 
     let _ = use_event_listener(root_ctx.overlay_ref, click, move |_| {
         dialog_ctx.close();
@@ -241,7 +240,7 @@ pub fn OverlayEvents(children: Children) -> impl IntoView {
 
 #[component]
 pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<DialogState>().root.get_untracked();
 
     let close_ref = root_ctx.close_ref;
 
@@ -257,7 +256,7 @@ pub fn Close(children: Children, #[prop(into, optional)] class: String) -> impl 
 #[component]
 pub fn CloseEvents(children: Children) -> impl IntoView {
     let dialog_ctx = expect_context::<DialogState>();
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<DialogState>().root.get_untracked();
 
     let _ = use_event_listener(root_ctx.close_ref, click, move |_| {
         dialog_ctx.close();

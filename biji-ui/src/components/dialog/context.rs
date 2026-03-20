@@ -17,7 +17,6 @@ pub struct DialogState {
 
 impl DialogState {
     pub fn open(&self) {
-        self.root.set(RootContext::default());
         self.open.set(true);
     }
 
