@@ -2,6 +2,17 @@ use leptos::{context::Provider, prelude::*};
 
 use super::context::{AccordionState, RootContext};
 
+fn build_state(allow_loop: bool) -> AccordionState {
+    let root_ctx = RootContext {
+        allow_loop,
+        ..RootContext::default()
+    };
+    AccordionState {
+        root: RwSignal::new(root_ctx),
+        accordion_ref: NodeRef::new(),
+    }
+}
+
 pub fn use_accordion() -> AccordionState {
     expect_context::<AccordionState>()
 }
@@ -12,20 +23,12 @@ pub fn RootWith<IV: IntoView + 'static>(
     #[prop(into, optional)] class: String,
     #[prop(default = false)] allow_loop: bool,
 ) -> impl IntoView {
-    let accordion_ref = NodeRef::new();
-    let root_ctx = RootContext {
-        allow_loop,
-        ..RootContext::default()
-    };
-    let state = AccordionState {
-        root: RwSignal::new(root_ctx),
-        accordion_ref,
-    };
+    let state = build_state(allow_loop);
 
     view! {
         <Provider value={state}>
-            <div node_ref={accordion_ref} class={class}>
-                <Provider value={root_ctx}>{children(state)}</Provider>
+            <div node_ref={state.accordion_ref} class={class}>
+                {children(state)}
             </div>
         </Provider>
     }
