@@ -17,7 +17,7 @@ use crate::{
     utils::positioning::Positioning,
 };
 
-use super::context::{MenuContext, RootContext};
+use super::context::{MenuContext, MenubarContext};
 
 #[component]
 pub fn Item(
@@ -68,7 +68,7 @@ pub fn Item(
 
 #[component]
 pub fn ItemTriggerEvents(children: Children) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<MenubarContext>().root.get();
     let menu_ctx = expect_context::<MenuContext>();
     let item_ctx = expect_context::<ItemData>();
 

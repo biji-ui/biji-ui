@@ -17,7 +17,7 @@ use crate::{
     utils::{positioning::{AvoidCollisions, Positioning}, prevent_scroll::use_prevent_scroll},
 };
 
-use super::context::{ItemData, MenuContext, MenubarContext, RootContext};
+use super::context::{ItemData, MenuContext, MenubarContext};
 
 /// Walks the submenu tree rooted at `menu_context` and returns `true` if
 /// `target` is contained within any submenu trigger or content element.
@@ -55,7 +55,7 @@ pub fn Menu(
     hide_delay: Duration,
     children: Children,
 ) -> impl IntoView {
-    let ctx = expect_context::<RootContext>();
+    let ctx = expect_context::<MenubarContext>().root.get();
 
     let index = ctx.next_index();
 
@@ -92,7 +92,7 @@ pub fn MenuTrigger(
     #[prop(into, optional)] aria_label: Option<String>,
     children: Children,
 ) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<MenubarContext>().root.get();
     let menu_ctx = expect_context::<MenuContext>();
 
     let is_in_menubar = use_context::<MenubarContext>().is_some();
@@ -124,7 +124,7 @@ pub fn MenuTrigger(
 
 #[component]
 pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<MenubarContext>().root.get();
     let menu_ctx = expect_context::<MenuContext>();
 
     let eff = RenderEffect::new(move |_| {
