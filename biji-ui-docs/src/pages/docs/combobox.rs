@@ -249,6 +249,34 @@ const KEYBOARD: &[KeyboardRow] = &[
     },
 ];
 
+const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+use biji_ui::components::combobox;
+
+#[component]
+pub fn MyCombobox() -> impl IntoView {
+    view! {
+        <combobox::RootWith let:c>
+            <p class="text-sm text-muted-foreground">
+                {move || {
+                    c.value.get()
+                        .map(|v| format!("Selected: {v}"))
+                        .unwrap_or_else(|| "Nothing selected".to_string())
+                }}
+            </p>
+            <combobox::Trigger class="...">
+                <combobox::Value placeholder="Select a fruit..." />
+            </combobox::Trigger>
+            <Portal>
+                <combobox::Content class="..." show_class="..." hide_class="...">
+                    <combobox::Input placeholder="Search..." class="..." />
+                    <combobox::Item value="apple" class="...">"Apple"</combobox::Item>
+                    <combobox::Item value="banana" class="...">"Banana"</combobox::Item>
+                </combobox::Content>
+            </Portal>
+        </combobox::RootWith>
+    }
+}"#;
+
 #[component]
 pub fn ComboboxDocPage() -> impl IntoView {
     use crate::pages::docs::{DocPage, DocPreview};
@@ -331,8 +359,32 @@ pub fn ComboboxDocPage() -> impl IntoView {
                 }
                 #[cfg(feature = "csr")] { ().into_any() }
             }
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"ComboboxState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The state exposes "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"open"</code>
+                ", "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"value"</code>
+                ", and "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"query"</code>
+                " as reactive signals."
+            </p>
+            <DocPreview>
+                <ComboboxRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="InputTrigger" rows={INPUT_TRIGGER_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Value" rows={VALUE_PROPS} />
@@ -342,6 +394,80 @@ pub fn ComboboxDocPage() -> impl IntoView {
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn ComboboxRootWithExample() -> impl IntoView {
+    use biji_ui::components::combobox;
+    use leptos::portal::Portal;
+
+    const TRIGGER_CLS: &str = "flex items-center justify-between w-56 px-3 py-2 text-sm \
+        rounded-md border border-border bg-background text-foreground \
+        hover:bg-accent hover:text-accent-foreground \
+        data-[state=open]:bg-accent data-[state=open]:text-accent-foreground \
+        cursor-default select-none";
+
+    const CONTENT_CLS: &str = "z-50 w-56 overflow-hidden rounded-md border border-border \
+        bg-background shadow-md text-sm \
+        transition origin-[var(--biji-transform-origin)]";
+
+    const INPUT_CLS: &str = "w-full px-3 py-2 text-sm outline-none bg-transparent \
+        border-b border-border placeholder:text-muted-foreground";
+
+    const ITEM_CLS: &str = "flex items-center px-3 py-2 cursor-default select-none \
+        data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
+        data-[state=checked]:font-medium";
+
+    const FRUITS: &[(&str, &str)] = &[
+        ("apple", "Apple"),
+        ("banana", "Banana"),
+        ("cherry", "Cherry"),
+        ("mango", "Mango"),
+        ("pineapple", "Pineapple"),
+    ];
+
+    view! {
+        <div class="flex flex-col items-center gap-3 p-8">
+            <combobox::RootWith let:c>
+                <p class="text-sm text-muted-foreground">
+                    {move || {
+                        c.value
+                            .get()
+                            .map(|v| format!("Selected: {v}"))
+                            .unwrap_or_else(|| "Nothing selected".to_string())
+                    }}
+                </p>
+                <combobox::Trigger class={TRIGGER_CLS}>
+                    <combobox::Value placeholder="Select a fruit..." />
+                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </combobox::Trigger>
+                <Portal>
+                    <combobox::Content
+                        class={CONTENT_CLS}
+                        show_class="opacity-100 scale-100 duration-150 ease-out"
+                        hide_class="opacity-0 scale-95 duration-100 ease-in"
+                    >
+                        <combobox::Input placeholder="Search..." class={INPUT_CLS} />
+                        {FRUITS
+                            .iter()
+                            .map(|(value, label)| {
+                                view! {
+                                    <combobox::Item value={*value} label={*label} class={ITEM_CLS}>
+                                        <combobox::ItemText>{*label}</combobox::ItemText>
+                                    </combobox::Item>
+                                }
+                            })
+                            .collect::<Vec<_>>()}
+                        <combobox::Empty>
+                            <p class="px-3 py-2 text-sm text-muted-foreground">"No results."</p>
+                        </combobox::Empty>
+                    </combobox::Content>
+                </Portal>
+            </combobox::RootWith>
+        </div>
     }
 }
 
@@ -367,8 +493,6 @@ pub fn ComboboxExample() -> impl IntoView {
         data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
         data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
 
-    let last_value = RwSignal::new(String::from("None"));
-
     let fruits = [
         ("apple", "Apple"),
         ("apricot", "Apricot"),
@@ -389,7 +513,7 @@ pub fn ComboboxExample() -> impl IntoView {
 
     view! {
         <div class="flex flex-col gap-3 items-center">
-            <combobox::Root on_value_change={Callback::new(move |v: String| last_value.set(v))}>
+            <combobox::RootWith let:c>
                 <combobox::Trigger class={TRIGGER_CLS}>
                     <combobox::Value placeholder="Select a fruit..." />
                     <svg
@@ -447,11 +571,13 @@ pub fn ComboboxExample() -> impl IntoView {
                             .collect_view()}
                     </div>
                 </combobox::Content>
-            </combobox::Root>
-            <p class="text-xs text-muted-foreground">
-                "Selected: "
-                <span class="font-medium text-foreground">{move || last_value.get()}</span>
-            </p>
+                <p class="text-xs text-muted-foreground">
+                    "Selected: "
+                    <span class="font-medium text-foreground">
+                        {move || c.value.get().unwrap_or_else(|| "None".to_string())}
+                    </span>
+                </p>
+            </combobox::RootWith>
         </div>
     }
 }
@@ -486,10 +612,10 @@ pub async fn search_countries(
 fn AsyncItems(
     #[prop(optional)] on_loading_change: Option<Callback<bool>>,
 ) -> impl IntoView {
-    use biji_ui::components::combobox::{self, ComboboxContext};
+    use biji_ui::components::combobox::{self, ComboboxState};
     use leptos_use::{use_debounce_fn_with_arg, use_intersection_observer};
 
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
 
     // (query, page) drives the resource — query resets page to 0.
     let query_and_page = RwSignal::new((String::new(), 0u32));
@@ -679,7 +805,7 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
     use leptos::html;
     use leptos_use::{use_debounce_fn_with_arg, use_intersection_observer};
 
-    let ctx = expect_context::<combobox::ComboboxContext>();
+    let ctx = expect_context::<combobox::ComboboxState>();
 
     // (query, page) drives the resource — query changes reset page to 0.
     let query_and_page = RwSignal::new((String::new(), 0u32));
@@ -878,16 +1004,12 @@ pub fn ComboboxAsyncExample() -> impl IntoView {
         bg-background shadow-md text-sm \
         transition origin-[var(--biji-transform-origin)]";
 
-    let last_value = RwSignal::new(String::from("None"));
     // Owned by the parent — place the spinner anywhere you like.
     let is_loading = RwSignal::new(false);
 
     view! {
         <div class="flex flex-col gap-3 items-center">
-            <combobox::Root
-                inline=true
-                on_value_change={Callback::new(move |v: String| last_value.set(v))}
-            >
+            <combobox::RootWith inline=true let:c>
                 // Wrap the trigger so we can overlay the spinner on the right edge.
                 <div class="relative">
                     <combobox::InputTrigger
@@ -907,11 +1029,13 @@ pub fn ComboboxAsyncExample() -> impl IntoView {
                 >
                     <AsyncItems on_loading_change={Callback::new(move |v| is_loading.set(v))} />
                 </combobox::Content>
-            </combobox::Root>
-            <p class="text-xs text-muted-foreground">
-                "Selected: "
-                <span class="font-medium text-foreground">{move || last_value.get()}</span>
-            </p>
+                <p class="text-xs text-muted-foreground">
+                    "Selected: "
+                    <span class="font-medium text-foreground">
+                        {move || c.value.get().unwrap_or_else(|| "None".to_string())}
+                    </span>
+                </p>
+            </combobox::RootWith>
         </div>
     }
 }
@@ -936,8 +1060,6 @@ pub fn ComboboxInlineExample() -> impl IntoView {
         data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
         data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
 
-    let last_value = RwSignal::new(String::from("None"));
-
     let fruits = [
         ("apple", "Apple"),
         ("apricot", "Apricot"),
@@ -958,10 +1080,7 @@ pub fn ComboboxInlineExample() -> impl IntoView {
 
     view! {
         <div class="flex flex-col gap-3 items-center">
-            <combobox::Root
-                inline=true
-                on_value_change={Callback::new(move |v: String| last_value.set(v))}
-            >
+            <combobox::RootWith inline=true let:c>
                 <combobox::InputTrigger class={INPUT_TRIGGER_CLS} placeholder="Search a fruit..." />
                 <combobox::Content
                     class={CONTENT_CLS}
@@ -1001,11 +1120,13 @@ pub fn ComboboxInlineExample() -> impl IntoView {
                             .collect_view()}
                     </div>
                 </combobox::Content>
-            </combobox::Root>
-            <p class="text-xs text-muted-foreground">
-                "Selected: "
-                <span class="font-medium text-foreground">{move || last_value.get()}</span>
-            </p>
+                <p class="text-xs text-muted-foreground">
+                    "Selected: "
+                    <span class="font-medium text-foreground">
+                        {move || c.value.get().unwrap_or_else(|| "None".to_string())}
+                    </span>
+                </p>
+            </combobox::RootWith>
         </div>
     }
 }

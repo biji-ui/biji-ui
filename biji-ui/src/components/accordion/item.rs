@@ -13,7 +13,7 @@ use crate::{
     items::{Focus, ManageFocus, NavigateItems, Toggle},
 };
 
-use super::context::{ItemContext, RootContext};
+use super::context::{AccordionState, ItemContext};
 
 #[component]
 pub fn Item(
@@ -21,7 +21,7 @@ pub fn Item(
     #[prop(into, optional)] class: String,
     children: Children,
 ) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<AccordionState>().root.get();
 
     let index = root_ctx.next_index();
 
@@ -69,7 +69,7 @@ pub struct AccordionItemIds {
 
 #[component]
 pub fn ItemToggle(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<AccordionState>().root.get();
     let item_ctx = expect_context::<ItemContext>();
     let ids = expect_context::<AccordionItemIds>();
 
@@ -96,7 +96,7 @@ pub fn ItemToggle(#[prop(into, optional)] class: String, children: Children) -> 
 
 #[component]
 pub fn ItemToggleEvents(children: Children) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = expect_context::<AccordionState>().root.get();
     let item_ctx = expect_context::<ItemContext>();
 
     let _ = use_event_listener(item_ctx.trigger_ref, click, move |_| {

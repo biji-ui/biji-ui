@@ -3,7 +3,5 @@ pub(crate) mod singleton;
 pub mod tooltip;
 
 pub use crate::utils::positioning::{AvoidCollisions, Positioning};
-pub use tooltip::Arrow;
-pub use tooltip::Content;
-pub use tooltip::Root;
-pub use tooltip::Trigger;
+pub use context::TooltipState;
+pub use tooltip::{Arrow, Content, Root, RootWith, Trigger, use_tooltip};

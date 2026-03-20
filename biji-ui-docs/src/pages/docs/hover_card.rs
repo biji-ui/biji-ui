@@ -40,6 +40,38 @@ pub fn MyHoverCard() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+use biji_ui::components::hover_card;
+
+#[component]
+pub fn MyHoverCard() -> impl IntoView {
+    view! {
+        <hover_card::RootWith let:h>
+            <p class="mb-1 text-sm text-muted-foreground">
+                {move || if h.open.get() { "Card is open" } else { "Card is closed" }}
+            </p>
+            <hover_card::Trigger class="inline-block underline decoration-dotted cursor-pointer">
+                "@biji_ui"
+            </hover_card::Trigger>
+            <Portal>
+                <hover_card::Content
+                    class="z-50 w-64 rounded-lg border shadow-md transition bg-background \
+                           border-border origin-[var(--biji-transform-origin)]"
+                    show_class="opacity-100 scale-100 duration-150 ease-out"
+                    hide_class="opacity-0 scale-95 duration-100 ease-in"
+                >
+                    <div class="p-4">
+                        <p class="text-sm font-semibold">"Biji UI"</p>
+                        <p class="text-xs text-muted-foreground mt-1">
+                            "Headless UI components for Leptos."
+                        </p>
+                    </div>
+                </hover_card::Content>
+            </Portal>
+        </hover_card::RootWith>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -161,13 +193,68 @@ pub fn HoverCardDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"HoverCardState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The state is "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"Copy"</code>
+                " and safe to pass as a prop."
+            </p>
+            <DocPreview>
+                <HoverCardRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
             <PropsTable title="Arrow" rows={ARROW_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn HoverCardRootWithExample() -> impl IntoView {
+    use biji_ui::components::hover_card;
+
+    view! {
+        <div class="flex flex-col items-center gap-3 p-8">
+            <hover_card::RootWith let:h>
+                <p class="text-sm text-muted-foreground">
+                    {move || if h.open.get() { "Card is open" } else { "Card is closed" }}
+                </p>
+                <hover_card::Trigger class="inline-block font-medium underline \
+                                            decoration-dotted underline-offset-4 \
+                                            cursor-default">
+                    "@biji_ui"
+                </hover_card::Trigger>
+                <Portal>
+                    <hover_card::Content
+                        class="z-50 w-64 rounded-lg border shadow-md transition bg-background \
+                               border-border origin-[var(--biji-transform-origin)]"
+                        show_class="opacity-100 scale-100 duration-150 ease-out"
+                        hide_class="opacity-0 scale-95 duration-100 ease-in"
+                    >
+                        <div class="p-4">
+                            <p class="text-sm font-semibold">"Biji UI"</p>
+                            <p class="text-xs text-muted-foreground mt-1">
+                                "Headless UI components for Leptos."
+                            </p>
+                        </div>
+                    </hover_card::Content>
+                </Portal>
+            </hover_card::RootWith>
+        </div>
     }
 }
 

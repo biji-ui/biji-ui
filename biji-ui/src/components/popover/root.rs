@@ -19,7 +19,7 @@ use crate::{
     utils::positioning::{AvoidCollisions, Positioning},
 };
 
-use super::context::PopoverContext;
+use super::context::PopoverState;
 
 static POPOVER_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -28,44 +28,96 @@ fn next_popover_id() -> String {
     format!("biji-popover-{id}")
 }
 
-#[component]
-pub fn Root(
-    children: Children,
-    #[prop(into, optional)] class: String,
-    #[prop(default = Positioning::Bottom)] positioning: Positioning,
-    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
-    #[prop(default = 8)] arrow_size: i32,
-    #[prop(default = false)] open: bool,
-    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
-    /// When true, focuses the first focusable element inside Content when the popover opens.
-    #[prop(default = true)]
+fn build_state(
+    open: Option<RwSignal<bool>>,
+    positioning: Positioning,
+    hide_delay: Duration,
+    arrow_size: i32,
+    avoid_collisions: AvoidCollisions,
     auto_focus: bool,
-    #[prop(optional)] on_open_change: Option<Callback<bool>>,
-) -> impl IntoView {
-    let ctx = PopoverContext {
-        open: RwSignal::new(open),
+) -> PopoverState {
+    let open_sig = open.unwrap_or_else(|| RwSignal::new(false));
+    PopoverState {
+        open: open_sig,
+        data_state: Signal::derive(move || if open_sig.get() { "open" } else { "closed" }),
+        trigger_ref: NodeRef::new(),
+        content_ref: NodeRef::new(),
         hide_delay,
         positioning,
         arrow_size,
         popover_id: StoredValue::new(next_popover_id()),
         avoid_collisions,
         auto_focus,
-        on_open_change,
-        ..PopoverContext::default()
-    };
+    }
+}
 
+/// Returns the [`PopoverState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+pub fn use_popover() -> PopoverState {
+    expect_context::<PopoverState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`PopoverState`]
+/// directly inside the children via the `let:` binding.
+#[component]
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(PopoverState) -> IV + Send + Sync + 'static,
+    #[prop(into, optional)] class: String,
+    #[prop(default = Positioning::Bottom)] positioning: Positioning,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = 8)] arrow_size: i32,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+    #[prop(default = true)] auto_focus: bool,
+) -> impl IntoView {
+    let state = build_state(
+        open,
+        positioning,
+        hide_delay,
+        arrow_size,
+        avoid_collisions,
+        auto_focus,
+    );
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <RootEvents>
-                <div class={class}>{children()}</div>
+                <div class={class}>{children(state)}</div>
             </RootEvents>
         </Provider>
     }
 }
 
+/// The standard popover root. Use [`RootWith`] instead when you need to access
+/// [`PopoverState`] inline via `let:p`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(default = Positioning::Bottom)] positioning: Positioning,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = 8)] arrow_size: i32,
+    #[prop(into, default = None)] open: Option<RwSignal<bool>>,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+    #[prop(default = true)] auto_focus: bool,
+) -> impl IntoView {
+    view! {
+        <RootWith
+            positioning={positioning}
+            hide_delay={hide_delay}
+            arrow_size={arrow_size}
+            open={open}
+            avoid_collisions={avoid_collisions}
+            auto_focus={auto_focus}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
+    }
+}
+
 #[component]
 fn RootEvents(children: Children) -> impl IntoView {
-    let ctx = expect_context::<PopoverContext>();
+    let ctx = expect_context::<PopoverState>();
 
     let _ = use_event_listener(use_document(), keydown, move |evt| {
         if evt.key() == "Escape" && ctx.open.get() {
@@ -98,7 +150,7 @@ fn RootEvents(children: Children) -> impl IntoView {
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<PopoverContext>();
+    let ctx = expect_context::<PopoverState>();
 
     let _ = use_event_listener(ctx.trigger_ref, leptos::ev::click, move |_| {
         ctx.toggle();
@@ -110,7 +162,7 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
             type="button"
             aria-expanded={move || if ctx.open.get() { "true" } else { "false" }}
             aria-controls={ctx.popover_id.get_value()}
-            data-state={move || ctx.data_state()}
+            data-state={ctx.data_state}
             class={class}
         >
             {children()}
@@ -125,7 +177,7 @@ pub fn Content(
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<PopoverContext>();
+    let ctx = expect_context::<PopoverState>();
     let content_ref = ctx.content_ref;
 
     let UseElementBoundingReturn {
@@ -143,32 +195,22 @@ pub fn Content(
     } = use_element_bounding(ctx.trigger_ref);
 
     let style_signal = Signal::derive(move || {
-        // Use use_element_bounding signals only for reactive dependencies.
-        // They fire when the element mounts/unmounts (zero → non-zero transition
-        // tells us the content is now in the DOM).
         let raw_cw = *content_width.read();
         let raw_ch = *content_height.read();
-        // Re-run when open state changes so we pick up the fresh trigger position.
         let _ = ctx.open.get();
-        // Establish reactive dependencies on trigger bounding signals so that
-        // scroll / resize events cause the position to recompute.
         let _ = top.read();
         let _ = left.read();
         let _ = width.read();
         let _ = height.read();
-        // use_element_bounding reports 0 when the element is not yet in the DOM.
-        let hidden = || format!(
-            "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: {};",
-            ctx.positioning.transform_origin()
-        );
+        let hidden = || {
+            format!(
+                "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: {};",
+                ctx.positioning.transform_origin()
+            )
+        };
         if raw_cw == 0.0 && raw_ch == 0.0 {
             return hidden();
         }
-        // Use offsetWidth/offsetHeight for content dimensions: unlike
-        // getBoundingClientRect (used by use_element_bounding), these are not
-        // affected by CSS transforms.  This prevents the initial scale-95
-        // animation class from producing shrunken dimensions (e.g. 273px instead
-        // of 288px for w-72 at 0.95 scale).
         let Some(content_div) = content_ref.get_untracked() else {
             return hidden();
         };
@@ -181,9 +223,6 @@ pub fn Content(
         if cw == 0.0 && ch == 0.0 {
             return hidden();
         }
-        // Read the trigger's bounding rect fresh from the DOM.  use_element_bounding
-        // can return a stale value from initial hydration when the page layout shifts
-        // before the first scroll/resize event fires.
         let Some(trigger) = ctx.trigger_ref.get_untracked() else {
             return hidden();
         };
@@ -229,7 +268,6 @@ pub fn Content(
     let focus_handle: Arc<Mutex<Option<TimeoutHandle>>> = Arc::new(Mutex::new(None));
     let focus_handle_cleanup = Arc::clone(&focus_handle);
     let focus_eff = RenderEffect::new(move |_| {
-        // Cancel any pending focus timeout before scheduling a new one.
         if let Some(h) = focus_handle.lock().unwrap().take() {
             h.clear();
         }
@@ -286,13 +324,12 @@ fn focus_first_element(container: &web_sys::HtmlElement) {
             }
         }
     }
-    // No focusable child — focus the container itself (requires tabindex on it).
     let _ = container.focus();
 }
 
 #[component]
 pub fn Arrow(#[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<PopoverContext>();
+    let ctx = expect_context::<PopoverState>();
     view! {
         <div
             class={class}

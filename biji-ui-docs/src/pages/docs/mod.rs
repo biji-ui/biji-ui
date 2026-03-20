@@ -34,7 +34,7 @@ pub mod tooltip;
 
 use biji_ui::components::{
     command as commandui,
-    dialog::{self as dialogui, context::DialogContext},
+    dialog::{self as dialogui, DialogState},
     menu,
 };
 use biji_ui::custom_animated_show::CustomAnimatedShow;
@@ -221,7 +221,7 @@ pub fn TopNav() -> impl IntoView {
 
 #[component]
 pub fn SidebarTrigger() -> impl IntoView {
-    let ctx = expect_context::<DialogContext>();
+    let ctx = expect_context::<DialogState>();
 
     let is_large_screen = use_media_query("(min-width: 1024px)");
 
@@ -279,7 +279,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
 
     let components = COMPONENT_PAGES;
 
-    let dialog_ctx = use_context::<DialogContext>();
+    let dialog_ctx = use_context::<DialogState>();
 
     view! {
         <nav class={class}>

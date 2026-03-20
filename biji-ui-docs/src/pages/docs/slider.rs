@@ -11,6 +11,35 @@ const INSTALL_CODE: &str = concat!(
     "\", features = [\"slider\"] }",
 );
 
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::slider;
+
+#[component]
+pub fn LabeledSlider() -> impl IntoView {
+    let thumb_class = "absolute block w-5 h-5 -translate-x-1/2 rounded-full border-2 border-primary bg-background shadow transition outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-grab active:cursor-grabbing";
+
+    view! {
+        <slider::RootWith
+            default_value=50.0
+            min=0.0
+            max=100.0
+            class="flex flex-col gap-2 w-full"
+            let:s
+        >
+            <div class="flex justify-between items-center text-sm">
+                <span>"Volume"</span>
+                <span class="tabular-nums font-medium">{move || s.value.get() as u32}</span>
+            </div>
+            <div class="relative flex items-center w-full h-5 touch-none select-none">
+                <slider::Track class="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
+                    <slider::Range class="absolute h-full bg-primary" />
+                </slider::Track>
+                <slider::Thumb class={thumb_class} />
+            </div>
+        </slider::RootWith>
+    }
+}"#;
+
 const USAGE_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::slider;
 
@@ -18,7 +47,7 @@ use biji_ui::components::slider;
 pub fn MySlider() -> impl IntoView {
     view! {
         <slider::Root
-            value=50.0
+            default_value=50.0
             class="relative flex items-center w-full h-5 touch-none select-none"
         >
             <slider::Track class="relative flex-1 h-2 overflow-hidden rounded-full bg-secondary">
@@ -65,12 +94,6 @@ const ROOT_PROPS: &[PropRow] = &[
         prop_type: "bool",
         default: "false",
         description: "When true, prevents the slider from being interacted with.",
-    },
-    PropRow {
-        name: "on_value_change",
-        prop_type: "Option<Callback<f64>>",
-        default: "None",
-        description: "Callback fired when the value changes. Receives the new value.",
     },
 ];
 
@@ -161,14 +184,66 @@ pub fn SliderDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-4 text-sm text-muted-foreground">
+                "Use "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"<RootWith>"</code>
+                " when you need direct access to "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"SliderState"</code>
+                " inside the children. The "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"let:s"</code>
+                " binding exposes "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"s.value"</code>
+                " and "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"s.percentage"</code>
+                " as reactive signals for custom rendering."
+            </p>
+            <DocPreview>
+                <SliderRootWithExample />
+            </DocPreview>
+            <Code
+                class="mt-4 [&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Track" rows={TRACK_PROPS} />
             <PropsTable title="Range" rows={RANGE_PROPS} />
             <PropsTable title="Thumb" rows={THUMB_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn SliderRootWithExample() -> impl IntoView {
+    use biji_ui::components::slider;
+
+    let thumb_class = "absolute block h-5 w-5 -translate-x-1/2 rounded-full border-2 border-primary bg-background shadow transition-colors outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-grab active:cursor-grabbing";
+
+    view! {
+        <div class="w-full max-w-sm">
+            <slider::RootWith
+                default_value=50.0
+                min=0.0
+                max=100.0
+                class="flex flex-col gap-2 w-full"
+                let:s
+            >
+                <div class="flex justify-between items-center text-sm">
+                    <span>"Volume"</span>
+                    <span class="tabular-nums font-medium">{move || s.value.get() as u32}</span>
+                </div>
+                <div class="relative flex items-center w-full h-5 touch-none select-none">
+                    <slider::Track class="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
+                        <slider::Range class="absolute h-full bg-primary" />
+                    </slider::Track>
+                    <slider::Thumb class={thumb_class} />
+                </div>
+            </slider::RootWith>
+        </div>
     }
 }
 
@@ -183,7 +258,7 @@ pub fn SliderExample() -> impl IntoView {
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium">"Volume"</span>
                 <slider::Root
-                    value=60.0
+                    default_value=60.0
                     class="relative flex items-center w-full h-5 touch-none select-none"
                 >
                     <slider::Track class="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
@@ -195,7 +270,7 @@ pub fn SliderExample() -> impl IntoView {
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium">"Temperature (step: 5)"</span>
                 <slider::Root
-                    value=20.0
+                    default_value=20.0
                     min=0.0
                     max=100.0
                     step=5.0
@@ -210,7 +285,7 @@ pub fn SliderExample() -> impl IntoView {
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium text-muted-foreground">"Disabled"</span>
                 <slider::Root
-                    value=40.0
+                    default_value=40.0
                     disabled=true
                     class="relative flex items-center w-full h-5 touch-none select-none"
                 >

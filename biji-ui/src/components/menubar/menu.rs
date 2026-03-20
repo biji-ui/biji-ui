@@ -19,6 +19,14 @@ use crate::{
 
 use super::context::{ItemData, MenuContext, MenubarContext, RootContext};
 
+pub(super) fn get_root_ctx() -> RootContext {
+    if let Some(menubar_ctx) = use_context::<MenubarContext>() {
+        menubar_ctx.root.get()
+    } else {
+        expect_context::<RootContext>()
+    }
+}
+
 /// Walks the submenu tree rooted at `menu_context` and returns `true` if
 /// `target` is contained within any submenu trigger or content element.
 /// Used by the click-outside handler to avoid closing a menu when the user
@@ -55,7 +63,7 @@ pub fn Menu(
     hide_delay: Duration,
     children: Children,
 ) -> impl IntoView {
-    let ctx = expect_context::<RootContext>();
+    let ctx = get_root_ctx();
 
     let index = ctx.next_index();
 
@@ -92,7 +100,7 @@ pub fn MenuTrigger(
     #[prop(into, optional)] aria_label: Option<String>,
     children: Children,
 ) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = get_root_ctx();
     let menu_ctx = expect_context::<MenuContext>();
 
     let is_in_menubar = use_context::<MenubarContext>().is_some();
@@ -124,7 +132,7 @@ pub fn MenuTrigger(
 
 #[component]
 pub fn MenuTriggerEvents(children: Children) -> impl IntoView {
-    let root_ctx = expect_context::<RootContext>();
+    let root_ctx = get_root_ctx();
     let menu_ctx = expect_context::<MenuContext>();
 
     let eff = RenderEffect::new(move |_| {

@@ -5,40 +5,86 @@ use leptos::{
 };
 use leptos_use::use_event_listener;
 
-use super::context::{PinInputContext, next_pin_input_id};
+use super::context::PinInputState;
 
+/// Returns the [`PinInputState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+///
+/// Call this inside any child component that needs access to PIN input state.
+pub fn use_pin_input() -> PinInputState {
+    expect_context::<PinInputState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`PinInputState`]
+/// directly inside the children via the `let:` binding.
+///
+/// ```rust
+/// <pin_input::RootWith length=4 class="flex flex-col items-center gap-4" let:s>
+///     <div class="flex gap-2">
+///         <pin_input::Cell index=0 class="..." />
+///         <pin_input::Cell index=1 class="..." />
+///         <pin_input::Cell index=2 class="..." />
+///         <pin_input::Cell index=3 class="..." />
+///     </div>
+///     <p class="text-xs text-muted-foreground">
+///         {move || if s.is_complete.get() {
+///             format!("Code: {}", s.value.get())
+///         } else {
+///             format!("{}/4 digits entered", s.value.get().len())
+///         }}
+///     </p>
+/// </pin_input::RootWith>
+/// ```
+///
+/// The `s: PinInputState` binding is `Copy`, so it can be passed to child components as a prop.
 #[component]
-pub fn Root(
-    children: Children,
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(PinInputState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
+    /// Controlled signal for the per-cell values. When provided, the PIN input reads and writes
+    /// this signal directly (the `Vec` must have at least `length` elements).
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Vec<String>>>,
     #[prop(default = 4)] length: usize,
     #[prop(default = false)] disabled: bool,
-    #[prop(into, optional)] placeholder: Option<String>,
-    #[prop(optional)] on_complete: Option<Callback<String>>,
-    #[prop(optional)] on_change: Option<Callback<String>>,
+    #[prop(into, default = String::from("○"))] placeholder: String,
+    #[prop(into, default = None)] on_complete: Option<Callback<String>>,
 ) -> impl IntoView {
-    let cell_refs: Vec<NodeRef<leptos::html::Input>> = (0..length).map(|_| NodeRef::new()).collect();
-
-    let ctx = PinInputContext {
-        values: RwSignal::new(vec![String::new(); length]),
-        length,
-        cell_refs: StoredValue::new(cell_refs),
-        disabled,
-        placeholder: StoredValue::new(placeholder.unwrap_or_else(|| String::from("○"))),
-        root_id: StoredValue::new(next_pin_input_id()),
-        on_complete,
-        on_change,
-    };
+    let state = PinInputState::new(value, length, disabled, placeholder, on_complete);
 
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <div
                 data-disabled={if disabled { Some("true") } else { None }}
                 class={class}
             >
-                {children()}
+                {children(state)}
             </div>
         </Provider>
+    }
+}
+
+/// The standard PIN input root. Renders a wrapper `<div>` and provides [`PinInputState`]
+/// to all descendants via context.
+///
+/// Use [`RootWith`] instead when you need to access [`PinInputState`] inline via `let:s`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(into, default = None)] value: Option<RwSignal<Vec<String>>>,
+    #[prop(default = 4)] length: usize,
+    #[prop(default = false)] disabled: bool,
+    #[prop(into, default = String::from("○"))] placeholder: String,
+    #[prop(into, default = None)] on_complete: Option<Callback<String>>,
+) -> impl IntoView {
+    view! {
+        <RootWith
+            value=value length=length disabled=disabled placeholder=placeholder
+            on_complete=on_complete class=class
+            let:_
+        >
+            {children()}
+        </RootWith>
     }
 }
 
@@ -47,20 +93,20 @@ pub fn Cell(
     #[prop()] index: usize,
     #[prop(into, optional)] class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<PinInputContext>();
+    let state = expect_context::<PinInputState>();
 
-    // Bounds check
-    let cell_ref = ctx.cell_refs.with_value(|refs| {
-        refs.get(index).copied()
-    });
+    let cell_ref = state.cell_refs.with_value(|refs| refs.get(index).copied());
     let Some(cell_ref) = cell_ref else {
-        leptos::logging::warn!("pin_input::Cell index={index} out of bounds (length={})", ctx.length);
+        leptos::logging::warn!(
+            "pin_input::Cell index={index} out of bounds (length={})",
+            state.length
+        );
         return view! { <input type="text" disabled=true /> }.into_any();
     };
 
     // Sync DOM value when signal changes (handles external paste updates for non-focused cells)
     let sync_eff = RenderEffect::new(move |_| {
-        let val = ctx.values.with(|v| v.get(index).cloned().unwrap_or_default());
+        let val = state.values.with(|v| v.get(index).cloned().unwrap_or_default());
         if let Some(el) = cell_ref.get() {
             el.set_value(&val);
         }
@@ -71,13 +117,12 @@ pub fn Cell(
     let _ = use_event_listener(cell_ref, leptos::ev::input, move |evt| {
         let raw = event_target_value(&evt);
         let ch = raw.chars().last().map(|c| c.to_string()).unwrap_or_default();
-        // Sync DOM immediately so the display is correct before signal update
         if let Some(el) = cell_ref.get_untracked() {
             el.set_value(&ch);
         }
-        ctx.set_cell(index, ch.clone());
-        if !ch.is_empty() && index + 1 < ctx.length {
-            ctx.focus_cell(index + 1);
+        state.set_cell(index, ch.clone());
+        if !ch.is_empty() && index + 1 < state.length {
+            state.focus_cell(index + 1);
         }
     });
 
@@ -85,24 +130,25 @@ pub fn Cell(
     let _ = use_event_listener(cell_ref, keydown, move |evt| {
         match evt.key().as_str() {
             "Backspace" => {
-                let current = ctx.values.with(|v| v.get(index).cloned().unwrap_or_default());
+                let current =
+                    state.values.with(|v| v.get(index).cloned().unwrap_or_default());
                 if current.is_empty() && index > 0 {
-                    ctx.set_cell(index - 1, String::new());
-                    ctx.focus_cell(index - 1);
+                    state.set_cell(index - 1, String::new());
+                    state.focus_cell(index - 1);
                 } else {
-                    ctx.set_cell(index, String::new());
+                    state.set_cell(index, String::new());
                 }
             }
             "ArrowLeft" => {
                 evt.prevent_default();
                 if index > 0 {
-                    ctx.focus_cell(index - 1);
+                    state.focus_cell(index - 1);
                 }
             }
             "ArrowRight" => {
                 evt.prevent_default();
-                if index + 1 < ctx.length {
-                    ctx.focus_cell(index + 1);
+                if index + 1 < state.length {
+                    state.focus_cell(index + 1);
                 }
             }
             _ => {}
@@ -118,8 +164,7 @@ pub fn Cell(
             .unwrap_or_default();
         let chars: Vec<char> = pasted.chars().collect();
         let mut last_filled = index;
-        // Update signal in one batch
-        ctx.values.update(|v| {
+        state.values.update(|v| {
             for (offset, ch) in chars.iter().enumerate() {
                 let cell_idx = index + offset;
                 if cell_idx >= v.len() {
@@ -129,8 +174,7 @@ pub fn Cell(
                 last_filled = cell_idx;
             }
         });
-        // Sync DOM values for cells that were filled by this paste
-        ctx.cell_refs.with_value(|refs| {
+        state.cell_refs.with_value(|refs| {
             for (offset, ch) in chars.iter().enumerate() {
                 let cell_idx = index + offset;
                 if cell_idx >= refs.len() {
@@ -141,19 +185,13 @@ pub fn Cell(
                 }
             }
         });
-        // Fire callbacks
-        let full = ctx.current_value();
-        if let Some(cb) = ctx.on_change {
-            cb.run(full.clone());
-        }
-        if ctx.is_complete() {
-            if let Some(cb) = ctx.on_complete {
-                cb.run(full);
+        if state.is_complete.get() {
+            if let Some(cb) = state.on_complete {
+                cb.run(state.value.get());
             }
         }
-        // Focus next unfilled cell or last filled
-        let next_focus = (last_filled + 1).min(ctx.length - 1);
-        ctx.focus_cell(next_focus);
+        let next_focus = (last_filled + 1).min(state.length - 1);
+        state.focus_cell(next_focus);
     });
 
     // Select all on focus so typing replaces the current char
@@ -163,13 +201,13 @@ pub fn Cell(
         }
     });
 
-    let placeholder_str = ctx.placeholder.get_value();
+    let placeholder_str = state.placeholder.get_value();
     let is_filled = Memo::new(move |_| {
-        ctx.values.with(|v| !v.get(index).map(|s| s.is_empty()).unwrap_or(true))
+        state.values.with(|v| !v.get(index).map(|s| s.is_empty()).unwrap_or(true))
     });
 
-    let length = ctx.length;
-    let cell_id = ctx.root_id.with_value(|id| format!("{id}-{index}"));
+    let length = state.length;
+    let cell_id = state.root_id.with_value(|id| format!("{id}-{index}"));
 
     view! {
         <input
@@ -180,13 +218,14 @@ pub fn Cell(
             inputmode="numeric"
             maxlength="1"
             placeholder={placeholder_str}
-            disabled={ctx.disabled}
+            disabled={state.disabled}
             autocomplete="one-time-code"
             aria-label={format!("Digit {} of {}", index + 1, length)}
             data-index={index.to_string()}
             data-filled={move || if is_filled.get() { Some("true") } else { None }}
-            data-disabled={if ctx.disabled { Some("true") } else { None }}
+            data-disabled={if state.disabled { Some("true") } else { None }}
             class={class}
         />
-    }.into_any()
+    }
+    .into_any()
 }

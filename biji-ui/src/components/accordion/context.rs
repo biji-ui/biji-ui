@@ -14,7 +14,7 @@ use crate::items::{
 };
 
 #[derive(Copy, Clone)]
-pub struct AccordionContext {
+pub struct AccordionState {
     pub accordion_ref: NodeRef<Div>,
     pub root: RwSignal<RootContext>,
 }

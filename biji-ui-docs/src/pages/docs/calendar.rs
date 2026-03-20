@@ -46,6 +46,48 @@ pub fn MyCalendar() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::calendar::{self, CalendarValue};
+
+#[component]
+pub fn MyCalendar() -> impl IntoView {
+    view! {
+        <calendar::RootWith selection_type={calendar::SelectionType::Single} let:cal>
+            <calendar::Header class="flex justify-between items-center mb-3">
+                <calendar::PrevButton class="flex justify-center items-center w-7 h-7 text-sm rounded-md hover:bg-muted">
+                    "‹"
+                </calendar::PrevButton>
+                <calendar::Heading class="text-sm font-medium cursor-pointer" />
+                <calendar::NextButton class="flex justify-center items-center w-7 h-7 text-sm rounded-md hover:bg-muted">
+                    "›"
+                </calendar::NextButton>
+            </calendar::Header>
+            <calendar::Grid>
+                <calendar::GridHead class="grid grid-cols-7 mb-1 text-xs text-center text-muted-foreground" />
+                <calendar::GridBody
+                    day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square"
+                    month_class="grid grid-cols-4 gap-1 [&_button]:py-2"
+                    year_class="grid grid-cols-5 gap-1 [&_button]:py-2"
+                />
+            </calendar::Grid>
+            <div class="flex flex-col gap-0.5 justify-center items-center mt-3 h-8">
+                <p class="text-sm text-center text-muted-foreground">
+                    {move || cal.value.with(|v| match v {
+                        CalendarValue::Single(Some(d)) => d.format("%-d %B %Y").to_string(),
+                        _ => "No date selected".to_string(),
+                    })}
+                </p>
+                <p class="text-xs text-center text-muted-foreground/60">
+                    {move || match cal.hover_date.get() {
+                        Some(d) => d.format("Hovering: %-d %B %Y").to_string(),
+                        None => "No hover date".to_string(),
+                    }}
+                </p>
+            </div>
+        </calendar::RootWith>
+    }
+}"#;
+
 const RANGE_CODE: &str = r#"// Use CalendarValue::Range as the initial value.
 let value = RwSignal::new(calendar::CalendarValue::Range {
     start: None,
@@ -85,13 +127,13 @@ const CONTROLLED_CODE: &str = r#"// The parent owns the value signal and writes 
 let today = chrono::Local::now().date_naive();
 let value = RwSignal::new(calendar::CalendarValue::Single(None));
 
-// NavButtons must live inside <calendar::Root> to access CalendarContext,
+// NavButtons must live inside <calendar::Root> to access CalendarState,
 // which lets it also navigate the displayed month when setting the value.
 #[component]
 fn NavButtons(value: RwSignal<calendar::CalendarValue>) -> impl IntoView {
-    use biji_ui::components::calendar::{CalendarContext, CalendarValue};
+    use biji_ui::components::calendar::{CalendarState, CalendarValue};
     use chrono::Datelike;
-    let ctx = expect_context::<CalendarContext>();
+    let ctx = expect_context::<CalendarState>();
     let today = chrono::Local::now().date_naive();
     let ly = today.with_year(today.year() - 1).unwrap_or(today);
     let lw = today.checked_sub_signed(chrono::Duration::weeks(1)).unwrap_or(today);
@@ -367,13 +409,30 @@ pub fn CalendarDocPage() -> impl IntoView {
                 <SingleCalendar />
             </DocPreview>
             <SectionHeading title="Installation" />
-            <Code
-                class={code_class}
-                code={INSTALL_CODE}
-                language="toml"
-            />
+            <Code class={code_class} code={INSTALL_CODE} language="toml" />
             <SectionHeading title="Usage" />
             <Code class={code_class} code={USAGE_CODE} language="rust" />
+            <SectionHeading title="RootWith" />
+            <p class="mb-4 text-sm text-muted-foreground">
+                "Use "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"<RootWith>"</code>
+                " when you need direct access to "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"CalendarState"</code>
+                " inside the children. The "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"let:cal"</code>
+                " binding exposes "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"cal.value"</code> ", "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"cal.view"</code>
+                ", and "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">
+                    "cal.placeholder"
+                </code>
+                " as reactive signals — no callbacks needed to read the current selection."
+            </p>
+            <DocPreview>
+                <CalendarRootWithExample />
+            </DocPreview>
+            <Code class={code_class} code={ROOT_WITH_CODE} language="rust" />
             <SectionHeading title="Examples" />
             <h3 class="mt-8 mb-2 text-base font-semibold">"Range"</h3>
             <p class="mb-5 text-sm text-muted-foreground">
@@ -410,9 +469,8 @@ pub fn CalendarDocPage() -> impl IntoView {
                 " signal is owned by the parent and can be written to at any time. Components inside "
                 <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"Root"</code>
                 " can also access "
-                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">
-                    "CalendarContext"
-                </code> " directly to navigate the displayed month alongside the value change."
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"CalendarState"</code>
+                " directly to navigate the displayed month alongside the value change."
             </p>
             <DocPreview>
                 <ControlledCalendar />
@@ -446,7 +504,7 @@ pub fn CalendarDocPage() -> impl IntoView {
             </DocPreview>
             <Code class={code_class} code={CUSTOM_DISABLED_CODE} language="rust" />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Header" rows={HEADER_PROPS} />
             <PropsTable title="PrevButton" rows={PREV_BUTTON_PROPS} />
             <PropsTable title="NextButton" rows={NEXT_BUTTON_PROPS} />
@@ -457,6 +515,60 @@ pub fn CalendarDocPage() -> impl IntoView {
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn CalendarRootWithExample() -> impl IntoView {
+    use biji_ui::components::calendar::{self, CalendarValue};
+
+    view! {
+        <div class="flex flex-col gap-3 items-center">
+            <p class="text-xs font-medium text-muted-foreground">
+                "RootWith — selected date displayed inline"
+            </p>
+            <calendar::RootWith selection_type={calendar::SelectionType::Single} let:cal>
+                <div class="p-3 rounded-lg border select-none border-border w-[272px]">
+                    <calendar::Header class="flex justify-between items-center mb-3">
+                        <calendar::PrevButton class="flex justify-center items-center w-7 h-7 text-sm rounded-md transition-colors hover:bg-muted">
+                            "\u{2039}"
+                        </calendar::PrevButton>
+                        <calendar::Heading class="py-1 px-2 text-sm font-medium rounded-md transition-colors cursor-pointer hover:bg-muted" />
+                        <calendar::NextButton class="flex justify-center items-center w-7 h-7 text-sm rounded-md transition-colors hover:bg-muted">
+                            "\u{203a}"
+                        </calendar::NextButton>
+                    </calendar::Header>
+                    <calendar::Grid>
+                        <calendar::GridHead class="grid grid-cols-7 text-center text-xs text-muted-foreground mb-1 [&>div]:py-1" />
+                        <calendar::GridBody
+                            class="min-h-[253px] [&_button]:w-full [&_button]:text-sm [&_button]:rounded-md [&_button]:transition-colors [&_button:hover]:bg-muted [&_button[data-selected]]:bg-primary [&_button[data-selected]]:text-primary-foreground [&_button[data-disabled]]:opacity-30 [&_button[data-disabled]]:pointer-events-none"
+                            day_class="grid grid-cols-7 gap-y-1 [&_button]:aspect-square [&_button[data-today]:not([data-selected])]:font-bold"
+                            month_class="content-start grid grid-cols-4 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-month]]:font-bold"
+                            year_class="content-start grid grid-cols-5 gap-1 [&_button]:py-2 [&_button]:text-center [&_button[data-current-year]]:font-bold"
+                        />
+                    </calendar::Grid>
+                    <div class="flex flex-col gap-0.5 justify-center items-center mt-3 h-8">
+                        <p class="text-sm text-center text-muted-foreground">
+                            {move || {
+                                cal.value
+                                    .with(|v| match v {
+                                        CalendarValue::Single(Some(d)) => {
+                                            d.format("%-d %B %Y").to_string()
+                                        }
+                                        _ => "No date selected".to_string(),
+                                    })
+                            }}
+                        </p>
+                        <p class="text-xs text-center text-muted-foreground/60">
+                            {move || match cal.hover_date.get() {
+                                Some(d) => d.format("Hovering: %-d %B %Y").to_string(),
+                                None => "No hover date".to_string(),
+                            }}
+                        </p>
+                    </div>
+                </div>
+            </calendar::RootWith>
+        </div>
     }
 }
 
@@ -571,10 +683,10 @@ fn ControlledCalendar() -> impl IntoView {
 
 #[component]
 fn NavButtons(value: RwSignal<biji_ui::components::calendar::CalendarValue>) -> impl IntoView {
-    use biji_ui::components::calendar::{CalendarContext, CalendarValue};
+    use biji_ui::components::calendar::{CalendarState, CalendarValue};
     use chrono::Datelike;
 
-    let ctx = expect_context::<CalendarContext>();
+    let ctx = expect_context::<CalendarState>();
     let today = chrono::Local::now().date_naive();
     let ly = today.with_year(today.year() - 1).unwrap_or(today);
     let lw = today
@@ -692,8 +804,8 @@ fn MinMaxCalendar() -> impl IntoView {
 /// Used to hide secondary grids in month/year picker mode.
 #[component]
 fn DayOnlyGrid(children: ChildrenFn) -> impl IntoView {
-    use biji_ui::components::calendar::{CalendarContext, CalendarView};
-    let ctx = expect_context::<CalendarContext>();
+    use biji_ui::components::calendar::{CalendarState, CalendarView};
+    let ctx = expect_context::<CalendarState>();
     view! { <Show when={move || ctx.view.get() == CalendarView::Day}>{children()}</Show> }
 }
 
