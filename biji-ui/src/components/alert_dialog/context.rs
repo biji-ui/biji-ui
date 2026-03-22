@@ -19,11 +19,11 @@ pub struct AlertDialogState {
 }
 
 impl AlertDialogState {
-    pub(crate) fn open(&self) {
+    pub fn open(&self) {
         self.open.set(true);
     }
 
-    pub(crate) fn close(&self) {
+    pub fn close(&self) {
         self.open.set(false);
     }
 }

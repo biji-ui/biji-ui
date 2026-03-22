@@ -87,22 +87,19 @@ pub fn RootWith<IV: IntoView + 'static>(
 /// [`AlertDialogState`] inline via `let:d`.
 #[component]
 pub fn Root(
-    children: ChildrenFn,
+    children: Children,
     #[prop(into, optional)] class: String,
     #[prop(default = true)] prevent_scroll: bool,
     #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
     #[prop(into, default = None)] open: Option<RwSignal<bool>>,
 ) -> impl IntoView {
+    let state = build_state(open, prevent_scroll, hide_delay);
     view! {
-        <RootWith
-            prevent_scroll={prevent_scroll}
-            hide_delay={hide_delay}
-            open={open}
-            class={class}
-            let:_
-        >
-            {children()}
-        </RootWith>
+        <Provider value={state}>
+            <RootEvents>
+                <div class={class}>{children()}</div>
+            </RootEvents>
+        </Provider>
     }
 }
 
@@ -156,13 +153,22 @@ pub fn Overlay(
 
 #[component]
 pub fn Content(
-    children: ChildrenFn,
+    children: Children,
     #[prop(into, optional)] class: String,
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
     let ctx = expect_context::<AlertDialogState>();
     let content_ref = ctx.content_ref;
+
+    // Reactive class: switches between show_class and hide_class as the dialog
+    // opens and closes. Content stays in the DOM so children only need to be
+    // a plain `Children` (FnOnce), not `ChildrenFn`.
+    let show_cls = StoredValue::new(cn!(class, show_class));
+    // Always include `pointer-events-none` when hidden — the content div is
+    // fixed-positioned with a high z-index and would block clicks on the
+    // trigger and page elements when invisible without this.
+    let hide_cls = StoredValue::new(format!("{} pointer-events-none", cn!(class, hide_class)));
 
     let focus_handle: Arc<Mutex<Option<TimeoutHandle>>> = Arc::new(Mutex::new(None));
     let focus_handle_cleanup = Arc::clone(&focus_handle);
@@ -214,20 +220,18 @@ pub fn Content(
     });
 
     view! {
-        <CustomAnimatedShow
-            when={ctx.open}
-            show_class={cn!(class, show_class)}
-            hide_class={cn!(class, hide_class)}
-            hide_delay={ctx.hide_delay}
+        <div
             node_ref={content_ref}
-            attr:role="alertdialog"
-            attr:aria-modal="true"
-            attr:aria-labelledby={ctx.title_id.get_value()}
-            attr:aria-describedby={ctx.desc_id.get_value()}
-            attr:tabindex="-1"
+            class={move || if ctx.open.get() { show_cls.get_value() } else { hide_cls.get_value() }}
+            role="alertdialog"
+            aria-modal={move || if ctx.open.get() { "true" } else { "false" }}
+            aria-hidden={move || if ctx.open.get() { "false" } else { "true" }}
+            aria-labelledby={ctx.title_id.get_value()}
+            aria-describedby={ctx.desc_id.get_value()}
+            tabindex="-1"
         >
             {children()}
-        </CustomAnimatedShow>
+        </div>
     }
 }
 
@@ -270,9 +274,26 @@ pub fn Cancel(children: Children, #[prop(into, optional)] class: String) -> impl
 }
 
 #[component]
-pub fn Action(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
+pub fn Action(
+    children: Children,
+    #[prop(into, optional)] class: String,
+    /// Called when the action button is clicked, before the dialog closes.
+    #[prop(optional)]
+    on_click: Option<Callback<()>>,
+) -> impl IntoView {
+    let ctx = expect_context::<AlertDialogState>();
+
     view! {
-        <button type="button" class={class}>
+        <button
+            type="button"
+            class={class}
+            on:click=move |_| {
+                if let Some(cb) = on_click {
+                    cb.run(());
+                }
+                ctx.close();
+            }
+        >
             {children()}
         </button>
     }
