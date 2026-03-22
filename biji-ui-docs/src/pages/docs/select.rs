@@ -1,4 +1,4 @@
-use leptos::{portal::Portal, prelude::*};
+use leptos::prelude::*;
 
 use crate::components::{
     api_table::{
@@ -14,7 +14,7 @@ const INSTALL_CODE: &str = concat!(
     "\", features = [\"select\"] }",
 );
 
-const USAGE_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const USAGE_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::select;
 
 // Reusable class constants
@@ -48,44 +48,42 @@ pub fn MySelect() -> impl IntoView {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                 </svg>
             </select::Trigger>
-            <Portal>
-                <select::Content
-                    class=CONTENT_CLS
-                    show_class="opacity-100 scale-100 duration-150 ease-out"
-                    hide_class="opacity-0 scale-95 duration-100 ease-in"
-                >
-                    <select::Item value="apple" class=ITEM_CLS>
-                        <select::ItemText>"Apple"</select::ItemText>
-                        <select::ItemIndicator>
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </select::ItemIndicator>
-                    </select::Item>
-                    <select::Item value="banana" class=ITEM_CLS>
-                        <select::ItemText>"Banana"</select::ItemText>
-                        <select::ItemIndicator>
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </select::ItemIndicator>
-                    </select::Item>
-                    <select::Item value="cherry" class=ITEM_CLS>
-                        <select::ItemText>"Cherry"</select::ItemText>
-                        <select::ItemIndicator>
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </select::ItemIndicator>
-                    </select::Item>
-                </select::Content>
-            </Portal>
+            <select::Content
+                class=CONTENT_CLS
+                show_class="opacity-100 scale-100 duration-150 ease-out"
+                hide_class="opacity-0 scale-95 duration-100 ease-in"
+            >
+                <select::Item value="apple" class=ITEM_CLS>
+                    <select::ItemText>"Apple"</select::ItemText>
+                    <select::ItemIndicator>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </select::ItemIndicator>
+                </select::Item>
+                <select::Item value="banana" class=ITEM_CLS>
+                    <select::ItemText>"Banana"</select::ItemText>
+                    <select::ItemIndicator>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </select::ItemIndicator>
+                </select::Item>
+                <select::Item value="cherry" class=ITEM_CLS>
+                    <select::ItemText>"Cherry"</select::ItemText>
+                    <select::ItemIndicator>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </select::ItemIndicator>
+                </select::Item>
+            </select::Content>
         </select::Root>
     }
 }"#;
@@ -237,7 +235,7 @@ const KEYBOARD: &[KeyboardRow] = &[
     },
 ];
 
-const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::select;
 
 #[component]
@@ -258,13 +256,11 @@ pub fn MySelect() -> impl IntoView {
             <select::Trigger class="...">
                 <select::Value placeholder="Select a fruit..." />
             </select::Trigger>
-            <Portal>
-                <select::Content class="..." show_class="..." hide_class="...">
-                    <select::Item value="apple" label="Apple" class="...">
-                        <select::ItemText>"Apple"</select::ItemText>
-                    </select::Item>
-                </select::Content>
-            </Portal>
+            <select::Content class="..." show_class="..." hide_class="...">
+                <select::Item value="apple" label="Apple" class="...">
+                    <select::ItemText>"Apple"</select::ItemText>
+                </select::Item>
+            </select::Content>
         </select::RootWith>
     }
 }"#;
@@ -396,30 +392,28 @@ pub fn SelectRootWithExample() -> impl IntoView {
                     <select::Value placeholder="Select a fruit..." />
                     <ChevronDown />
                 </select::Trigger>
-                <Portal>
-                    <select::Content
-                        class={CONTENT_CLS}
-                        show_class="opacity-100 scale-100 duration-150 ease-out"
-                        hide_class="opacity-0 scale-95 duration-100 ease-in"
-                    >
-                        <select::Item value="apple" label="Apple" class={ITEM_CLS}>
-                            <select::ItemText>"Apple"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                        <select::Item value="banana" label="Banana" class={ITEM_CLS}>
-                            <select::ItemText>"Banana"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                        <select::Item value="cherry" label="Cherry" class={ITEM_CLS}>
-                            <select::ItemText>"Cherry"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                        <select::Item value="mango" label="Mango" class={ITEM_CLS}>
-                            <select::ItemText>"Mango"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                    </select::Content>
-                </Portal>
+                <select::Content
+                    class={CONTENT_CLS}
+                    show_class="opacity-100 scale-100 duration-150 ease-out"
+                    hide_class="opacity-0 scale-95 duration-100 ease-in"
+                >
+                    <select::Item value="apple" label="Apple" class={ITEM_CLS}>
+                        <select::ItemText>"Apple"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                    <select::Item value="banana" label="Banana" class={ITEM_CLS}>
+                        <select::ItemText>"Banana"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                    <select::Item value="cherry" label="Cherry" class={ITEM_CLS}>
+                        <select::ItemText>"Cherry"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                    <select::Item value="mango" label="Mango" class={ITEM_CLS}>
+                        <select::ItemText>"Mango"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                </select::Content>
             </select::RootWith>
         </div>
     }
@@ -436,33 +430,31 @@ pub fn SelectExample() -> impl IntoView {
                     <select::Value placeholder="Select a fruit..." />
                     <ChevronDown />
                 </select::Trigger>
-                <Portal>
-                    <select::Content
-                        class={CONTENT_CLS}
-                        show_class="opacity-100 scale-100 duration-150 ease-out"
-                        hide_class="opacity-0 scale-95 duration-100 ease-in"
-                    >
-                        <select::Item value="apple" label="Apple" class={ITEM_CLS}>
-                            <select::ItemText>"Apple"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                        <select::Item value="banana" label="Banana" class={ITEM_CLS}>
-                            <select::ItemText>"Banana"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                        <select::Item value="cherry" label="Cherry" class={ITEM_CLS}>
-                            <select::ItemText>"Cherry"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                        <select::Item value="mango" label="Mango" class={ITEM_CLS}>
-                            <select::ItemText>"Mango"</select::ItemText>
-                            <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
-                        </select::Item>
-                        <select::Item value="pineapple" label="Pineapple (disabled)" disabled=true class={ITEM_CLS}>
-                            <select::ItemText>"Pineapple (disabled)"</select::ItemText>
-                        </select::Item>
-                    </select::Content>
-                </Portal>
+                <select::Content
+                    class={CONTENT_CLS}
+                    show_class="opacity-100 scale-100 duration-150 ease-out"
+                    hide_class="opacity-0 scale-95 duration-100 ease-in"
+                >
+                    <select::Item value="apple" label="Apple" class={ITEM_CLS}>
+                        <select::ItemText>"Apple"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                    <select::Item value="banana" label="Banana" class={ITEM_CLS}>
+                        <select::ItemText>"Banana"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                    <select::Item value="cherry" label="Cherry" class={ITEM_CLS}>
+                        <select::ItemText>"Cherry"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                    <select::Item value="mango" label="Mango" class={ITEM_CLS}>
+                        <select::ItemText>"Mango"</select::ItemText>
+                        <select::ItemIndicator><CheckIcon /></select::ItemIndicator>
+                    </select::Item>
+                    <select::Item value="pineapple" label="Pineapple (disabled)" disabled=true class={ITEM_CLS}>
+                        <select::ItemText>"Pineapple (disabled)"</select::ItemText>
+                    </select::Item>
+                </select::Content>
                 <p class="text-sm text-muted-foreground">
                     {move || {
                         s.value

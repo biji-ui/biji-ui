@@ -109,45 +109,43 @@ pub fn ThemeMode() -> impl IntoView {
                 <icons::Sun class="w-5 h-5 dark:hidden stroke-zinc-900"></icons::Sun>
                 <icons::Moon class="hidden w-5 h-5 dark:block stroke-white"></icons::Moon>
             </menu::Trigger>
-            <Portal>
-                <menu::Content
-                    class="flex flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none z-[70] transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
-                    show_class="opacity-100 duration-150 ease-in"
-                    hide_class="opacity-0 duration-200 ease-out"
-                >
-                    {modes
-                        .into_iter()
-                        .map(|(title, m)| {
-                            view! {
-                                <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
-                                    <button
-                                        on:click={move |_| { set_mode.set(m.clone()) }}
-                                        class="flex justify-between py-1.5 px-2 w-full align-center"
-                                    >
-                                        <div class="flex gap-2">
-                                            {match m.clone() {
-                                                ColorMode::Light => {
-                                                    view! { <icons::Sun class="w-4"></icons::Sun> }.into_any()
-                                                }
-                                                ColorMode::Dark => {
-                                                    view! { <icons::Moon class="w-4"></icons::Moon> }.into_any()
-                                                }
-                                                _ => {
-                                                    view! { <icons::SunMoon class="w-4"></icons::SunMoon> }
-                                                        .into_any()
-                                                }
-                                            }} {title}
-                                        </div>
-                                        <Show when={move || m.clone() == mode.get()}>
-                                            <icons::Check class="w-4"></icons::Check>
-                                        </Show>
-                                    </button>
-                                </menu::Item>
-                            }
-                        })
-                        .collect_view()}
-                </menu::Content>
-            </Portal>
+            <menu::Content
+                class="flex flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none z-[70] transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
+                show_class="opacity-100 duration-150 ease-in"
+                hide_class="opacity-0 duration-200 ease-out"
+            >
+                {modes
+                    .into_iter()
+                    .map(|(title, m)| {
+                        view! {
+                            <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
+                                <button
+                                    on:click={move |_| { set_mode.set(m.clone()) }}
+                                    class="flex justify-between py-1.5 px-2 w-full align-center"
+                                >
+                                    <div class="flex gap-2">
+                                        {match m.clone() {
+                                            ColorMode::Light => {
+                                                view! { <icons::Sun class="w-4"></icons::Sun> }.into_any()
+                                            }
+                                            ColorMode::Dark => {
+                                                view! { <icons::Moon class="w-4"></icons::Moon> }.into_any()
+                                            }
+                                            _ => {
+                                                view! { <icons::SunMoon class="w-4"></icons::SunMoon> }
+                                                    .into_any()
+                                            }
+                                        }} {title}
+                                    </div>
+                                    <Show when={move || m.clone() == mode.get()}>
+                                        <icons::Check class="w-4"></icons::Check>
+                                    </Show>
+                                </button>
+                            </menu::Item>
+                        }
+                    })
+                    .collect_view()}
+            </menu::Content>
         </menu::Menu>
     }
 }
@@ -251,6 +249,10 @@ pub fn Sidebar() -> impl IntoView {
             <dialogui::Trigger class="flex justify-center items-center w-6 h-6 rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <SidebarTrigger />
             </dialogui::Trigger>
+            // Portal is required here: TopNav has backdrop-blur-sm which creates
+            // a new CSS containing block for position:fixed descendants. Without
+            // Portal the Overlay and Content are positioned relative to the TopNav
+            // (56px tall) instead of the viewport, collapsing their height.
             <Portal>
                 <dialogui::Overlay
                     class="fixed inset-0 top-14 transition-opacity duration-300 ease-linear bg-zinc-400/20 backdrop-blur-sm dark:bg-black/40"
@@ -401,26 +403,26 @@ pub fn DocsPage() -> impl IntoView {
 
     view! {
         <leptos::context::Provider value={palette_ctx}>
-            <div class="h-full lg:ml-72 xl:ml-80">
-                <header class="contents lg:flex lg:fixed lg:inset-0 lg:pointer-events-none lg:z-[60]">
-                    <div class="contents lg:block lg:overflow-y-auto lg:px-6 lg:pt-4 lg:pb-8 lg:w-72 lg:border-r lg:pointer-events-auto xl:w-80 lg:border-zinc-900/10 lg:dark:border-white/10">
-                        <div class="hidden lg:flex">
-                            <a aria-label="Home" href="/">
-                                <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
-                            </a>
-                        </div>
-                        <TopNav />
-                        <SidebarNav class="hidden lg:block lg:mt-10" />
-                    </div>
-                </header>
-                <main class="flex relative flex-col px-4 pt-14 h-full sm:px-6 lg:px-8">
+            // Desktop sidebar: independently fixed to full viewport height
+            <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-[60] lg:flex lg:w-72 lg:flex-col lg:border-r xl:w-80 lg:border-zinc-900/10 lg:dark:border-white/10 lg:pointer-events-auto">
+                <div class="flex shrink-0 px-6 pt-4">
+                    <a aria-label="Home" href="/">
+                        <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
+                    </a>
+                </div>
+                <SidebarNav class="overflow-y-auto flex-1 px-6 pb-8 mt-10" />
+            </div>
+
+            // Content area (offset by sidebar width on desktop)
+            <div class="lg:ml-72 xl:ml-80">
+                <TopNav />
+                <main class="flex relative flex-col px-4 pt-14 sm:px-6 lg:px-8">
                     <Outlet />
                     <icons::HeroPattern></icons::HeroPattern>
                 </main>
             </div>
-            <Portal>
-                <CommandPalette />
-            </Portal>
+
+            <CommandPalette />
         </leptos::context::Provider>
     }
 }

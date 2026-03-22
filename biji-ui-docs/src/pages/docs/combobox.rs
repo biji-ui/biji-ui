@@ -249,7 +249,7 @@ const KEYBOARD: &[KeyboardRow] = &[
     },
 ];
 
-const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::combobox;
 
 #[component]
@@ -266,13 +266,11 @@ pub fn MyCombobox() -> impl IntoView {
             <combobox::Trigger class="...">
                 <combobox::Value placeholder="Select a fruit..." />
             </combobox::Trigger>
-            <Portal>
-                <combobox::Content class="..." show_class="..." hide_class="...">
-                    <combobox::Input placeholder="Search..." class="..." />
-                    <combobox::Item value="apple" class="...">"Apple"</combobox::Item>
-                    <combobox::Item value="banana" class="...">"Banana"</combobox::Item>
-                </combobox::Content>
-            </Portal>
+            <combobox::Content class="..." show_class="..." hide_class="...">
+                <combobox::Input placeholder="Search..." class="..." />
+                <combobox::Item value="apple" class="...">"Apple"</combobox::Item>
+                <combobox::Item value="banana" class="...">"Banana"</combobox::Item>
+            </combobox::Content>
         </combobox::RootWith>
     }
 }"#;
@@ -400,7 +398,6 @@ pub fn ComboboxDocPage() -> impl IntoView {
 #[component]
 pub fn ComboboxRootWithExample() -> impl IntoView {
     use biji_ui::components::combobox;
-    use leptos::portal::Portal;
 
     const TRIGGER_CLS: &str = "flex items-center justify-between w-56 px-3 py-2 text-sm \
         rounded-md border border-border bg-background text-foreground \
@@ -444,28 +441,26 @@ pub fn ComboboxRootWithExample() -> impl IntoView {
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </combobox::Trigger>
-                <Portal>
-                    <combobox::Content
-                        class={CONTENT_CLS}
-                        show_class="opacity-100 scale-100 duration-150 ease-out"
-                        hide_class="opacity-0 scale-95 duration-100 ease-in"
-                    >
-                        <combobox::Input placeholder="Search..." class={INPUT_CLS} />
-                        {FRUITS
-                            .iter()
-                            .map(|(value, label)| {
-                                view! {
-                                    <combobox::Item value={*value} label={*label} class={ITEM_CLS}>
-                                        <combobox::ItemText>{*label}</combobox::ItemText>
-                                    </combobox::Item>
-                                }
-                            })
-                            .collect::<Vec<_>>()}
-                        <combobox::Empty>
-                            <p class="px-3 py-2 text-sm text-muted-foreground">"No results."</p>
-                        </combobox::Empty>
-                    </combobox::Content>
-                </Portal>
+                <combobox::Content
+                    class={CONTENT_CLS}
+                    show_class="opacity-100 scale-100 duration-150 ease-out"
+                    hide_class="opacity-0 scale-95 duration-100 ease-in"
+                >
+                    <combobox::Input placeholder="Search..." class={INPUT_CLS} />
+                    {FRUITS
+                        .iter()
+                        .map(|(value, label)| {
+                            view! {
+                                <combobox::Item value={*value} label={*label} class={ITEM_CLS}>
+                                    <combobox::ItemText>{*label}</combobox::ItemText>
+                                </combobox::Item>
+                            }
+                        })
+                        .collect::<Vec<_>>()}
+                    <combobox::Empty>
+                        <p class="px-3 py-2 text-sm text-muted-foreground">"No results."</p>
+                    </combobox::Empty>
+                </combobox::Content>
             </combobox::RootWith>
         </div>
     }

@@ -62,7 +62,7 @@ pub fn MyAlertDialog() -> impl IntoView {
 }"#;
 
 const ROOT_WITH_CODE: &str = r#"use std::time::Duration;
-use leptos::{portal::Portal, prelude::*};
+use leptos::prelude::*;
 use biji_ui::components::alert_dialog;
 
 #[component]
@@ -75,33 +75,31 @@ pub fn MyAlertDialog() -> impl IntoView {
             <alert_dialog::Trigger class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-500">
                 "Delete account"
             </alert_dialog::Trigger>
-            <Portal>
-                <alert_dialog::Overlay
-                    class="fixed inset-0 z-[80] bg-black/40"
-                    show_class="opacity-100 duration-300 ease-out"
-                    hide_class="opacity-0 duration-200 ease-in"
-                />
-                <alert_dialog::Content
-                    class="fixed left-1/2 top-1/2 z-[90] w-full max-w-md rounded-lg bg-background p-6 shadow-xl"
-                    show_class="opacity-100 scale-100 duration-300 ease-out translate-x-[-50%] translate-y-[-50%]"
-                    hide_class="opacity-0 scale-95 duration-200 ease-in translate-x-[-50%] translate-y-[-50%]"
-                >
-                    <alert_dialog::Title class="text-lg font-semibold">
-                        "Are you absolutely sure?"
-                    </alert_dialog::Title>
-                    <alert_dialog::Description class="mt-2 text-sm text-muted-foreground">
-                        "This action cannot be undone."
-                    </alert_dialog::Description>
-                    <div class="mt-6 flex justify-end gap-3">
-                        <alert_dialog::Cancel class="rounded-md border px-4 py-2 text-sm font-medium">
-                            "Cancel"
-                        </alert_dialog::Cancel>
-                        <alert_dialog::Action class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500">
-                            "Confirm"
-                        </alert_dialog::Action>
-                    </div>
-                </alert_dialog::Content>
-            </Portal>
+            <alert_dialog::Overlay
+                class="fixed inset-0 z-[80] bg-black/40"
+                show_class="opacity-100 duration-300 ease-out"
+                hide_class="opacity-0 duration-200 ease-in"
+            />
+            <alert_dialog::Content
+                class="fixed left-1/2 top-1/2 z-[90] w-full max-w-md rounded-lg bg-background p-6 shadow-xl"
+                show_class="opacity-100 scale-100 duration-300 ease-out translate-x-[-50%] translate-y-[-50%]"
+                hide_class="opacity-0 scale-95 duration-200 ease-in translate-x-[-50%] translate-y-[-50%]"
+            >
+                <alert_dialog::Title class="text-lg font-semibold">
+                    "Are you absolutely sure?"
+                </alert_dialog::Title>
+                <alert_dialog::Description class="mt-2 text-sm text-muted-foreground">
+                    "This action cannot be undone."
+                </alert_dialog::Description>
+                <div class="mt-6 flex justify-end gap-3">
+                    <alert_dialog::Cancel class="rounded-md border px-4 py-2 text-sm font-medium">
+                        "Cancel"
+                    </alert_dialog::Cancel>
+                    <alert_dialog::Action class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500">
+                        "Confirm"
+                    </alert_dialog::Action>
+                </div>
+            </alert_dialog::Content>
         </alert_dialog::RootWith>
     }
 }"#;

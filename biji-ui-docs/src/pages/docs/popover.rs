@@ -1,4 +1,4 @@
-use leptos::{portal::Portal, prelude::*};
+use leptos::prelude::*;
 
 use crate::components::{
     api_table::{
@@ -15,7 +15,7 @@ const INSTALL_CODE: &str = concat!(
     "\", features = [\"popover\"] }",
 );
 
-const USAGE_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const USAGE_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::popover;
 
 #[component]
@@ -25,21 +25,19 @@ pub fn MyPopover() -> impl IntoView {
             <popover::Trigger class="py-1.5 px-3 text-sm rounded border">
                 "Open popover"
             </popover::Trigger>
-            <Portal>
-                <popover::Content
-                    class="z-50 p-4 text-sm rounded-lg border shadow-md transition bg-background origin-[var(--biji-transform-origin)]"
-                    show_class="opacity-100 scale-100 duration-150 ease-out"
-                    hide_class="opacity-0 scale-95 duration-100 ease-in"
-                >
-                    <popover::Arrow class="border-t border-l border-border" />
-                    "Popover content goes here."
-                </popover::Content>
-            </Portal>
+            <popover::Content
+                class="z-50 p-4 text-sm rounded-lg border shadow-md transition bg-background origin-[var(--biji-transform-origin)]"
+                show_class="opacity-100 scale-100 duration-150 ease-out"
+                hide_class="opacity-0 scale-95 duration-100 ease-in"
+            >
+                <popover::Arrow class="border-t border-l border-border" />
+                "Popover content goes here."
+            </popover::Content>
         </popover::Root>
     }
 }"#;
 
-const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::popover;
 
 #[component]
@@ -52,15 +50,13 @@ pub fn MyPopover() -> impl IntoView {
             <popover::Trigger class="py-1.5 px-3 text-sm rounded border">
                 "Open popover"
             </popover::Trigger>
-            <Portal>
-                <popover::Content
-                    class="z-50 p-4 text-sm rounded-lg border shadow-md transition bg-background origin-[var(--biji-transform-origin)]"
-                    show_class="opacity-100 scale-100 duration-150 ease-out"
-                    hide_class="opacity-0 scale-95 duration-100 ease-in"
-                >
-                    "Popover content goes here."
-                </popover::Content>
-            </Portal>
+            <popover::Content
+                class="z-50 p-4 text-sm rounded-lg border shadow-md transition bg-background origin-[var(--biji-transform-origin)]"
+                show_class="opacity-100 scale-100 duration-150 ease-out"
+                hide_class="opacity-0 scale-95 duration-100 ease-in"
+            >
+                "Popover content goes here."
+            </popover::Content>
         </popover::RootWith>
     }
 }"#;
@@ -327,17 +323,15 @@ pub fn PopoverRootWithExample() -> impl IntoView {
                 <popover::Trigger class={btn(Variant::Outline)}>
                     "Open popover"
                 </popover::Trigger>
-                <Portal>
-                    <popover::Content
-                        class="z-50 p-4 w-64 text-sm rounded-lg border shadow-md transition \
-                               bg-background border-border origin-[var(--biji-transform-origin)]"
-                        show_class="opacity-100 scale-100 duration-150 ease-out"
-                        hide_class="opacity-0 scale-95 duration-100 ease-in"
-                    >
-                        <popover::Arrow class="border-t border-l border-border" />
-                        "Popover content goes here."
-                    </popover::Content>
-                </Portal>
+                <popover::Content
+                    class="z-50 p-4 w-64 text-sm rounded-lg border shadow-md transition \
+                           bg-background border-border origin-[var(--biji-transform-origin)]"
+                    show_class="opacity-100 scale-100 duration-150 ease-out"
+                    hide_class="opacity-0 scale-95 duration-100 ease-in"
+                >
+                    <popover::Arrow class="border-t border-l border-border" />
+                    "Popover content goes here."
+                </popover::Content>
             </popover::RootWith>
         </div>
     }
@@ -353,37 +347,35 @@ pub fn PopoverExample() -> impl IntoView {
                 <popover::Trigger class={btn(Variant::Outline)}>
                     "Open popover"
                 </popover::Trigger>
-                <Portal>
-                    <popover::Content
-                        class="p-4 w-72 text-sm rounded-lg border shadow-md transition z-50 border-border bg-background origin-[var(--biji-transform-origin)]"
-                        show_class="opacity-100 scale-100 duration-150 ease-out"
-                        hide_class="opacity-0 scale-95 duration-100 ease-in"
-                    >
-                        <popover::Arrow class="border-t border-l border-border bg-background" />
-                        <p class="mb-1 font-semibold">"Dimensions"</p>
-                        <p class="text-xs text-muted-foreground">
-                            "Set the dimensions for the layer."
-                        </p>
-                        <div class="flex flex-col gap-2 mt-3">
-                            <label class="flex flex-col gap-1 text-xs">
-                                <span class="font-medium">"Width"</span>
-                                <input
-                                    type="text"
-                                    placeholder="100%"
-                                    class="py-1 px-3 h-8 text-sm rounded-md border focus:ring-2 focus:outline-none border-input bg-background focus:ring-ring"
-                                />
-                            </label>
-                            <label class="flex flex-col gap-1 text-xs">
-                                <span class="font-medium">"Max width"</span>
-                                <input
-                                    type="text"
-                                    placeholder="300px"
-                                    class="py-1 px-3 h-8 text-sm rounded-md border focus:ring-2 focus:outline-none border-input bg-background focus:ring-ring"
-                                />
-                            </label>
-                        </div>
-                    </popover::Content>
-                </Portal>
+                <popover::Content
+                    class="p-4 w-72 text-sm rounded-lg border shadow-md transition z-50 border-border bg-background origin-[var(--biji-transform-origin)]"
+                    show_class="opacity-100 scale-100 duration-150 ease-out"
+                    hide_class="opacity-0 scale-95 duration-100 ease-in"
+                >
+                    <popover::Arrow class="border-t border-l border-border bg-background" />
+                    <p class="mb-1 font-semibold">"Dimensions"</p>
+                    <p class="text-xs text-muted-foreground">
+                        "Set the dimensions for the layer."
+                    </p>
+                    <div class="flex flex-col gap-2 mt-3">
+                        <label class="flex flex-col gap-1 text-xs">
+                            <span class="font-medium">"Width"</span>
+                            <input
+                                type="text"
+                                placeholder="100%"
+                                class="py-1 px-3 h-8 text-sm rounded-md border focus:ring-2 focus:outline-none border-input bg-background focus:ring-ring"
+                            />
+                        </label>
+                        <label class="flex flex-col gap-1 text-xs">
+                            <span class="font-medium">"Max width"</span>
+                            <input
+                                type="text"
+                                placeholder="300px"
+                                class="py-1 px-3 h-8 text-sm rounded-md border focus:ring-2 focus:outline-none border-input bg-background focus:ring-ring"
+                            />
+                        </label>
+                    </div>
+                </popover::Content>
             </popover::Root>
         </div>
     }

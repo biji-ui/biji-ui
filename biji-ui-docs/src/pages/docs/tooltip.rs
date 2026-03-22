@@ -1,4 +1,4 @@
-use leptos::{portal::Portal, prelude::*};
+use leptos::prelude::*;
 
 use crate::components::{
     api_table::{PropRow, PropsTable, SectionHeading},
@@ -12,7 +12,7 @@ const INSTALL_CODE: &str = concat!(
     "\", features = [\"tooltip\"] }",
 );
 
-const USAGE_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const USAGE_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::tooltip;
 
 #[component]
@@ -22,21 +22,19 @@ pub fn MyTooltip() -> impl IntoView {
             <tooltip::Trigger class="rounded border px-3 py-1.5 text-sm">
                 "Hover me"
             </tooltip::Trigger>
-            <Portal>
-                <tooltip::Content
-                    class="z-50 rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
-                    show_class="opacity-100"
-                    hide_class="opacity-0"
-                >
-                    <tooltip::Arrow class="border-t border-l border-slate-500" />
-                    "Tooltip content"
-                </tooltip::Content>
-            </Portal>
+            <tooltip::Content
+                class="z-50 rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
+                show_class="opacity-100"
+                hide_class="opacity-0"
+            >
+                <tooltip::Arrow class="border-t border-l border-slate-500" />
+                "Tooltip content"
+            </tooltip::Content>
         </tooltip::Root>
     }
 }"#;
 
-const ROOT_WITH_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::tooltip;
 
 #[component]
@@ -49,15 +47,13 @@ pub fn MyTooltip() -> impl IntoView {
             <tooltip::Trigger class="rounded border px-3 py-1.5 text-sm">
                 "Hover me"
             </tooltip::Trigger>
-            <Portal>
-                <tooltip::Content
-                    class="z-50 rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
-                    show_class="opacity-100"
-                    hide_class="opacity-0"
-                >
-                    "Tooltip content"
-                </tooltip::Content>
-            </Portal>
+            <tooltip::Content
+                class="z-50 rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
+                show_class="opacity-100"
+                hide_class="opacity-0"
+            >
+                "Tooltip content"
+            </tooltip::Content>
         </tooltip::RootWith>
     }
 }"#;
@@ -229,15 +225,13 @@ pub fn TooltipRootWithExample() -> impl IntoView {
                     {move || if t.open.get() { "Tooltip is open" } else { "Tooltip is closed" }}
                 </p>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Hover or focus me"</tooltip::Trigger>
-                <Portal>
-                    <tooltip::Content
-                        class="z-50 inline-block w-max rounded-lg border border-slate-500 bg-gray-900 px-3 py-2 text-sm font-medium text-white shadow-sm dark:bg-gray-700"
-                        show_class="opacity-100"
-                        hide_class="opacity-0"
-                    >
-                        "Tooltip content"
-                    </tooltip::Content>
-                </Portal>
+                <tooltip::Content
+                    class="z-50 inline-block w-max rounded-lg border border-slate-500 bg-gray-900 px-3 py-2 text-sm font-medium text-white shadow-sm dark:bg-gray-700"
+                    show_class="opacity-100"
+                    hide_class="opacity-0"
+                >
+                    "Tooltip content"
+                </tooltip::Content>
             </tooltip::RootWith>
         </div>
     }
@@ -250,75 +244,51 @@ pub fn TooltipExample() -> impl IntoView {
         <div class="grid grid-cols-3 gap-2">
             <tooltip::Root positioning={tooltip::Positioning::TopStart}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Top start"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::Top}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Top"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::TopEnd}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Top end"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::RightStart}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Right start"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::Right}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Right"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::RightEnd}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Right end"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::BottomStart}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Bottom start"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::Bottom}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Bottom"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::BottomEnd}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Bottom end"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::LeftStart}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Left start"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::Left}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Left"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
             <tooltip::Root positioning={tooltip::Positioning::LeftEnd}>
                 <tooltip::Trigger class={BUTTON_BASE_STYLE}>"Left end"</tooltip::Trigger>
-                <Portal>
-                    <Content />
-                </Portal>
+                <Content />
             </tooltip::Root>
         </div>
     }
