@@ -21,7 +21,7 @@ use super::context::{ItemData, MenuContext, MenubarContext, RootContext};
 
 pub(super) fn get_root_ctx() -> RootContext {
     if let Some(menubar_ctx) = use_context::<MenubarContext>() {
-        menubar_ctx.root.get()
+        menubar_ctx.root.get_untracked()
     } else {
         expect_context::<RootContext>()
     }
