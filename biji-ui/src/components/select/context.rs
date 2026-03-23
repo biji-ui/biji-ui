@@ -15,7 +15,7 @@ use crate::{
         FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, filter_active,
         next_item, previous_item,
     },
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
 #[derive(Copy, Clone)]
@@ -122,7 +122,7 @@ pub struct SelectItemContext {
     pub value: StoredValue<String>,
     /// Display label shown in the trigger when this item is selected.
     /// Defaults to `value` if not explicitly provided.
-    pub label: StoredValue<String>,
+    pub label: StoredValue<StringProp>,
     pub disabled: bool,
     pub item_ref: NodeRef<Div>,
 }

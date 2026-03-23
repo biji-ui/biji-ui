@@ -22,7 +22,7 @@ use crate::{
     cn,
     custom_animated_show::CustomAnimatedShow,
     items::{FilterActiveItems, Focus, ManageFocus, NavigateItems},
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
 use super::context::{SelectItemContext, SelectState};
@@ -73,7 +73,7 @@ fn build_state(
         };
         state.items.with(|m| {
             if let Some(item) = m.values().find(|i| i.value.with_value(|iv| *iv == val)) {
-                let lbl = item.label.with_value(|l| l.clone());
+                let lbl = item.label.with_value(|l| l.get());
                 state.selected_label.set(Some(lbl));
             }
         });
@@ -227,9 +227,9 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 }
 
 #[component]
-pub fn Value(#[prop(into, optional)] placeholder: String) -> impl IntoView {
+pub fn Value(#[prop(into, optional)] placeholder: StringProp) -> impl IntoView {
     let ctx = expect_context::<SelectState>();
-    view! { <span>{move || { ctx.selected_label.get().unwrap_or_else(|| placeholder.clone()) }}</span> }
+    view! { <span>{move || { ctx.selected_label.get().unwrap_or_else(|| placeholder.get()) }}</span> }
 }
 
 #[component]
@@ -408,7 +408,7 @@ pub fn Content(
                     if let Some(item) = item {
                         if !item.disabled {
                             let val = item.value.with_value(|v| v.clone());
-                            let lbl = item.label.with_value(|l| l.clone());
+                            let lbl = item.label.with_value(|l| l.get());
                             ctx.select(val, lbl);
                             if let Some(trigger) = ctx.trigger_ref.get() {
                                 let _ = trigger.focus();
@@ -449,18 +449,18 @@ pub fn Item(
     /// Display text shown in the trigger when this item is selected.
     /// Defaults to `value` if not provided.
     #[prop(into, optional)]
-    label: Option<String>,
+    label: Option<StringProp>,
     #[prop(into, optional)] class: String,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     let ctx = expect_context::<SelectState>();
 
     let index = ctx.next_index();
-    let label_text = label.unwrap_or_else(|| value.clone());
+    let label_sp = label.unwrap_or_else(|| StringProp::from(value.as_str()));
     let item_ctx = SelectItemContext {
         index,
         value: StoredValue::new(value),
-        label: StoredValue::new(label_text),
+        label: StoredValue::new(label_sp),
         disabled,
         item_ref: NodeRef::new(),
     };
@@ -476,7 +476,7 @@ pub fn Item(
             return;
         }
         let val = item_ctx.value.with_value(|v| v.clone());
-        let lbl = item_ctx.label.with_value(|l| l.clone());
+        let lbl = item_ctx.label.with_value(|l| l.get());
         ctx.select(val, lbl);
         if let Some(trigger) = ctx.trigger_ref.get() {
             let _ = trigger.focus();

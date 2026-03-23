@@ -15,7 +15,7 @@ use crate::{
         FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, filter_active,
         next_item, previous_item,
     },
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
 #[derive(Copy, Clone)]
@@ -98,7 +98,7 @@ impl ComboboxState {
             return all;
         }
         all.into_iter()
-            .filter(|item| item.label.with_value(|l| l.to_lowercase().contains(&q)))
+            .filter(|item| item.label.with_value(|l| l.get().to_lowercase().contains(&q)))
             .collect()
     }
 }
@@ -144,7 +144,7 @@ impl NavigateItems<ComboboxItemContext> for ComboboxState {
 pub struct ComboboxItemContext {
     pub index: usize,
     pub value: StoredValue<String>,
-    pub label: StoredValue<String>,
+    pub label: StoredValue<StringProp>,
     pub disabled: bool,
     pub item_ref: NodeRef<Div>,
 }

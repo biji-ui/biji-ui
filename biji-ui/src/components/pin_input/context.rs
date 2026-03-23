@@ -2,6 +2,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use leptos::{html::Input, prelude::*};
 
+use crate::utils::props::StringProp;
+
 static PIN_INPUT_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 pub(crate) fn next_pin_input_id() -> String {
@@ -23,7 +25,7 @@ pub struct PinInputState {
     /// `true` when every cell has a character.
     pub is_complete: Signal<bool>,
     pub(crate) cell_refs: StoredValue<Vec<NodeRef<Input>>>,
-    pub(crate) placeholder: StoredValue<String>,
+    pub(crate) placeholder: StoredValue<StringProp>,
     pub(crate) root_id: StoredValue<String>,
     pub(crate) on_complete: Option<Callback<String>>,
 }
@@ -33,7 +35,7 @@ impl PinInputState {
         values_signal: Option<RwSignal<Vec<String>>>,
         length: usize,
         disabled: bool,
-        placeholder: String,
+        placeholder: StringProp,
         on_complete: Option<Callback<String>>,
     ) -> Self {
         let cell_refs: Vec<NodeRef<Input>> = (0..length).map(|_| NodeRef::new()).collect();

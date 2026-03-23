@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+use crate::utils::props::StringProp;
+
 use leptos::{
     context::Provider,
     ev::{click, focus, keydown, mouseover},
@@ -97,7 +99,7 @@ pub fn Menu(
 #[component]
 pub fn MenuTrigger(
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] aria_label: Option<String>,
+    #[prop(into, optional)] aria_label: Option<StringProp>,
     children: Children,
 ) -> impl IntoView {
     let root_ctx = get_root_ctx();
@@ -114,7 +116,7 @@ pub fn MenuTrigger(
                 node_ref={trigger_ref}
                 class={class}
                 role={role}
-                aria-label={aria_label}
+                aria-label={move || aria_label.as_ref().map(|f| f.get())}
                 aria-haspopup="menu"
                 aria-expanded={move || if menu_ctx.open.get() { "true" } else { "false" }}
                 aria-disabled={if menu_ctx.disabled { Some("true") } else { None }}

@@ -22,7 +22,7 @@ use crate::{
     cn,
     custom_animated_show::CustomAnimatedShow,
     items::{Focus, ManageFocus, NavigateItems},
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
 use super::context::{ComboboxItemContext, ComboboxState};
@@ -75,7 +75,7 @@ fn build_state(
         };
         state.items.with(|m| {
             if let Some(item) = m.values().find(|i| i.value.with_value(|iv| *iv == val)) {
-                let lbl = item.label.with_value(|l| l.clone());
+                let lbl = item.label.with_value(|l| l.get());
                 state.selected_label.set(Some(lbl));
             }
         });
@@ -270,9 +270,9 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 }
 
 #[component]
-pub fn Value(#[prop(into, optional)] placeholder: String) -> impl IntoView {
+pub fn Value(#[prop(into, optional)] placeholder: StringProp) -> impl IntoView {
     let ctx = expect_context::<ComboboxState>();
-    view! { <span>{move || ctx.selected_label.get().unwrap_or_else(|| placeholder.clone())}</span> }
+    view! { <span>{move || ctx.selected_label.get().unwrap_or_else(|| placeholder.get())}</span> }
 }
 
 #[component]
@@ -464,7 +464,7 @@ pub fn Content(
                 if let Some(item) = item {
                     if !item.disabled {
                         let val = item.value.with_value(|v| v.clone());
-                        let lbl = item.label.with_value(|l| l.clone());
+                        let lbl = item.label.with_value(|l| l.get());
                         ctx.select(val, lbl);
                         if ctx.inline_mode {
                             ctx.suppress_next_open.set_value(true);
@@ -504,7 +504,7 @@ pub fn Content(
 #[component]
 pub fn Input(
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] placeholder: String,
+    #[prop(into, optional)] placeholder: StringProp,
 ) -> impl IntoView {
     let ctx = expect_context::<ComboboxState>();
 
@@ -518,7 +518,7 @@ pub fn Input(
         <input
             node_ref={ctx.input_ref}
             type="text"
-            placeholder={placeholder}
+            placeholder={move || placeholder.get()}
             autocomplete="off"
             class={class}
         />
@@ -535,7 +535,7 @@ pub fn Input(
 #[component]
 pub fn InputTrigger(
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] placeholder: String,
+    #[prop(into, optional)] placeholder: StringProp,
 ) -> impl IntoView {
     let ctx = expect_context::<ComboboxState>();
 
@@ -615,7 +615,7 @@ pub fn InputTrigger(
                     if let Some(item) = item {
                         if !item.disabled {
                             let val = item.value.with_value(|v| v.clone());
-                            let lbl = item.label.with_value(|l| l.clone());
+                            let lbl = item.label.with_value(|l| l.get());
                             ctx.select(val, lbl);
                             // suppress_next_open not needed — we're already in the input
                         }
@@ -652,7 +652,7 @@ pub fn InputTrigger(
         <input
             node_ref={ctx.input_ref}
             type="text"
-            placeholder={placeholder}
+            placeholder={move || placeholder.get()}
             autocomplete="off"
             class={class}
         />
@@ -663,18 +663,18 @@ pub fn InputTrigger(
 pub fn Item(
     children: Children,
     #[prop(into)] value: String,
-    #[prop(into, optional)] label: Option<String>,
+    #[prop(into, optional)] label: Option<StringProp>,
     #[prop(into, optional)] class: String,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
     let ctx = expect_context::<ComboboxState>();
 
     let index = ctx.next_index();
-    let label_text = label.unwrap_or_else(|| value.clone());
+    let label_sp = label.unwrap_or_else(|| StringProp::from(value.as_str()));
     let item_ctx = ComboboxItemContext {
         index,
         value: StoredValue::new(value),
-        label: StoredValue::new(label_text),
+        label: StoredValue::new(label_sp),
         disabled,
         item_ref: NodeRef::new(),
     };
@@ -691,7 +691,7 @@ pub fn Item(
         if q.is_empty() {
             return true;
         }
-        item_ctx.label.with_value(|l| l.to_lowercase().contains(&q))
+        item_ctx.label.with_value(|l| l.get().to_lowercase().contains(&q))
     });
 
     let _ = use_event_listener(item_ctx.item_ref, click, move |_| {
@@ -699,7 +699,7 @@ pub fn Item(
             return;
         }
         let val = item_ctx.value.with_value(|v| v.clone());
-        let lbl = item_ctx.label.with_value(|l| l.clone());
+        let lbl = item_ctx.label.with_value(|l| l.get());
         ctx.select(val, lbl);
         if ctx.inline_mode {
             ctx.suppress_next_open.set_value(true);

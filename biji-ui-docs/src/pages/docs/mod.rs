@@ -155,8 +155,11 @@ pub fn TopNav() -> impl IntoView {
     view! {
         <div
             style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2; --scrollbar-width-nav: var(--scrollbar-width, 0px);"
-            class="fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
+            class="fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80"
         >
+            // Blur background as a non-ancestor sibling so it doesn't create a
+            // CSS containing block that would break position:fixed menu content.
+            <div class="absolute inset-0 -z-10 backdrop-blur-sm dark:backdrop-blur pointer-events-none bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]" aria-hidden="true" />
             <div class="absolute inset-x-0 top-full h-px transition bg-zinc-900/10 dark:bg-white/10"></div>
             // Desktop center: full-width search input
             <div class="hidden lg:block lg:flex-auto lg:max-w-md">

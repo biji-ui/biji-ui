@@ -5,7 +5,7 @@ use leptos::{
 };
 use leptos_use::use_event_listener;
 
-use crate::items::{Focus, ManageFocus, NavigateItems};
+use crate::{items::{Focus, ManageFocus, NavigateItems}, utils::props::StringProp};
 
 use super::context::{CommandContext, CommandGroupContext, CommandItemContext};
 
@@ -84,7 +84,7 @@ fn RootEvents(children: Children) -> impl IntoView {
 #[component]
 pub fn Input(
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] placeholder: String,
+    #[prop(into, optional)] placeholder: StringProp,
 ) -> impl IntoView {
     let ctx = expect_context::<CommandContext>();
 
@@ -119,7 +119,7 @@ pub fn Input(
             aria-expanded="true"
             aria-autocomplete="list"
             aria-controls={ctx.list_id.get_value()}
-            placeholder={placeholder}
+            placeholder={move || placeholder.get()}
             autocomplete="off"
             class={class}
         />
@@ -147,7 +147,7 @@ pub fn List(
 pub fn Group(
     children: Children,
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] label: Option<String>,
+    #[prop(into, optional)] label: Option<StringProp>,
     #[prop(into, optional)] label_class: String,
 ) -> impl IntoView {
     let group_ctx = CommandGroupContext {
@@ -162,7 +162,7 @@ pub fn Group(
                 role="group"
             >
                 {label.map(|lbl| view! {
-                    <div class={label_class} aria-hidden="true">{lbl}</div>
+                    <div class={label_class} aria-hidden="true">{move || lbl.get()}</div>
                 })}
                 {children()}
             </div>
@@ -174,7 +174,7 @@ pub fn Group(
 pub fn Item(
     children: Children,
     #[prop(into)] value: String,
-    #[prop(into, optional)] label: Option<String>,
+    #[prop(into, optional)] label: Option<StringProp>,
     #[prop(into, optional)] class: String,
     #[prop(default = false)] disabled: bool,
     #[prop(optional)] on_select: Option<Callback<String>>,
@@ -183,11 +183,11 @@ pub fn Item(
     let group_ctx = use_context::<CommandGroupContext>();
 
     let index = ctx.next_index();
-    let label_text = label.unwrap_or_else(|| value.clone());
+    let label_sp = label.unwrap_or_else(|| StringProp::from(value.as_str()));
     let item_ctx = CommandItemContext {
         index,
         value: StoredValue::new(value),
-        label: StoredValue::new(label_text),
+        label: StoredValue::new(label_sp),
         disabled,
         item_ref: NodeRef::new(),
     };
@@ -308,7 +308,8 @@ pub fn Empty(children: ChildrenFn) -> impl IntoView {
 #[component]
 pub fn HighlightedText(
     /// The full label string to display.
-    label: String,
+    #[prop(into)]
+    label: StringProp,
     /// CSS class applied to the `<span>` wrapping the matched portion.
     #[prop(into, optional)]
     highlight_class: String,
@@ -321,16 +322,17 @@ pub fn HighlightedText(
         {move || {
             let q = ctx.query.get().to_lowercase();
             label.with_value(|label| {
+                let label_str = label.get();
                 if q.is_empty() {
-                    return view! { <span>{label.clone()}</span> }.into_any();
+                    return view! { <span>{label_str}</span> }.into_any();
                 }
-                let lower = label.to_lowercase();
+                let lower = label_str.to_lowercase();
                 if let Some(byte_pos) = lower.find(&q) {
-                    // Use char counts to slice `label` so Unicode chars that change
+                    // Use char counts to slice `label_str` so Unicode chars that change
                     // byte-length when lowercased don't produce invalid byte offsets.
                     let char_pos = lower[..byte_pos].chars().count();
                     let q_char_len = q.chars().count();
-                    let mut chars = label.chars();
+                    let mut chars = label_str.chars();
                     let before: String = chars.by_ref().take(char_pos).collect();
                     let matched: String = chars.by_ref().take(q_char_len).collect();
                     let after: String = chars.collect();
@@ -344,7 +346,7 @@ pub fn HighlightedText(
                     }
                     .into_any()
                 } else {
-                    view! { <span>{label.clone()}</span> }.into_any()
+                    view! { <span>{label_str}</span> }.into_any()
                 }
             })
         }}

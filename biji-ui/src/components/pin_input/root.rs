@@ -5,6 +5,8 @@ use leptos::{
 };
 use leptos_use::use_event_listener;
 
+use crate::utils::props::StringProp;
+
 use super::context::PinInputState;
 
 /// Returns the [`PinInputState`] from the nearest [`Root`] or [`RootWith`] ancestor.
@@ -46,7 +48,7 @@ pub fn RootWith<IV: IntoView + 'static>(
     value: Option<RwSignal<Vec<String>>>,
     #[prop(default = 4)] length: usize,
     #[prop(default = false)] disabled: bool,
-    #[prop(into, default = String::from("○"))] placeholder: String,
+    #[prop(into, default = StringProp::from("○"))] placeholder: StringProp,
     #[prop(into, default = None)] on_complete: Option<Callback<String>>,
 ) -> impl IntoView {
     let state = PinInputState::new(value, length, disabled, placeholder, on_complete);
@@ -74,7 +76,7 @@ pub fn Root(
     #[prop(into, default = None)] value: Option<RwSignal<Vec<String>>>,
     #[prop(default = 4)] length: usize,
     #[prop(default = false)] disabled: bool,
-    #[prop(into, default = String::from("○"))] placeholder: String,
+    #[prop(into, default = StringProp::from("○"))] placeholder: StringProp,
     #[prop(into, default = None)] on_complete: Option<Callback<String>>,
 ) -> impl IntoView {
     view! {
@@ -201,7 +203,6 @@ pub fn Cell(
         }
     });
 
-    let placeholder_str = state.placeholder.get_value();
     let is_filled = Memo::new(move |_| {
         state.values.with(|v| !v.get(index).map(|s| s.is_empty()).unwrap_or(true))
     });
@@ -217,7 +218,7 @@ pub fn Cell(
             type="text"
             inputmode="numeric"
             maxlength="1"
-            placeholder={placeholder_str}
+            placeholder={move || state.placeholder.with_value(|p| p.get())}
             disabled={state.disabled}
             autocomplete="one-time-code"
             aria-label={format!("Digit {} of {}", index + 1, length)}

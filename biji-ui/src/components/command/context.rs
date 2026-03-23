@@ -16,9 +16,12 @@ use leptos::{
 };
 use wasm_bindgen::JsCast;
 
-use crate::items::{
-    FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, filter_active,
-    next_item, previous_item,
+use crate::{
+    items::{
+        FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, filter_active,
+        next_item, previous_item,
+    },
+    utils::props::StringProp,
 };
 
 #[derive(Copy, Clone)]
@@ -72,7 +75,7 @@ impl CommandContext {
         self.items.with(|m| {
             m.get(&index)
                 .map(|item| {
-                    !item.disabled && item.label.with_value(|l| l.to_lowercase().contains(&q))
+                    !item.disabled && item.label.with_value(|l| l.get().to_lowercase().contains(&q))
                 })
                 .unwrap_or(false)
         })
@@ -85,7 +88,7 @@ impl CommandContext {
             return all;
         }
         all.into_iter()
-            .filter(|item| item.label.with_value(|l| l.to_lowercase().contains(&q)))
+            .filter(|item| item.label.with_value(|l| l.get().to_lowercase().contains(&q)))
             .collect()
     }
 }
@@ -130,7 +133,7 @@ impl NavigateItems<CommandItemContext> for CommandContext {
 pub struct CommandItemContext {
     pub index: usize,
     pub value: StoredValue<String>,
-    pub label: StoredValue<String>,
+    pub label: StoredValue<StringProp>,
     pub disabled: bool,
     pub item_ref: NodeRef<Div>,
 }

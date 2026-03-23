@@ -45,6 +45,8 @@ pub mod items;
 /// Utility modules for positioning, scroll prevention, and polygon math.
 pub mod utils;
 
+pub use utils::props::StringProp;
+
 /// A trait for converting a value into a CSS class string.
 ///
 /// This trait is used by the [`cn!`] macro to normalize different string types
