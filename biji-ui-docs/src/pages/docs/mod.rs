@@ -19,6 +19,7 @@ pub mod getting_started;
 pub mod hover_card;
 pub mod menubar;
 pub mod navigation_menu;
+pub mod pagination;
 pub mod pin_input;
 pub mod popover;
 pub mod progress;
@@ -63,6 +64,7 @@ pub const COMPONENT_PAGES: &[(&str, &str)] = &[
     ("/docs/hover-card", "Hover Card"),
     ("/docs/menubar", "Menubar"),
     ("/docs/navigation-menu", "Navigation Menu"),
+    ("/docs/pagination", "Pagination"),
     ("/docs/pin-input", "PIN Input"),
     ("/docs/popover", "Popover"),
     ("/docs/progress", "Progress"),

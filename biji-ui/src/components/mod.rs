@@ -40,6 +40,9 @@ pub mod menubar;
 #[cfg(feature = "navigation_menu")]
 pub mod navigation_menu;
 
+#[cfg(feature = "pagination")]
+pub mod pagination;
+
 #[cfg(feature = "pin_input")]
 pub mod pin_input;
 
