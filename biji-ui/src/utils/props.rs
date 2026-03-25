@@ -17,6 +17,7 @@ use std::sync::Arc;
 /// // Reactive closure — re-evaluated when signals inside it change
 /// aria_label=move || t_string!(i18n, nav.toggle)
 /// ```
+#[derive(Clone)]
 pub struct StringProp(Arc<dyn Fn() -> String + Send + Sync>);
 
 impl StringProp {
