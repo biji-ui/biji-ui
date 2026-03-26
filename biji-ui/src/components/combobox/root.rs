@@ -37,6 +37,7 @@ fn next_combobox_id() -> String {
 fn build_state(
     value: Option<RwSignal<Option<String>>>,
     default_value: Option<String>,
+    label: Option<RwSignal<Option<String>>>,
     positioning: Positioning,
     hide_delay: Duration,
     avoid_collisions: AvoidCollisions,
@@ -51,7 +52,7 @@ fn build_state(
         input_ref: NodeRef::new(),
         open,
         value: value_sig,
-        selected_label: RwSignal::new(None),
+        selected_label: label.unwrap_or_else(|| RwSignal::new(None)),
         query: RwSignal::new(String::new()),
         data_state,
         item_focus: RwSignal::new(None),
@@ -95,6 +96,12 @@ pub fn RootWith<IV: IntoView + 'static>(
     #[prop(into, default = None)]
     value: Option<RwSignal<Option<String>>>,
     #[prop(into, default = None)] default_value: Option<String>,
+    /// Controlled label signal. When provided, the combobox uses this signal as the
+    /// selected label instead of managing it internally. Useful when the selected item
+    /// may not be present in the currently loaded page (e.g. paginated async lists)
+    /// and the label is sourced from an external context or server fetch.
+    #[prop(into, default = None)]
+    label: Option<RwSignal<Option<String>>>,
     #[prop(default = Positioning::BottomStart)] positioning: Positioning,
     #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
     #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
@@ -102,7 +109,7 @@ pub fn RootWith<IV: IntoView + 'static>(
     #[prop(default = false)]
     inline: bool,
 ) -> impl IntoView {
-    let state = build_state(value, default_value, positioning, hide_delay, avoid_collisions, inline);
+    let state = build_state(value, default_value, label, positioning, hide_delay, avoid_collisions, inline);
     view! {
         <Provider value={state}>
             <RootEvents>
@@ -118,6 +125,7 @@ pub fn Root(
     #[prop(into, optional)] class: String,
     #[prop(into, default = None)] value: Option<RwSignal<Option<String>>>,
     #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(into, default = None)] label: Option<RwSignal<Option<String>>>,
     #[prop(default = Positioning::BottomStart)] positioning: Positioning,
     #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
     #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
@@ -129,6 +137,7 @@ pub fn Root(
         <RootWith
             value={value}
             default_value={default_value}
+            label={label}
             positioning={positioning}
             hide_delay={hide_delay}
             avoid_collisions={avoid_collisions}
