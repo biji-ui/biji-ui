@@ -65,16 +65,20 @@ fn build_state(
         next_id: StoredValue::new(AtomicUsize::new(0)),
         inline_mode,
         suppress_next_open: StoredValue::new(false),
+        items_version: RwSignal::new(0),
+        items_notify_pending: StoredValue::new(false),
     };
     // Resolve the initial label once items mount (same pattern as Select).
+    // Subscribes to items_version (not items directly) to avoid O(N²) on batch mount.
     Effect::new(move |_| {
+        state.items_version.get();
         if state.selected_label.get_untracked().is_some() {
             return;
         }
         let Some(val) = state.value.get_untracked() else {
             return;
         };
-        state.items.with(|m| {
+        state.items.with_untracked(|m| {
             if let Some(item) = m.values().find(|i| i.value.with_value(|iv| *iv == val)) {
                 let lbl = item.label.with_value(|l| l.get());
                 state.selected_label.set(Some(lbl));
@@ -154,11 +158,12 @@ pub fn Root(
 fn RootEvents(children: Children) -> impl IntoView {
     let ctx = expect_context::<ComboboxState>();
 
-    // Auto-highlight the first visible item when the query changes (always reset)
-    // or when the item list changes and nothing is focused yet (initial mount / open).
+    // Auto-highlight the first visible item when the query changes or when a new
+    // batch of items finishes mounting. Subscribes to items_version (not items
+    // directly) so this fires once per batch rather than once per item → O(1).
     Effect::new(move |prev_query: Option<String>| {
         let query = ctx.query.get();
-        ctx.items.with(|_| {}); // reactive dep without cloning
+        ctx.items_version.get();
         let query_changed = prev_query.as_deref() != Some(query.as_str());
         if query_changed || ctx.item_focus.get_untracked().is_none() {
             let first = ctx.navigate_first_item();
@@ -783,7 +788,10 @@ pub fn ItemIndicator(children: ChildrenFn) -> impl IntoView {
 #[component]
 pub fn Empty(children: ChildrenFn) -> impl IntoView {
     let ctx = expect_context::<ComboboxState>();
-    let has_visible = Memo::new(move |_| !ctx.visible_items().is_empty());
+    let has_visible = Memo::new(move |_| {
+        ctx.items_version.get(); // batch-mount notification
+        !ctx.visible_items().is_empty()
+    });
 
     view! {
         <Show when={move || !has_visible.get()} fallback={|| ()}>

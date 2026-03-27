@@ -7,6 +7,7 @@ use std::{
 use leptos::{
     html::{Button, Div, Input},
     prelude::*,
+    task::spawn_local,
 };
 use wasm_bindgen::JsCast;
 
@@ -43,6 +44,12 @@ pub struct ComboboxState {
     /// Suppresses the next focus-triggered open (used after programmatic focus returns to the input
     /// post-selection, to avoid immediately re-opening the dropdown).
     pub(crate) suppress_next_open: StoredValue<bool>,
+    /// Incremented once (via a microtask) after a batch of `upsert_item` calls settles.
+    /// Subscribers use this instead of `items` directly to avoid O(N²) reactivity when
+    /// N items mount simultaneously.
+    pub(crate) items_version: RwSignal<u64>,
+    /// Guards the single `spawn_local` scheduled per batch of `upsert_item` calls.
+    pub(crate) items_notify_pending: StoredValue<bool>,
 }
 
 impl ComboboxState {
@@ -52,9 +59,22 @@ impl ComboboxState {
     }
 
     pub(crate) fn upsert_item(&self, index: usize, item: ComboboxItemContext) {
-        self.items.update(|m| {
+        // Update the map without triggering reactive subscribers. Multiple items
+        // mounting in the same render frame each call this; notifying on every call
+        // would fire the focus-reset Effect N times → O(N²) visible_items() work.
+        self.items.update_untracked(|m| {
             *m.entry(index).or_insert(item) = item;
         });
+        // Schedule a single reactive notification after the current sync batch settles.
+        if !self.items_notify_pending.get_value() {
+            self.items_notify_pending.set_value(true);
+            let pending = self.items_notify_pending;
+            let version = self.items_version;
+            spawn_local(async move {
+                pending.set_value(false);
+                version.update(|v| *v += 1);
+            });
+        }
     }
 
     pub(crate) fn remove_item(&self, index: usize) {
@@ -93,7 +113,9 @@ impl ComboboxState {
     /// Items that are active (not disabled) and match the current query.
     pub(crate) fn visible_items(&self) -> Vec<ComboboxItemContext> {
         let q = self.query.get().to_lowercase();
-        let all = filter_active(self.items.get());
+        // Use get_untracked so callers inside Effects don't create an extra reactive
+        // dependency on `items` — they should depend on `items_version` instead.
+        let all = filter_active(self.items.get_untracked());
         if q.is_empty() {
             return all;
         }
