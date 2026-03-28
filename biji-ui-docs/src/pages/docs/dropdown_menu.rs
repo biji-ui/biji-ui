@@ -15,7 +15,7 @@ const INSTALL_CODE: &str = concat!(
 );
 
 const USAGE_CODE: &str = r#"use std::time::Duration;
-use leptos::{portal::Portal, prelude::*};
+use leptos::prelude::*;
 use biji_ui::components::menu;
 
 #[component]
@@ -28,26 +28,24 @@ pub fn MyDropdownMenu() -> impl IntoView {
             <menu::Trigger class="rounded border px-3 py-1.5 text-sm">
                 "Open menu"
             </menu::Trigger>
-            <Portal>
-                <menu::Content
-                    class="z-50 flex flex-col p-1 w-48 rounded-md border shadow-md bg-background"
-                    show_class="opacity-100 transition duration-150 ease-in"
-                    hide_class="opacity-0 transition duration-200 ease-out"
+            <menu::Content
+                class="z-50 flex flex-col p-1 w-48 rounded-md border shadow-md bg-background"
+                show_class="opacity-100 transition duration-150 ease-in"
+                hide_class="opacity-0 transition duration-200 ease-out"
+            >
+                <menu::Item class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent data-[highlighted]:bg-muted">
+                    "Profile"
+                </menu::Item>
+                <menu::Item class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent data-[highlighted]:bg-muted">
+                    "Settings"
+                </menu::Item>
+                <menu::Item
+                    disabled=true
+                    class="px-2 py-1.5 text-sm rounded-sm data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                 >
-                    <menu::Item class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent data-[highlighted]:bg-muted">
-                        "Profile"
-                    </menu::Item>
-                    <menu::Item class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent data-[highlighted]:bg-muted">
-                        "Settings"
-                    </menu::Item>
-                    <menu::Item
-                        disabled=true
-                        class="px-2 py-1.5 text-sm rounded-sm data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                    >
-                        "Billing"
-                    </menu::Item>
-                </menu::Content>
-            </Portal>
+                    "Billing"
+                </menu::Item>
+            </menu::Content>
         </menu::Menu>
     }
 }"#;

@@ -22,10 +22,10 @@ use crate::{
     cn,
     custom_animated_show::CustomAnimatedShow,
     items::{FilterActiveItems, Focus, ManageFocus, NavigateItems},
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
-use super::context::{SelectContext, SelectItemContext};
+use super::context::{SelectItemContext, SelectState};
 
 static SELECT_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -34,59 +34,107 @@ fn next_select_id() -> String {
     format!("biji-select-{id}")
 }
 
-#[component]
-pub fn Root(
-    children: Children,
-    #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
-    #[prop(default = Positioning::BottomStart)] positioning: Positioning,
-    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
-    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
-    #[prop(optional)] on_value_change: Option<Callback<String>>,
-) -> impl IntoView {
-    let ctx = SelectContext {
-        open: RwSignal::new(false),
-        value: RwSignal::new(value),
+fn build_state(
+    value: Option<RwSignal<Option<String>>>,
+    default_value: Option<String>,
+    positioning: Positioning,
+    hide_delay: Duration,
+    avoid_collisions: AvoidCollisions,
+) -> SelectState {
+    let open = RwSignal::new(false);
+    let data_state = Signal::derive(move || if open.get() { "open" } else { "closed" });
+    let value_sig = value.unwrap_or_else(|| RwSignal::new(default_value));
+    let state = SelectState {
+        trigger_ref: NodeRef::new(),
+        content_ref: NodeRef::new(),
+        open,
+        value: value_sig,
         selected_label: RwSignal::new(None),
+        data_state,
+        item_focus: RwSignal::new(None),
+        items: RwSignal::new(Default::default()),
         hide_delay,
         positioning,
+        arrow_size: 0,
         select_id: StoredValue::new(next_select_id()),
         avoid_collisions,
-        on_value_change,
-        ..SelectContext::default()
+        next_id: StoredValue::new(AtomicUsize::new(0)),
     };
-
     // Resolve the initial label once items mount. selected_label starts as None
     // because Item children haven't registered yet at Root construction time.
-    // This effect tracks ctx.items and runs whenever items change; once the
+    // This effect tracks state.items and runs whenever items change; once the
     // label is resolved it bails out immediately on subsequent runs.
     Effect::new(move |_| {
-        if ctx.selected_label.get_untracked().is_some() {
+        if state.selected_label.get_untracked().is_some() {
             return;
         }
-        let Some(val) = ctx.value.get_untracked() else {
+        let Some(val) = state.value.get_untracked() else {
             return;
         };
-        ctx.items.with(|m| {
+        state.items.with(|m| {
             if let Some(item) = m.values().find(|i| i.value.with_value(|iv| *iv == val)) {
-                let lbl = item.label.with_value(|l| l.clone());
-                ctx.selected_label.set(Some(lbl));
+                let lbl = item.label.with_value(|l| l.get());
+                state.selected_label.set(Some(lbl));
             }
         });
     });
+    state
+}
 
+pub fn use_select() -> SelectState {
+    expect_context::<SelectState>()
+}
+
+#[component]
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(SelectState) -> IV + Send + Sync + 'static,
+    #[prop(into, optional)] class: String,
+    /// Controlled signal. When provided, the select reads and writes this signal directly.
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(default = Positioning::BottomStart)] positioning: Positioning,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+) -> impl IntoView {
+    let state = build_state(value, default_value, positioning, hide_delay, avoid_collisions);
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <RootEvents>
-                <div class={class}>{children()}</div>
+                <div class={class}>{children(state)}</div>
             </RootEvents>
         </Provider>
     }
 }
 
 #[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(into, default = None)] value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(default = Positioning::BottomStart)] positioning: Positioning,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+) -> impl IntoView {
+    view! {
+        <RootWith
+            value={value}
+            default_value={default_value}
+            positioning={positioning}
+            hide_delay={hide_delay}
+            avoid_collisions={avoid_collisions}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
+    }
+}
+
+#[component]
 fn RootEvents(children: Children) -> impl IntoView {
-    let ctx = expect_context::<SelectContext>();
+    let ctx = expect_context::<SelectState>();
 
     let _ = use_event_listener(use_document(), keydown, move |evt| {
         if evt.key() == "Escape" && ctx.open.get() {
@@ -119,7 +167,7 @@ fn RootEvents(children: Children) -> impl IntoView {
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<SelectContext>();
+    let ctx = expect_context::<SelectState>();
 
     let _ = use_event_listener(ctx.trigger_ref, click, move |_| {
         ctx.toggle();
@@ -179,17 +227,9 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 }
 
 #[component]
-pub fn Value(#[prop(into, optional)] placeholder: String) -> impl IntoView {
-    let ctx = expect_context::<SelectContext>();
-    view! {
-        <span>
-            {move || {
-                ctx.selected_label
-                    .get()
-                    .unwrap_or_else(|| placeholder.clone())
-            }}
-        </span>
-    }
+pub fn Value(#[prop(into, optional)] placeholder: StringProp) -> impl IntoView {
+    let ctx = expect_context::<SelectState>();
+    view! { <span>{move || { ctx.selected_label.get().unwrap_or_else(|| placeholder.get()) }}</span> }
 }
 
 #[component]
@@ -199,7 +239,7 @@ pub fn Content(
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<SelectContext>();
+    let ctx = expect_context::<SelectState>();
     let content_ref = ctx.content_ref;
 
     let UseElementBoundingReturn {
@@ -368,7 +408,7 @@ pub fn Content(
                     if let Some(item) = item {
                         if !item.disabled {
                             let val = item.value.with_value(|v| v.clone());
-                            let lbl = item.label.with_value(|l| l.clone());
+                            let lbl = item.label.with_value(|l| l.get());
                             ctx.select(val, lbl);
                             if let Some(trigger) = ctx.trigger_ref.get() {
                                 let _ = trigger.focus();
@@ -409,18 +449,18 @@ pub fn Item(
     /// Display text shown in the trigger when this item is selected.
     /// Defaults to `value` if not provided.
     #[prop(into, optional)]
-    label: Option<String>,
+    label: Option<StringProp>,
     #[prop(into, optional)] class: String,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let ctx = expect_context::<SelectContext>();
+    let ctx = expect_context::<SelectState>();
 
     let index = ctx.next_index();
-    let label_text = label.unwrap_or_else(|| value.clone());
+    let label_sp = label.unwrap_or_else(|| StringProp::from(value.as_str()));
     let item_ctx = SelectItemContext {
         index,
         value: StoredValue::new(value),
-        label: StoredValue::new(label_text),
+        label: StoredValue::new(label_sp),
         disabled,
         item_ref: NodeRef::new(),
     };
@@ -436,7 +476,7 @@ pub fn Item(
             return;
         }
         let val = item_ctx.value.with_value(|v| v.clone());
-        let lbl = item_ctx.label.with_value(|l| l.clone());
+        let lbl = item_ctx.label.with_value(|l| l.get());
         ctx.select(val, lbl);
         if let Some(trigger) = ctx.trigger_ref.get() {
             let _ = trigger.focus();
@@ -453,8 +493,11 @@ pub fn Item(
         ctx.set_focus(Some(item_ctx.index));
     });
 
-    let is_selected =
-        Memo::new(move |_| ctx.value.get().is_some_and(|v| item_ctx.value.with_value(|iv| v == *iv)));
+    let is_selected = Memo::new(move |_| {
+        ctx.value
+            .get()
+            .is_some_and(|v| item_ctx.value.with_value(|iv| v == *iv))
+    });
 
     view! {
         <Provider value={item_ctx}>
@@ -477,14 +520,12 @@ pub fn Item(
 
 #[component]
 pub fn ItemText(children: Children) -> impl IntoView {
-    view! {
-        <span>{children()}</span>
-    }
+    view! { <span>{children()}</span> }
 }
 
 #[component]
 pub fn ItemIndicator(children: ChildrenFn) -> impl IntoView {
-    let ctx = expect_context::<SelectContext>();
+    let ctx = expect_context::<SelectState>();
     let item_ctx = expect_context::<SelectItemContext>();
 
     view! {

@@ -37,6 +37,32 @@ pub fn MyToggleGroup() -> impl IntoView {
     }
 }"#;
 
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::toggle_group::{self, ToggleGroupType};
+
+#[component]
+pub fn AlignmentPicker() -> impl IntoView {
+    let item_class = "px-3 py-2 text-sm font-medium transition-colors \
+        first:rounded-l-md last:rounded-r-md border-r border-border last:border-r-0 \
+        data-[state=on]:bg-accent data-[state=on]:text-accent-foreground";
+
+    view! {
+        <toggle_group::RootWith
+            group_type={ToggleGroupType::Single}
+            default_value="center"
+            class="inline-flex rounded-md border border-border"
+            let:tg
+        >
+            <toggle_group::Item value="left" class={item_class}>"Left"</toggle_group::Item>
+            <toggle_group::Item value="center" class={item_class}>"Center"</toggle_group::Item>
+            <toggle_group::Item value="right" class={item_class}>"Right"</toggle_group::Item>
+            <p class="text-xs text-muted-foreground w-full text-center mt-2">
+                "Selected: " {move || tg.value.with(|v| v.first().cloned().unwrap_or_default())}
+            </p>
+        </toggle_group::RootWith>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -67,18 +93,6 @@ const ROOT_PROPS: &[PropRow] = &[
         prop_type: "bool",
         default: "false",
         description: "When true, all items are disabled.",
-    },
-    PropRow {
-        name: "on_value_change",
-        prop_type: "Option<Callback<String>>",
-        default: "None",
-        description: "Fired with the toggled value string when an item is pressed or unpressed.",
-    },
-    PropRow {
-        name: "on_values_change",
-        prop_type: "Option<Callback<Vec<String>>>",
-        default: "None",
-        description: "Fired with the full current selection after any change (useful for Multiple mode).",
     },
 ];
 
@@ -176,13 +190,108 @@ pub fn ToggleGroupDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-4 text-sm text-muted-foreground">
+                "Use "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"<RootWith>"</code>
+                " when you need direct access to "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"ToggleGroupState"</code>
+                " inside the children. The "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"let:tg"</code>
+                " binding exposes "
+                <code class="py-0.5 px-1 font-mono text-xs rounded bg-muted">"tg.value"</code>
+                " as a reactive signal for reading the current selection without callbacks."
+            </p>
+            <DocPreview>
+                <ToggleGroupRootWithExample />
+            </DocPreview>
+            <Code
+                class="mt-4 [&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Item" rows={ITEM_PROPS} />
             <PropsTable title="ToggleGroupType" rows={TYPE_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn ToggleGroupRootWithExample() -> impl IntoView {
+    use biji_ui::components::toggle_group::{self, ToggleGroupType};
+
+    const ITEM_CLS: &str = "px-3 py-2 text-sm font-medium transition-colors \
+        first:rounded-l-md last:rounded-r-md border-r border-border last:border-r-0 \
+        hover:bg-accent hover:text-accent-foreground \
+        data-[state=on]:bg-accent data-[state=on]:text-accent-foreground \
+        data-[disabled]:pointer-events-none data-[disabled]:opacity-50 \
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+    view! {
+        <div class="flex flex-col items-center gap-6">
+            <div class="flex flex-col items-center gap-2">
+                <p class="text-xs text-muted-foreground">"Alignment (single)"</p>
+                <toggle_group::RootWith
+                    group_type={ToggleGroupType::Single}
+                    default_value="center".to_string()
+                    class="flex flex-col items-center gap-2"
+                    let:tg
+                >
+                    <div class="inline-flex rounded-md border border-border">
+                        <toggle_group::Item value="left" class={ITEM_CLS}>
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="21" y1="6" x2="3" y2="6"/><line x1="15" y1="12" x2="3" y2="12"/>
+                                <line x1="17" y1="18" x2="3" y2="18"/>
+                            </svg>
+                        </toggle_group::Item>
+                        <toggle_group::Item value="center" class={ITEM_CLS}>
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="12" x2="7" y2="12"/>
+                                <line x1="19" y1="18" x2="5" y2="18"/>
+                            </svg>
+                        </toggle_group::Item>
+                        <toggle_group::Item value="right" class={ITEM_CLS}>
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="12" x2="9" y2="12"/>
+                                <line x1="21" y1="18" x2="7" y2="18"/>
+                            </svg>
+                        </toggle_group::Item>
+                    </div>
+                    <p class="text-xs text-muted-foreground">
+                        "Selected: " {move || tg.value.with(|v| v.first().cloned().unwrap_or_default())}
+                    </p>
+                </toggle_group::RootWith>
+            </div>
+
+            <div class="flex flex-col items-center gap-2">
+                <p class="text-xs text-muted-foreground">"Formatting (multiple)"</p>
+                <toggle_group::RootWith
+                    group_type={ToggleGroupType::Multiple}
+                    default_values={vec!["bold".to_string()]}
+                    class="flex flex-col items-center gap-2"
+                    let:tg
+                >
+                    <div class="inline-flex rounded-md border border-border">
+                        <toggle_group::Item value="bold" class={ITEM_CLS}>
+                            <span class="font-bold text-sm">"B"</span>
+                        </toggle_group::Item>
+                        <toggle_group::Item value="italic" class={ITEM_CLS}>
+                            <span class="italic text-sm">"I"</span>
+                        </toggle_group::Item>
+                        <toggle_group::Item value="underline" class={ITEM_CLS}>
+                            <span class="underline text-sm">"U"</span>
+                        </toggle_group::Item>
+                    </div>
+                    <p class="text-xs text-muted-foreground">
+                        "Active: " {move || tg.value.with(|v| if v.is_empty() { "none".to_string() } else { v.join(", ") })}
+                    </p>
+                </toggle_group::RootWith>
+            </div>
+        </div>
     }
 }
 
@@ -197,19 +306,14 @@ pub fn ToggleGroupExample() -> impl IntoView {
         data-[disabled]:pointer-events-none data-[disabled]:opacity-50 \
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-    let alignment = RwSignal::new(String::from("center"));
-    let styles = RwSignal::<Vec<String>>::new(vec!["bold".to_string()]);
-
     view! {
         <div class="flex flex-col items-center gap-6">
-            // Single-select: text alignment
             <div class="flex flex-col items-center gap-2">
                 <p class="text-xs text-muted-foreground">"Alignment (single)"</p>
                 <toggle_group::Root
                     group_type={ToggleGroupType::Single}
-                    value="center"
+                    default_value="center".to_string()
                     class="inline-flex rounded-md border border-border"
-                    on_value_change={Callback::new(move |v: String| alignment.set(v))}
                 >
                     <toggle_group::Item value="left" class={ITEM_CLS}>
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -230,19 +334,14 @@ pub fn ToggleGroupExample() -> impl IntoView {
                         </svg>
                     </toggle_group::Item>
                 </toggle_group::Root>
-                <p class="text-xs text-muted-foreground">
-                    "Selected: " {move || alignment.get()}
-                </p>
             </div>
 
-            // Multi-select: text formatting
             <div class="flex flex-col items-center gap-2">
                 <p class="text-xs text-muted-foreground">"Formatting (multiple)"</p>
                 <toggle_group::Root
                     group_type={ToggleGroupType::Multiple}
-                    values={vec!["bold".to_string()]}
+                    default_values={vec!["bold".to_string()]}
                     class="inline-flex rounded-md border border-border"
-                    on_values_change={Callback::new(move |v: Vec<String>| styles.set(v))}
                 >
                     <toggle_group::Item value="bold" class={ITEM_CLS}>
                         <span class="font-bold text-sm">"B"</span>
@@ -254,12 +353,6 @@ pub fn ToggleGroupExample() -> impl IntoView {
                         <span class="underline text-sm">"U"</span>
                     </toggle_group::Item>
                 </toggle_group::Root>
-                <p class="text-xs text-muted-foreground">
-                    "Active: " {move || {
-                        let s = styles.get();
-                        if s.is_empty() { "none".to_string() } else { s.join(", ") }
-                    }}
-                </p>
             </div>
         </div>
     }

@@ -233,8 +233,8 @@ impl Positioning {
             arrow_size,
         );
         format!(
-            "position: fixed; top: {}px; left: {}px; --biji-transform-origin: {}; --biji-tooltip-arrow-top: {}px; --biji-tooltip-arrow-left: {}px; --biji-tooltip-arrow-rotation: {}deg;",
-            position.0, position.1, self.transform_origin(), arrow_position.0, arrow_position.1, arrow_position.2
+            "position: fixed; top: {}px; left: {}px; --biji-transform-origin: {}; --biji-anchor-width: {}px; --biji-tooltip-arrow-top: {}px; --biji-tooltip-arrow-left: {}px; --biji-tooltip-arrow-rotation: {}deg;",
+            position.0, position.1, self.transform_origin(), trigger_width, arrow_position.0, arrow_position.1, arrow_position.2
         )
     }
 
@@ -394,8 +394,8 @@ impl Positioning {
             offset,
         );
         format!(
-            "position: fixed; top: {}px; left: {}px; --biji-transform-origin: {};",
-            position.0, position.1, self.transform_origin()
+            "position: fixed; top: {}px; left: {}px; --biji-transform-origin: {}; --biji-anchor-width: {}px;",
+            position.0, position.1, self.transform_origin(), trigger_width
         )
     }
 

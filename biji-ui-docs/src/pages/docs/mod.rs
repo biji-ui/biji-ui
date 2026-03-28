@@ -19,6 +19,7 @@ pub mod getting_started;
 pub mod hover_card;
 pub mod menubar;
 pub mod navigation_menu;
+pub mod pagination;
 pub mod pin_input;
 pub mod popover;
 pub mod progress;
@@ -34,7 +35,7 @@ pub mod tooltip;
 
 use biji_ui::components::{
     command as commandui,
-    dialog::{self as dialogui, context::DialogContext},
+    dialog::{self as dialogui, DialogState},
     menu,
 };
 use biji_ui::custom_animated_show::CustomAnimatedShow;
@@ -63,6 +64,7 @@ pub const COMPONENT_PAGES: &[(&str, &str)] = &[
     ("/docs/hover-card", "Hover Card"),
     ("/docs/menubar", "Menubar"),
     ("/docs/navigation-menu", "Navigation Menu"),
+    ("/docs/pagination", "Pagination"),
     ("/docs/pin-input", "PIN Input"),
     ("/docs/popover", "Popover"),
     ("/docs/progress", "Progress"),
@@ -109,45 +111,43 @@ pub fn ThemeMode() -> impl IntoView {
                 <icons::Sun class="w-5 h-5 dark:hidden stroke-zinc-900"></icons::Sun>
                 <icons::Moon class="hidden w-5 h-5 dark:block stroke-white"></icons::Moon>
             </menu::Trigger>
-            <Portal>
-                <menu::Content
-                    class="flex flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none z-[70] transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
-                    show_class="opacity-100 duration-150 ease-in"
-                    hide_class="opacity-0 duration-200 ease-out"
-                >
-                    {modes
-                        .into_iter()
-                        .map(|(title, m)| {
-                            view! {
-                                <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
-                                    <button
-                                        on:click={move |_| { set_mode.set(m.clone()) }}
-                                        class="flex justify-between py-1.5 px-2 w-full align-center"
-                                    >
-                                        <div class="flex gap-2">
-                                            {match m.clone() {
-                                                ColorMode::Light => {
-                                                    view! { <icons::Sun class="w-4"></icons::Sun> }.into_any()
-                                                }
-                                                ColorMode::Dark => {
-                                                    view! { <icons::Moon class="w-4"></icons::Moon> }.into_any()
-                                                }
-                                                _ => {
-                                                    view! { <icons::SunMoon class="w-4"></icons::SunMoon> }
-                                                        .into_any()
-                                                }
-                                            }} {title}
-                                        </div>
-                                        <Show when={move || m.clone() == mode.get()}>
-                                            <icons::Check class="w-4"></icons::Check>
-                                        </Show>
-                                    </button>
-                                </menu::Item>
-                            }
-                        })
-                        .collect_view()}
-                </menu::Content>
-            </Portal>
+            <menu::Content
+                class="flex flex-col p-1 w-40 rounded-md border shadow-md focus:outline-none z-[70] transition-[opacity,transform] min-w-[8rem] border-border bg-background text-foreground"
+                show_class="opacity-100 duration-150 ease-in"
+                hide_class="opacity-0 duration-200 ease-out"
+            >
+                {modes
+                    .into_iter()
+                    .map(|(title, m)| {
+                        view! {
+                            <menu::Item class="flex items-center text-sm rounded-sm cursor-pointer outline-none select-none focus:outline-none hover:bg-accent hover:text-accent-foreground !ring-0 !ring-transparent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-muted">
+                                <button
+                                    on:click={move |_| { set_mode.set(m.clone()) }}
+                                    class="flex justify-between py-1.5 px-2 w-full align-center"
+                                >
+                                    <div class="flex gap-2">
+                                        {match m.clone() {
+                                            ColorMode::Light => {
+                                                view! { <icons::Sun class="w-4"></icons::Sun> }.into_any()
+                                            }
+                                            ColorMode::Dark => {
+                                                view! { <icons::Moon class="w-4"></icons::Moon> }.into_any()
+                                            }
+                                            _ => {
+                                                view! { <icons::SunMoon class="w-4"></icons::SunMoon> }
+                                                    .into_any()
+                                            }
+                                        }} {title}
+                                    </div>
+                                    <Show when={move || m.clone() == mode.get()}>
+                                        <icons::Check class="w-4"></icons::Check>
+                                    </Show>
+                                </button>
+                            </menu::Item>
+                        }
+                    })
+                    .collect_view()}
+            </menu::Content>
         </menu::Menu>
     }
 }
@@ -157,8 +157,11 @@ pub fn TopNav() -> impl IntoView {
     view! {
         <div
             style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2; --scrollbar-width-nav: var(--scrollbar-width, 0px);"
-            class="fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80 backdrop-blur-sm lg:left-72 xl:left-80 dark:backdrop-blur bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]"
+            class="fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between gap-12 pl-4 pr-[calc(var(--scrollbar-width-nav)+1rem)] transition sm:pl-6 sm:pr-[calc(var(--scrollbar-width-nav)+1.5rem)] lg:left-72 lg:pl-8 lg:pr-[calc(var(--scrollbar-width-nav)+2rem)] xl:left-80"
         >
+            // Blur background as a non-ancestor sibling so it doesn't create a
+            // CSS containing block that would break position:fixed menu content.
+            <div class="absolute inset-0 -z-10 backdrop-blur-sm dark:backdrop-blur pointer-events-none bg-white/[var(--bg-opacity-light)] dark:bg-zinc-900/[var(--bg-opacity-dark)]" aria-hidden="true" />
             <div class="absolute inset-x-0 top-full h-px transition bg-zinc-900/10 dark:bg-white/10"></div>
             // Desktop center: full-width search input
             <div class="hidden lg:block lg:flex-auto lg:max-w-md">
@@ -221,7 +224,7 @@ pub fn TopNav() -> impl IntoView {
 
 #[component]
 pub fn SidebarTrigger() -> impl IntoView {
-    let ctx = expect_context::<DialogContext>();
+    let ctx = expect_context::<DialogState>();
 
     let is_large_screen = use_media_query("(min-width: 1024px)");
 
@@ -251,6 +254,10 @@ pub fn Sidebar() -> impl IntoView {
             <dialogui::Trigger class="flex justify-center items-center w-6 h-6 rounded-md transition dark:hover:bg-white/5 hover:bg-zinc-900/5">
                 <SidebarTrigger />
             </dialogui::Trigger>
+            // Portal is required here: TopNav has backdrop-blur-sm which creates
+            // a new CSS containing block for position:fixed descendants. Without
+            // Portal the Overlay and Content are positioned relative to the TopNav
+            // (56px tall) instead of the viewport, collapsing their height.
             <Portal>
                 <dialogui::Overlay
                     class="fixed inset-0 top-14 transition-opacity duration-300 ease-linear bg-zinc-400/20 backdrop-blur-sm dark:bg-black/40"
@@ -279,7 +286,7 @@ pub fn SidebarNav(#[prop(into, optional)] class: String) -> impl IntoView {
 
     let components = COMPONENT_PAGES;
 
-    let dialog_ctx = use_context::<DialogContext>();
+    let dialog_ctx = use_context::<DialogState>();
 
     view! {
         <nav class={class}>
@@ -401,26 +408,26 @@ pub fn DocsPage() -> impl IntoView {
 
     view! {
         <leptos::context::Provider value={palette_ctx}>
-            <div class="h-full lg:ml-72 xl:ml-80">
-                <header class="contents lg:flex lg:fixed lg:inset-0 lg:pointer-events-none lg:z-[60]">
-                    <div class="contents lg:block lg:overflow-y-auto lg:px-6 lg:pt-4 lg:pb-8 lg:w-72 lg:border-r lg:pointer-events-auto xl:w-80 lg:border-zinc-900/10 lg:dark:border-white/10">
-                        <div class="hidden lg:flex">
-                            <a aria-label="Home" href="/">
-                                <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
-                            </a>
-                        </div>
-                        <TopNav />
-                        <SidebarNav class="hidden lg:block lg:mt-10" />
-                    </div>
-                </header>
-                <main class="flex relative flex-col px-4 pt-14 h-full sm:px-6 lg:px-8">
+            // Desktop sidebar: independently fixed to full viewport height
+            <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-[60] lg:flex lg:w-72 lg:flex-col lg:border-r xl:w-80 lg:border-zinc-900/10 lg:dark:border-white/10 lg:pointer-events-auto">
+                <div class="flex shrink-0 px-6 pt-4">
+                    <a aria-label="Home" href="/">
+                        <icons::BijiUI class="w-auto h-5"></icons::BijiUI>
+                    </a>
+                </div>
+                <SidebarNav class="overflow-y-auto flex-1 px-6 pb-8 mt-10" />
+            </div>
+
+            // Content area (offset by sidebar width on desktop)
+            <div class="lg:ml-72 xl:ml-80">
+                <TopNav />
+                <main class="flex relative flex-col px-4 pt-14 sm:px-6 lg:px-8">
                     <Outlet />
                     <icons::HeroPattern></icons::HeroPattern>
                 </main>
             </div>
-            <Portal>
-                <CommandPalette />
-            </Portal>
+
+            <CommandPalette />
         </leptos::context::Provider>
     }
 }

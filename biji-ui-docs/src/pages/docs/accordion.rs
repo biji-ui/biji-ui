@@ -48,6 +48,46 @@ const INSTALL_CODE: &str = concat!(
     "\", features = [\"accordion\"] }",
 );
 
+const ROOT_WITH_CODE: &str = r#"use std::time::Duration;
+use leptos::prelude::*;
+use biji_ui::components::accordion;
+
+#[component]
+pub fn MyAccordion() -> impl IntoView {
+    let items = [
+        ("What is biji-ui?", "A headless UI component library for Leptos."),
+        ("Is it accessible?", "Yes, it follows WAI-ARIA patterns."),
+    ];
+
+    view! {
+        <accordion::RootWith class="w-full" let:acc>
+            <p class="mb-2 text-xs text-muted-foreground">
+                {move || {
+                    let open_count = acc.root.get().items.with(|m| {
+                        m.values().filter(|i| i.open.get()).count()
+                    });
+                    format!("{} item(s) open", open_count)
+                }}
+            </p>
+            {items.into_iter().map(|(title, content)| view! {
+                <accordion::Item class="border-b border-border">
+                    <accordion::Toggle class="flex w-full items-center justify-between py-5 text-sm font-medium outline-none">
+                        {title}
+                    </accordion::Toggle>
+                    <accordion::Content
+                        class="pb-4 text-sm"
+                        show_class="opacity-100 transition duration-150"
+                        hide_class="opacity-0 transition duration-200"
+                        hide_delay={Duration::from_millis(200)}
+                    >
+                        {content}
+                    </accordion::Content>
+                </accordion::Item>
+            }).collect::<Vec<_>>()}
+        </accordion::RootWith>
+    }
+}"#;
+
 const ROOT_PROPS: &[PropRow] = &[
     PropRow {
         name: "class",
@@ -174,14 +214,83 @@ pub fn AccordionDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"AccordionState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"root"</code>
+                " field exposes the items map so you can read which items are open."
+            </p>
+            <DocPreview>
+                <AccordionRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Item" rows={ITEM_PROPS} />
             <PropsTable title="Toggle" rows={TOGGLE_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn AccordionRootWithExample() -> impl IntoView {
+    use biji_ui::components::accordion;
+
+    let items = [
+        ("What is the meaning of life?", "To become a better person, to help others, and to leave the world a better place than you found it."),
+        ("How do I become a better person?", "Read books, listen to podcasts, and surround yourself with people who inspire you."),
+        ("What is the best way to help others?", "Give them your time, attention, and love."),
+    ];
+
+    view! {
+        <div class="w-full sm:max-w-[70%] p-4">
+            <accordion::RootWith class="w-full" let:acc>
+                <p class="mb-3 text-xs text-muted-foreground">
+                    {move || {
+                        let open_count = acc.root.get().items.with(|m| {
+                            m.values().filter(|i| i.open.get()).count()
+                        });
+                        format!("{} of {} items open", open_count, items.len())
+                    }}
+                </p>
+                {items
+                    .into_iter()
+                    .map(|(title, content)| {
+                        view! {
+                            <accordion::Item class="border-b border-border group">
+                                <accordion::Toggle class="flex w-full px-1.5 flex-1 items-center justify-between py-5 text-[15px] font-medium outline-none transition-all focus:rounded-xl focus:outline-none [&[data-state=open]>span>svg]:rotate-180 data-[highlighted]:bg-muted !ring-0 !ring-transparent">
+                                    {title}
+                                    <span class="inline-flex size-8 items-center justify-center rounded-[7px] bg-transparent transition-all hover:bg-dark-10">
+                                        <icons::Caret class="size-[18px] transition-all duration-200"></icons::Caret>
+                                    </span>
+                                </accordion::Toggle>
+                                <accordion::Content
+                                    class="px-1.5 pt-1.5 pb-[25px] text-sm tracking-[-0.01em]"
+                                    show_class="opacity-100 transition duration-150 ease-in"
+                                    hide_class="opacity-0 transition duration-200 ease-out"
+                                    hide_delay={Duration::from_millis(200)}
+                                >
+                                    {content}
+                                </accordion::Content>
+                            </accordion::Item>
+                        }
+                    })
+                    .collect::<Vec<_>>()}
+            </accordion::RootWith>
+        </div>
     }
 }
 

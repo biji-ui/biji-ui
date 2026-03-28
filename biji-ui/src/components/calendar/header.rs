@@ -3,7 +3,7 @@ use leptos::{ev::click, html, prelude::*};
 use leptos_use::use_event_listener;
 
 use super::{
-    context::CalendarContext,
+    context::CalendarState,
     types::CalendarView,
 };
 
@@ -18,7 +18,7 @@ pub fn Header(#[prop(into, optional)] class: String, children: Children) -> impl
 /// Clickable button that displays the current month/year and cycles Day → Month → Year on click.
 #[component]
 pub fn Heading(#[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<CalendarContext>();
+    let ctx = expect_context::<CalendarState>();
     let btn_ref = NodeRef::<html::Button>::new();
 
     let _ = use_event_listener(btn_ref, click, move |_| {
@@ -80,7 +80,7 @@ pub fn Heading(#[prop(into, optional)] class: String) -> impl IntoView {
 /// Navigate to the previous month / year / decade depending on the current view.
 #[component]
 pub fn PrevButton(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
-    let ctx = expect_context::<CalendarContext>();
+    let ctx = expect_context::<CalendarState>();
     let btn_ref = NodeRef::<html::Button>::new();
 
     let _ = use_event_listener(btn_ref, click, move |_| {
@@ -97,7 +97,7 @@ pub fn PrevButton(#[prop(into, optional)] class: String, children: Children) -> 
 /// Navigate to the next month / year / decade depending on the current view.
 #[component]
 pub fn NextButton(#[prop(into, optional)] class: String, children: Children) -> impl IntoView {
-    let ctx = expect_context::<CalendarContext>();
+    let ctx = expect_context::<CalendarState>();
     let btn_ref = NodeRef::<html::Button>::new();
 
     let _ = use_event_listener(btn_ref, click, move |_| {
@@ -116,7 +116,7 @@ enum Direction {
     Next,
 }
 
-fn navigate(ctx: CalendarContext, direction: Direction) {
+fn navigate(ctx: CalendarState, direction: Direction) {
     let current = ctx.placeholder.get();
     let new_date = match (&direction, ctx.view.get()) {
         (Direction::Prev, CalendarView::Day) => {
