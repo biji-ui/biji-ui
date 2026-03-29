@@ -292,6 +292,9 @@ pub fn Action(
                     cb.run(());
                 }
                 ctx.close();
+                if let Some(trigger) = ctx.trigger_ref.get() {
+                    let _ = trigger.focus();
+                }
             }
         >
             {children()}
