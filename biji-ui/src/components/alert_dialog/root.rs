@@ -219,6 +219,32 @@ pub fn Content(
         }
     });
 
+    // Blur focused element inside the content when the dialog closes,
+    // preventing the "aria-hidden on focused element" browser warning.
+    Effect::new(move |prev: Option<bool>| {
+        let open = ctx.open.get();
+        if prev == Some(true) && !open {
+            #[cfg(target_arch = "wasm32")]
+            if let Some(el) = content_ref.get() {
+                use wasm_bindgen::JsCast;
+                if let Ok(active) = web_sys::window()
+                    .and_then(|w| w.document())
+                    .map(|d| d.active_element())
+                    .ok_or(())
+                {
+                    if let Some(active) = active {
+                        if el.unchecked_ref::<web_sys::Element>().contains(Some(&active)) {
+                            if let Ok(el) = active.dyn_into::<web_sys::HtmlElement>() {
+                                let _ = el.blur();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        open
+    });
+
     view! {
         <div
             node_ref={content_ref}
