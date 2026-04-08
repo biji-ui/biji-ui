@@ -1,4 +1,4 @@
-use leptos::{portal::Portal, prelude::*};
+use leptos::prelude::*;
 
 use crate::components::{
     api_table::{
@@ -14,7 +14,7 @@ const INSTALL_CODE: &str = concat!(
     "\", features = [\"navigation_menu\"] }",
 );
 
-const USAGE_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const USAGE_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::navigation_menu;
 
 #[component]
@@ -26,28 +26,26 @@ pub fn MyNav() -> impl IntoView {
                     <navigation_menu::Trigger class="px-3 py-1.5 text-sm rounded-md transition hover:bg-accent">
                         "Docs"
                     </navigation_menu::Trigger>
-                    <Portal>
-                        <navigation_menu::Content
-                            class="z-50 min-w-48 rounded-lg border shadow-md transition bg-background border-border origin-[var(--biji-transform-origin)]"
-                            show_class="opacity-100 scale-100 duration-150 ease-out"
-                            hide_class="opacity-0 scale-95 duration-100 ease-in"
-                        >
-                            <div class="grid gap-1 p-2">
-                                <navigation_menu::Link
-                                    href="/docs/getting-started"
-                                    class="block px-3 py-2 text-sm rounded-md hover:bg-accent"
-                                >
-                                    "Getting Started"
-                                </navigation_menu::Link>
-                                <navigation_menu::Link
-                                    href="/docs/accordion"
-                                    class="block px-3 py-2 text-sm rounded-md hover:bg-accent"
-                                >
-                                    "Accordion"
-                                </navigation_menu::Link>
-                            </div>
-                        </navigation_menu::Content>
-                    </Portal>
+                    <navigation_menu::Content
+                        class="z-50 min-w-48 rounded-lg border shadow-md transition bg-background border-border origin-[var(--biji-transform-origin)]"
+                        show_class="opacity-100 scale-100 duration-150 ease-out"
+                        hide_class="opacity-0 scale-95 duration-100 ease-in"
+                    >
+                        <div class="grid gap-1 p-2">
+                            <navigation_menu::Link
+                                href="/docs/getting-started"
+                                class="block px-3 py-2 text-sm rounded-md hover:bg-accent"
+                            >
+                                "Getting Started"
+                            </navigation_menu::Link>
+                            <navigation_menu::Link
+                                href="/docs/accordion"
+                                class="block px-3 py-2 text-sm rounded-md hover:bg-accent"
+                            >
+                                "Accordion"
+                            </navigation_menu::Link>
+                        </div>
+                    </navigation_menu::Content>
                 </navigation_menu::Item>
                 <navigation_menu::Item value="github">
                     <navigation_menu::Link
@@ -291,46 +289,44 @@ pub fn NavigationMenuExample() -> impl IntoView {
                                 <path d="m6 9 6 6 6-6"/>
                             </svg>
                         </navigation_menu::Trigger>
-                        <Portal>
-                            <navigation_menu::Content
-                                class="z-50 min-w-56 rounded-lg border shadow-lg transition \
-                                       bg-background border-border \
-                                       origin-[var(--biji-transform-origin)]"
-                                show_class="opacity-100 scale-100 duration-150 ease-out"
-                                hide_class="opacity-0 scale-95 duration-100 ease-in"
-                            >
-                                <div class="grid gap-0.5 p-2">
-                                    <p class="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                                        "Form Controls"
-                                    </p>
-                                    <navigation_menu::Link href="/docs/checkbox" class={LINK_CLS}>
-                                        "Checkbox"
-                                    </navigation_menu::Link>
-                                    <navigation_menu::Link href="/docs/radio-group" class={LINK_CLS}>
-                                        "Radio Group"
-                                    </navigation_menu::Link>
-                                    <navigation_menu::Link href="/docs/select" class={LINK_CLS}>
-                                        "Select"
-                                    </navigation_menu::Link>
-                                    <navigation_menu::Link href="/docs/slider" class={LINK_CLS}>
-                                        "Slider"
-                                    </navigation_menu::Link>
-                                    <div class="my-1 border-t border-border" />
-                                    <p class="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                                        "Overlay"
-                                    </p>
-                                    <navigation_menu::Link href="/docs/dialog" class={LINK_CLS}>
-                                        "Dialog"
-                                    </navigation_menu::Link>
-                                    <navigation_menu::Link href="/docs/popover" class={LINK_CLS}>
-                                        "Popover"
-                                    </navigation_menu::Link>
-                                    <navigation_menu::Link href="/docs/tooltip" class={LINK_CLS}>
-                                        "Tooltip"
-                                    </navigation_menu::Link>
-                                </div>
-                            </navigation_menu::Content>
-                        </Portal>
+                        <navigation_menu::Content
+                            class="z-50 min-w-56 rounded-lg border shadow-lg transition \
+                                   bg-background border-border \
+                                   origin-[var(--biji-transform-origin)]"
+                            show_class="opacity-100 scale-100 duration-150 ease-out"
+                            hide_class="opacity-0 scale-95 duration-100 ease-in"
+                        >
+                            <div class="grid gap-0.5 p-2">
+                                <p class="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                                    "Form Controls"
+                                </p>
+                                <navigation_menu::Link href="/docs/checkbox" class={LINK_CLS}>
+                                    "Checkbox"
+                                </navigation_menu::Link>
+                                <navigation_menu::Link href="/docs/radio-group" class={LINK_CLS}>
+                                    "Radio Group"
+                                </navigation_menu::Link>
+                                <navigation_menu::Link href="/docs/select" class={LINK_CLS}>
+                                    "Select"
+                                </navigation_menu::Link>
+                                <navigation_menu::Link href="/docs/slider" class={LINK_CLS}>
+                                    "Slider"
+                                </navigation_menu::Link>
+                                <div class="my-1 border-t border-border" />
+                                <p class="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                                    "Overlay"
+                                </p>
+                                <navigation_menu::Link href="/docs/dialog" class={LINK_CLS}>
+                                    "Dialog"
+                                </navigation_menu::Link>
+                                <navigation_menu::Link href="/docs/popover" class={LINK_CLS}>
+                                    "Popover"
+                                </navigation_menu::Link>
+                                <navigation_menu::Link href="/docs/tooltip" class={LINK_CLS}>
+                                    "Tooltip"
+                                </navigation_menu::Link>
+                            </div>
+                        </navigation_menu::Content>
                     </navigation_menu::Item>
 
                     <navigation_menu::Item value="docs">
@@ -342,27 +338,25 @@ pub fn NavigationMenuExample() -> impl IntoView {
                                 <path d="m6 9 6 6 6-6"/>
                             </svg>
                         </navigation_menu::Trigger>
-                        <Portal>
-                            <navigation_menu::Content
-                                class="z-50 min-w-48 rounded-lg border shadow-lg transition \
-                                       bg-background border-border \
-                                       origin-[var(--biji-transform-origin)]"
-                                show_class="opacity-100 scale-100 duration-150 ease-out"
-                                hide_class="opacity-0 scale-95 duration-100 ease-in"
-                            >
-                                <div class="grid gap-0.5 p-2">
-                                    <navigation_menu::Link href="/docs/getting-started" class={LINK_CLS}>
-                                        "Getting Started"
-                                    </navigation_menu::Link>
-                                    <navigation_menu::Link href="/docs/accordion" class={LINK_CLS}>
-                                        "Accordion"
-                                    </navigation_menu::Link>
-                                    <navigation_menu::Link href="/docs/tabs" class={LINK_CLS}>
-                                        "Tabs"
-                                    </navigation_menu::Link>
-                                </div>
-                            </navigation_menu::Content>
-                        </Portal>
+                        <navigation_menu::Content
+                            class="z-50 min-w-48 rounded-lg border shadow-lg transition \
+                                   bg-background border-border \
+                                   origin-[var(--biji-transform-origin)]"
+                            show_class="opacity-100 scale-100 duration-150 ease-out"
+                            hide_class="opacity-0 scale-95 duration-100 ease-in"
+                        >
+                            <div class="grid gap-0.5 p-2">
+                                <navigation_menu::Link href="/docs/getting-started" class={LINK_CLS}>
+                                    "Getting Started"
+                                </navigation_menu::Link>
+                                <navigation_menu::Link href="/docs/accordion" class={LINK_CLS}>
+                                    "Accordion"
+                                </navigation_menu::Link>
+                                <navigation_menu::Link href="/docs/tabs" class={LINK_CLS}>
+                                    "Tabs"
+                                </navigation_menu::Link>
+                            </div>
+                        </navigation_menu::Content>
                     </navigation_menu::Item>
 
                     <navigation_menu::Item value="github">

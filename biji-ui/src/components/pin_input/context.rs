@@ -2,6 +2,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use leptos::{html::Input, prelude::*};
 
+use crate::utils::props::StringProp;
+
 static PIN_INPUT_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 pub(crate) fn next_pin_input_id() -> String {
@@ -9,41 +11,60 @@ pub(crate) fn next_pin_input_id() -> String {
     format!("biji-pin-{id}")
 }
 
+/// Reactive state for a PIN input. Available via [`use_pin_input`](super::root::use_pin_input)
+/// or the `let:` binding on [`RootWith`](super::root::RootWith).
+///
+/// All fields are `Copy`, so it is safe to pass this struct to child components as a prop.
 #[derive(Copy, Clone)]
-pub struct PinInputContext {
+pub struct PinInputState {
     pub values: RwSignal<Vec<String>>,
     pub length: usize,
-    pub cell_refs: StoredValue<Vec<NodeRef<Input>>>,
     pub disabled: bool,
-    pub placeholder: StoredValue<String>,
-    /// Unique root ID used to generate stable `id`/`name` attributes for each cell.
-    pub root_id: StoredValue<String>,
+    /// Full PIN string — concatenation of all filled cells.
+    pub value: Signal<String>,
+    /// `true` when every cell has a character.
+    pub is_complete: Signal<bool>,
+    pub(crate) cell_refs: StoredValue<Vec<NodeRef<Input>>>,
+    pub(crate) placeholder: StoredValue<StringProp>,
+    pub(crate) root_id: StoredValue<String>,
     pub(crate) on_complete: Option<Callback<String>>,
-    pub(crate) on_change: Option<Callback<String>>,
 }
 
-impl PinInputContext {
-    pub fn current_value(&self) -> String {
-        self.values.with(|v| v.join(""))
+impl PinInputState {
+    pub(crate) fn new(
+        values_signal: Option<RwSignal<Vec<String>>>,
+        length: usize,
+        disabled: bool,
+        placeholder: StringProp,
+        on_complete: Option<Callback<String>>,
+    ) -> Self {
+        let cell_refs: Vec<NodeRef<Input>> = (0..length).map(|_| NodeRef::new()).collect();
+        let values = values_signal.unwrap_or_else(|| RwSignal::new(vec![String::new(); length]));
+        let value = Signal::derive(move || values.with(|v| v.join("")));
+        let is_complete =
+            Signal::derive(move || values.with(|v| v.iter().all(|s| !s.is_empty())));
+        Self {
+            values,
+            length,
+            disabled,
+            value,
+            is_complete,
+            cell_refs: StoredValue::new(cell_refs),
+            placeholder: StoredValue::new(placeholder),
+            root_id: StoredValue::new(next_pin_input_id()),
+            on_complete,
+        }
     }
 
-    pub fn is_complete(&self) -> bool {
-        self.values.with(|v| v.iter().all(|s| !s.is_empty()))
-    }
-
-    pub fn set_cell(&self, index: usize, value: String) {
+    pub fn set_cell(&self, index: usize, val: String) {
         self.values.update(|v| {
             if index < v.len() {
-                v[index] = value;
+                v[index] = val;
             }
         });
-        let full = self.current_value();
-        if let Some(cb) = self.on_change {
-            cb.run(full.clone());
-        }
-        if self.is_complete() {
+        if self.is_complete.get() {
             if let Some(cb) = self.on_complete {
-                cb.run(full);
+                cb.run(self.value.get());
             }
         }
     }

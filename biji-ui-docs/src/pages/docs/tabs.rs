@@ -20,7 +20,7 @@ use biji_ui::components::tabs;
 #[component]
 pub fn MyTabs() -> impl IntoView {
     view! {
-        <tabs::Root value="account" class="w-full max-w-md">
+        <tabs::Root default_value="account" class="w-full max-w-md">
             <tabs::List class="flex border-b border-border">
                 <tabs::Trigger
                     value="account"
@@ -42,6 +42,40 @@ pub fn MyTabs() -> impl IntoView {
                 "Change your password here."
             </tabs::Content>
         </tabs::Root>
+    }
+}"#;
+
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::tabs;
+
+#[component]
+pub fn MyTabs() -> impl IntoView {
+    view! {
+        <tabs::RootWith default_value="account" class="w-full max-w-md" let:t>
+            <p class="mb-2 text-sm text-muted-foreground">
+                {move || format!("Active tab: {}", t.value.get().unwrap_or_default())}
+            </p>
+            <tabs::List class="flex border-b border-border">
+                <tabs::Trigger
+                    value="account"
+                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px data-[state=active]:border-primary data-[state=inactive]:border-transparent"
+                >
+                    "Account"
+                </tabs::Trigger>
+                <tabs::Trigger
+                    value="password"
+                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px data-[state=active]:border-primary data-[state=inactive]:border-transparent"
+                >
+                    "Password"
+                </tabs::Trigger>
+            </tabs::List>
+            <tabs::Content value="account" class="p-4 text-sm">
+                "Manage your account settings here."
+            </tabs::Content>
+            <tabs::Content value="password" class="p-4 text-sm">
+                "Change your password here."
+            </tabs::Content>
+        </tabs::RootWith>
     }
 }"#;
 
@@ -213,8 +247,26 @@ pub fn TabsDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"TabsState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding — useful for driving external UI from the active tab value."
+            </p>
+            <DocPreview>
+                <TabsRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="List" rows={LIST_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
@@ -223,6 +275,42 @@ pub fn TabsDocPage() -> impl IntoView {
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn TabsRootWithExample() -> impl IntoView {
+    use biji_ui::components::tabs;
+
+    const TRIGGER_CLS: &str =
+        "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors \
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring \
+         data-[state=active]:border-primary data-[state=active]:text-foreground \
+         data-[state=inactive]:border-transparent data-[state=inactive]:text-muted-foreground \
+         hover:text-foreground";
+
+    view! {
+        <div class="flex flex-col items-center gap-4 p-8">
+            <tabs::RootWith default_value="account".to_string() class="w-full max-w-sm" let:t>
+                <p class="text-sm text-muted-foreground">
+                    {move || format!("Active: {}", t.value.get().unwrap_or_default())}
+                </p>
+                <tabs::List class="flex border-b border-border">
+                    <tabs::Trigger value="account" class={TRIGGER_CLS}>"Account"</tabs::Trigger>
+                    <tabs::Trigger value="password" class={TRIGGER_CLS}>"Password"</tabs::Trigger>
+                    <tabs::Trigger value="settings" class={TRIGGER_CLS}>"Settings"</tabs::Trigger>
+                </tabs::List>
+                <tabs::Content value="account" class="p-4 text-sm text-muted-foreground">
+                    "Manage your account settings here."
+                </tabs::Content>
+                <tabs::Content value="password" class="p-4 text-sm text-muted-foreground">
+                    "Change your password here."
+                </tabs::Content>
+                <tabs::Content value="settings" class="p-4 text-sm text-muted-foreground">
+                    "Configure your preferences here."
+                </tabs::Content>
+            </tabs::RootWith>
+        </div>
     }
 }
 
@@ -245,7 +333,7 @@ pub fn TabsExample() -> impl IntoView {
 
     view! {
         <div class="w-full max-w-md">
-            <tabs::Root value="account" class="w-full">
+            <tabs::Root default_value="account".to_string() class="w-full">
                 <tabs::List class="flex border-b border-border">
                     <tabs::Trigger value="account" class={TRIGGER_CLS}>"Account"</tabs::Trigger>
                     <tabs::Trigger value="password" class={TRIGGER_CLS}>"Password"</tabs::Trigger>

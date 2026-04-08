@@ -20,7 +20,7 @@ use crate::{
     cn,
     custom_animated_show::CustomAnimatedShow,
     items::{FilterActiveItems, Focus, ManageFocus, NavigateItems},
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
 use super::context::{NavMenuContext, NavMenuItemContext};
@@ -49,7 +49,7 @@ pub fn Root(
     #[prop(into, optional)] class: String,
     /// Optional `aria-label` for the `<nav>` element.
     #[prop(into, optional)]
-    aria_label: Option<String>,
+    aria_label: Option<StringProp>,
     #[prop(default = Positioning::BottomStart)] positioning: Positioning,
     #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
     /// How long after the pointer leaves before the open panel closes.
@@ -84,7 +84,7 @@ pub fn Root(
     view! {
         <Provider value={ctx}>
             <RootEvents>
-                <nav aria-label={aria_label} class={class}>
+                <nav aria-label={move || aria_label.as_ref().map(|f| f.get())} class={class}>
                     {children()}
                 </nav>
             </RootEvents>

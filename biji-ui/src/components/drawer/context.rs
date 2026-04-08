@@ -37,44 +37,34 @@ impl DrawerSide {
 }
 
 #[derive(Copy, Clone)]
-pub struct DrawerContext {
-    pub trigger_ref: NodeRef<Button>,
-    pub overlay_ref: NodeRef<Div>,
-    pub content_ref: NodeRef<Div>,
+pub struct DrawerState {
     pub open: RwSignal<bool>,
-    pub prevent_scroll: bool,
-    pub hide_delay: Duration,
+    pub data_state: Signal<&'static str>,
     pub side: DrawerSide,
-    pub drawer_id: StoredValue<String>,
-    pub title_id: StoredValue<String>,
-    pub description_id: StoredValue<String>,
-    pub on_open_change: Option<Callback<bool>>,
+    pub(crate) trigger_ref: NodeRef<Button>,
+    pub(crate) overlay_ref: NodeRef<Div>,
+    pub(crate) content_ref: NodeRef<Div>,
+    pub(crate) prevent_scroll: bool,
+    pub(crate) hide_delay: Duration,
+    pub(crate) drawer_id: StoredValue<String>,
+    pub(crate) title_id: StoredValue<String>,
+    pub(crate) description_id: StoredValue<String>,
 }
 
-impl DrawerContext {
-    pub fn open(&self) {
+impl DrawerState {
+    pub(crate) fn open(&self) {
         self.open.set(true);
-        if let Some(cb) = self.on_open_change {
-            cb.run(true);
-        }
     }
 
-    pub fn close(&self) {
+    pub(crate) fn close(&self) {
         self.open.set(false);
-        if let Some(cb) = self.on_open_change {
-            cb.run(false);
-        }
     }
 
-    pub fn toggle(&self) {
+    pub(crate) fn toggle(&self) {
         if self.open.get() {
             self.close();
         } else {
             self.open();
         }
-    }
-
-    pub fn data_state(&self) -> &'static str {
-        if self.open.get() { "open" } else { "closed" }
     }
 }

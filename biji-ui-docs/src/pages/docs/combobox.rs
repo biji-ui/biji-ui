@@ -249,6 +249,32 @@ const KEYBOARD: &[KeyboardRow] = &[
     },
 ];
 
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::combobox;
+
+#[component]
+pub fn MyCombobox() -> impl IntoView {
+    view! {
+        <combobox::RootWith let:c>
+            <p class="text-sm text-muted-foreground">
+                {move || {
+                    c.value.get()
+                        .map(|v| format!("Selected: {v}"))
+                        .unwrap_or_else(|| "Nothing selected".to_string())
+                }}
+            </p>
+            <combobox::Trigger class="...">
+                <combobox::Value placeholder="Select a fruit..." />
+            </combobox::Trigger>
+            <combobox::Content class="..." show_class="..." hide_class="...">
+                <combobox::Input placeholder="Search..." class="..." />
+                <combobox::Item value="apple" class="...">"Apple"</combobox::Item>
+                <combobox::Item value="banana" class="...">"Banana"</combobox::Item>
+            </combobox::Content>
+        </combobox::RootWith>
+    }
+}"#;
+
 #[component]
 pub fn ComboboxDocPage() -> impl IntoView {
     use crate::pages::docs::{DocPage, DocPreview};
@@ -298,26 +324,67 @@ pub fn ComboboxDocPage() -> impl IntoView {
                         <p class="mb-3 text-sm text-muted-foreground">
                             "Items are fetched from a Leptos "
                             <code class="font-mono text-foreground">{"#[server]"}</code>
-                            " function and rendered inside a dedicated "
-                            <code class="font-mono text-foreground">{"AsyncItems"}</code>
-                            " component placed directly inside "
+                            " function. The example splits responsibilities into two components: "
+                            <code class="font-mono text-foreground">{"AsyncQueryManager"}</code>
+                            " owns all reactive state and is mounted "
+                            <em>"outside"</em>
+                            " "
                             <code class="font-mono text-foreground">{"Content"}</code>
-                            ". The component owns pagination state and wires infinite scroll itself."
+                            ", and "
+                            <code class="font-mono text-foreground">{"ItemDisplay"}</code>
+                            " is a pure render component placed inside "
+                            <code class="font-mono text-foreground">{"Content"}</code>
+                            "."
                         </p>
                         <p class="mb-3 text-sm text-muted-foreground">
-                            "The query is debounced 300 ms before triggering a new call. " "An "
+                            "The query is debounced 300 ms before triggering a new call. An "
                             <code class="font-mono text-foreground">{"on_loading_change"}</code>
                             " callback fires "
                             <code class="font-mono text-foreground">{"true"}</code>
                             " when a fetch starts and "
                             <code class="font-mono text-foreground">{"false"}</code>
-                            " when it settles, so the parent can render a spinner anywhere — here it appears on the right edge of the input."
+                            " when it settles, so the parent can render a spinner anywhere."
                         </p>
-                        <p class="mb-4 text-sm text-muted-foreground">
+                        <p class="mb-3 text-sm text-muted-foreground">
                             "Infinite scroll is handled by an "
                             <code class="font-mono text-foreground">{"IntersectionObserver"}</code>
                             " on a sentinel element at the bottom of the list. When the sentinel becomes visible the next page is fetched and appended without re-rendering existing items."
                         </p>
+                        <div class="mb-4 rounded-md border border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30 px-4 py-3 text-sm">
+                            <p class="font-semibold text-amber-800 dark:text-amber-300 mb-1">"⚠ SSR + Hydrate: avoid Resource::new and LocalResource inside combobox"</p>
+                            <p class="text-amber-700 dark:text-amber-400 mb-2">
+                                <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">{"Resource::new"}</code>
+                                " and "
+                                <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">{"LocalResource"}</code>
+                                " register with the nearest "
+                                <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">{"<Suspense>"}</code>
+                                " / "
+                                <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">{"<Transition>"}</code>
+                                " boundary in the tree. When the resource becomes pending (e.g. on a new search keystroke), the boundary shows its fallback — causing a full-page blank flash if you have an "
+                                <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">{"AuthGuard"}</code>
+                                " or similar layout wrapper using "
+                                <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">{"<Transition>"}</code>
+                                "."
+                            </p>
+                            <p class="text-amber-700 dark:text-amber-400">
+                                "Use "
+                                <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">{"spawn_local"}</code>
+                                " with a generation counter instead. It is a detached async task with no knowledge of the reactive resource system and therefore never triggers any Suspense boundary. See the code sample below."
+                            </p>
+                        </div>
+                        <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 px-4 py-3 text-sm">
+                            <p class="font-semibold text-blue-800 dark:text-blue-300 mb-1">"💡 Lift async state outside Content"</p>
+                            <p class="text-blue-700 dark:text-blue-400">
+                                <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">{"combobox::Content"}</code>
+                                " unmounts its children after the hide animation completes. Placing Effects or Resources inside "
+                                <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">{"Content"}</code>
+                                " means recreating them on every open cycle, which causes a WASM block and a blank frame. Mount an "
+                                <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">{"AsyncQueryManager"}</code>
+                                " component alongside — not inside — "
+                                <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">{"Content"}</code>
+                                " so signals and Effects are created exactly once."
+                            </p>
+                        </div>
                         <Code
                             class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
                             code={ASYNC_EXAMPLE_CODE}
@@ -331,8 +398,32 @@ pub fn ComboboxDocPage() -> impl IntoView {
                 }
                 #[cfg(feature = "csr")] { ().into_any() }
             }
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"ComboboxState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The state exposes "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"open"</code>
+                ", "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"value"</code>
+                ", and "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"query"</code>
+                " as reactive signals."
+            </p>
+            <DocPreview>
+                <ComboboxRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="InputTrigger" rows={INPUT_TRIGGER_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Value" rows={VALUE_PROPS} />
@@ -342,6 +433,77 @@ pub fn ComboboxDocPage() -> impl IntoView {
             <DataAttrsTable rows={DATA_ATTRS} />
             <KeyboardTable rows={KEYBOARD} />
         </DocPage>
+    }
+}
+
+#[component]
+pub fn ComboboxRootWithExample() -> impl IntoView {
+    use biji_ui::components::combobox;
+
+    const TRIGGER_CLS: &str = "flex items-center justify-between w-56 px-3 py-2 text-sm \
+        rounded-md border border-border bg-background text-foreground \
+        hover:bg-accent hover:text-accent-foreground \
+        data-[state=open]:bg-accent data-[state=open]:text-accent-foreground \
+        cursor-default select-none";
+
+    const CONTENT_CLS: &str = "z-50 w-56 overflow-hidden rounded-md border border-border \
+        bg-background shadow-md text-sm \
+        transition origin-[var(--biji-transform-origin)]";
+
+    const INPUT_CLS: &str = "w-full px-3 py-2 text-sm outline-none bg-transparent \
+        border-b border-border placeholder:text-muted-foreground";
+
+    const ITEM_CLS: &str = "flex items-center px-3 py-2 cursor-default select-none \
+        data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
+        data-[state=checked]:font-medium";
+
+    const FRUITS: &[(&str, &str)] = &[
+        ("apple", "Apple"),
+        ("banana", "Banana"),
+        ("cherry", "Cherry"),
+        ("mango", "Mango"),
+        ("pineapple", "Pineapple"),
+    ];
+
+    view! {
+        <div class="flex flex-col items-center gap-3 p-8">
+            <combobox::RootWith let:c>
+                <p class="text-sm text-muted-foreground">
+                    {move || {
+                        c.value
+                            .get()
+                            .map(|v| format!("Selected: {v}"))
+                            .unwrap_or_else(|| "Nothing selected".to_string())
+                    }}
+                </p>
+                <combobox::Trigger class={TRIGGER_CLS}>
+                    <combobox::Value placeholder="Select a fruit..." />
+                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </combobox::Trigger>
+                <combobox::Content
+                    class={CONTENT_CLS}
+                    show_class="opacity-100 scale-100 duration-150 ease-out"
+                    hide_class="opacity-0 scale-95 duration-100 ease-in"
+                >
+                    <combobox::Input placeholder="Search..." class={INPUT_CLS} />
+                    {FRUITS
+                        .iter()
+                        .map(|(value, label)| {
+                            view! {
+                                <combobox::Item value={*value} label={*label} class={ITEM_CLS}>
+                                    <combobox::ItemText>{*label}</combobox::ItemText>
+                                </combobox::Item>
+                            }
+                        })
+                        .collect::<Vec<_>>()}
+                    <combobox::Empty>
+                        <p class="px-3 py-2 text-sm text-muted-foreground">"No results."</p>
+                    </combobox::Empty>
+                </combobox::Content>
+            </combobox::RootWith>
+        </div>
     }
 }
 
@@ -367,8 +529,6 @@ pub fn ComboboxExample() -> impl IntoView {
         data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
         data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
 
-    let last_value = RwSignal::new(String::from("None"));
-
     let fruits = [
         ("apple", "Apple"),
         ("apricot", "Apricot"),
@@ -389,7 +549,7 @@ pub fn ComboboxExample() -> impl IntoView {
 
     view! {
         <div class="flex flex-col gap-3 items-center">
-            <combobox::Root on_value_change={Callback::new(move |v: String| last_value.set(v))}>
+            <combobox::RootWith let:c>
                 <combobox::Trigger class={TRIGGER_CLS}>
                     <combobox::Value placeholder="Select a fruit..." />
                     <svg
@@ -447,11 +607,13 @@ pub fn ComboboxExample() -> impl IntoView {
                             .collect_view()}
                     </div>
                 </combobox::Content>
-            </combobox::Root>
-            <p class="text-xs text-muted-foreground">
-                "Selected: "
-                <span class="font-medium text-foreground">{move || last_value.get()}</span>
-            </p>
+                <p class="text-xs text-muted-foreground">
+                    "Selected: "
+                    <span class="font-medium text-foreground">
+                        {move || c.value.get().unwrap_or_else(|| "None".to_string())}
+                    </span>
+                </p>
+            </combobox::RootWith>
         </div>
     }
 }
@@ -469,113 +631,244 @@ pub async fn search_countries(
     let countries: &[(&str, &str)] = &[("de", "Germany"), ("fr", "France") /* … */];
     let q = query.to_lowercase();
     let skip = (page * per_page) as usize;
-    let mut batch: Vec<_> = countries
+    let mut fetched: Vec<_> = countries
         .iter()
         .filter(|(_, n)| q.is_empty() || n.to_lowercase().contains(&q))
         .skip(skip)
         .take(per_page as usize + 1)   // one extra → has_more signal
         .collect();
-    let has_more = batch.len() > per_page as usize;
-    batch.truncate(per_page as usize);
-    Ok((batch.into_iter().map(|(v, l)| (v.to_string(), l.to_string())).collect(), has_more))
+    let has_more = fetched.len() > per_page as usize;
+    fetched.truncate(per_page as usize);
+    Ok((fetched.into_iter().map(|(v, l)| (v.to_string(), l.to_string())).collect(), has_more))
 }
 
-// AsyncItems owns the scroll container and wires infinite scroll itself.
-// `on_loading_change` lets the parent show a header spinner.
+// ── AsyncQueryManager ────────────────────────────────────────────────────────
+//
+// Manages debounced search and async fetching. Rendered OUTSIDE
+// combobox::Content so it is never unmounted when the dropdown closes.
+//
+// combobox::Content uses an animated show/hide: it unmounts its children
+// after the hide animation completes. Putting Effects or Resources inside
+// Content means recreating them on every open cycle — WASM block → blank frame.
+// By keeping this component outside Content, signals and Effects are created
+// exactly once for the lifetime of the parent.
+//
+// spawn_local instead of Resource::new
+// ─────────────────────────────────────
+// Resource::new (and LocalResource) register with the nearest Suspense /
+// Transition boundary in the tree. When the resource becomes pending (e.g.
+// on a new search), a parent <Transition> sees a pending resource and briefly
+// shows its fallback — a blank screen flash. This is especially noticeable
+// in apps that wrap routes with an AuthGuard <Transition>.
+// spawn_local is a detached async task: it has no knowledge of the reactive
+// resource system and therefore never triggers any Suspense boundary.
+
 #[component]
-fn AsyncItems(
-    #[prop(optional)] on_loading_change: Option<Callback<bool>>,
+fn AsyncQueryManager(
+    query_and_page: RwSignal<(String, u32)>,
+    items: RwSignal<Vec<(String, String)>>,
+    has_more: RwSignal<bool>,
+    show_empty: RwSignal<bool>,
+    is_loading: RwSignal<bool>,
+    is_fetching: RwSignal<bool>,
+    on_loading_change: Callback<bool>,
 ) -> impl IntoView {
-    use biji_ui::components::combobox::{self, ComboboxContext};
-    use leptos_use::{use_debounce_fn_with_arg, use_intersection_observer};
+    use biji_ui::components::combobox::ComboboxState;
+    use leptos::reactive::spawn_local;
+    use leptos_use::use_debounce_fn_with_arg;
 
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
 
-    // (query, page) drives the resource — query resets page to 0.
-    let query_and_page = RwSignal::new((String::new(), 0u32));
-
-    let update_query = use_debounce_fn_with_arg(
+    let set_query = use_debounce_fn_with_arg(
         move |q: String| {
-            query_and_page.set((q, 0));
-            if let Some(cb) = on_loading_change { cb.run(true); }
+            // Skip if the query hasn't changed (avoids spurious reset at t=300ms).
+            if q == query_and_page.get_untracked().0 { return; }
+            batch(|| {
+                query_and_page.set((q, 0));
+                has_more.set(false);
+                show_empty.set(false);
+                is_loading.set(true);
+                on_loading_change.run(true);
+            });
         },
         300.0,
     );
-    Effect::new(move |_| { update_query(ctx.query.get()); });
+    Effect::new(move |_| { set_query(ctx.query.get()); });
 
-    let results = Resource::new(
-        move || query_and_page.get(),
-        |(q, p)| search_countries(q, p, 8),
-    );
+    // Generation counter: when a new fetch starts, any in-flight response
+    // with an older sequence number is discarded. Prevents stale results
+    // overwriting newer ones when the query changes quickly.
+    let fetch_gen = RwSignal::new(0u64);
 
-    let items = RwSignal::<Vec<(String, String)>>::new(vec![]);
-    let fetch_error = RwSignal::<Option<String>>::new(None);
-    let has_more = RwSignal::new(false);
-    let is_fetching = RwSignal::new(false);
+    // Signal loading on mount — the first fetch fires immediately.
+    on_loading_change.run(true);
 
-    Effect::new(move |_| match results.get() {
-        None => {}
-        Some(Ok((batch, more))) => {
-            if query_and_page.get_untracked().1 == 0 { items.set(batch); }
-            else { items.update(|v| v.extend(batch)); }
-            has_more.set(more);
-            fetch_error.set(None);
-            is_fetching.set(false);
-            if let Some(cb) = on_loading_change { cb.run(false); }
-        }
-        Some(Err(e)) => {
-            if query_and_page.get_untracked().1 == 0 { items.set(vec![]); }
-            fetch_error.set(Some(e.to_string()));
-            has_more.set(false);
-            is_fetching.set(false);
-            if let Some(cb) = on_loading_change { cb.run(false); }
-        }
+    Effect::new(move |_| {
+        let (q, page) = query_and_page.get();
+        let fetch_seq = fetch_gen.get_untracked() + 1;
+        fetch_gen.set(fetch_seq);
+
+        spawn_local(async move {
+            let result = search_countries(q, page, 8).await;
+
+            // Discard if a newer request has already started.
+            if fetch_gen.get_untracked() != fetch_seq { return; }
+
+            match result {
+                Ok((page_items, more)) => {
+                    let is_empty = page_items.is_empty();
+                    batch(|| {
+                        if page == 0 {
+                            items.set(page_items);
+                            show_empty.set(is_empty);
+                        } else {
+                            items.update(|v| v.extend(page_items));
+                        }
+                        has_more.set(more);
+                        is_fetching.set(false);
+                        is_loading.set(false);
+                        on_loading_change.run(false);
+                    });
+                }
+                Err(_) => {
+                    batch(|| {
+                        if page == 0 { items.set(vec![]); }
+                        has_more.set(false);
+                        show_empty.set(false);
+                        is_fetching.set(false);
+                        is_loading.set(false);
+                        on_loading_change.run(false);
+                    });
+                }
+            }
+        });
     });
+}
 
-    // Guarded load_more — no-op if already in flight or no more pages.
-    let load_more = move || {
-        if is_fetching.get_untracked() || !has_more.get_untracked() { return; }
-        is_fetching.set(true);
-        query_and_page.update(|(_, p)| *p += 1);
-        if let Some(cb) = on_loading_change { cb.run(true); }
-    };
+// ── ItemDisplay ───────────────────────────────────────────────────────────────
+//
+// Pure rendering — no Effects, no Resources, no Signals created here.
+// Lives inside combobox::Content so it remounts on every open, but
+// because it only creates DOM nodes + event listeners the cost is negligible.
 
-    // Sentinel div at the bottom of the list.
-    // IntersectionObserver fires load_more when it scrolls into view.
-    // Always rendered (but hidden via `hidden` class) so the observer
-    // can detect when it transitions from hidden→visible.
+#[component]
+fn ItemDisplay(
+    items: RwSignal<Vec<(String, String)>>,
+    is_loading: RwSignal<bool>,
+    show_empty: RwSignal<bool>,
+    has_more: RwSignal<bool>,
+    load_more: Callback<()>,
+) -> impl IntoView {
+    use leptos::html;
+    use leptos_use::use_intersection_observer;
+
     let sentinel_ref = NodeRef::<html::Div>::new();
     use_intersection_observer(sentinel_ref, move |entries, _| {
         if entries.first().map(|e| e.is_intersecting()).unwrap_or(false) {
-            load_more();
+            load_more.run(());
         }
     });
 
+    const ITEM_CLS: &str = "flex items-center px-3 py-1.5 cursor-default select-none outline-none \
+        hover:bg-accent hover:text-accent-foreground \
+        data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
+        data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
+
     view! {
         <div class="overflow-y-auto py-1 max-h-60">
-            // … items + sentinel …
+            <Show when={move || is_loading.get() && items.with(|v| v.is_empty())}>
+                <div class="flex justify-center py-4">
+                    <div class="w-4 h-4 rounded-full border-2 animate-spin border-muted-foreground border-t-transparent" />
+                </div>
+            </Show>
+            <Show when={move || show_empty.get()}>
+                <div class="py-4 px-3 text-sm text-center text-muted-foreground">
+                    "No countries found."
+                </div>
+            </Show>
+            <For
+                each={move || items.get()}
+                key={|(value, _)| value.clone()}
+                children={move |(value, label)| {
+                    view! {
+                        <combobox::Item value={value} label={label.clone()} class={ITEM_CLS}>
+                            <span class="flex-1">{label}</span>
+                            <combobox::ItemIndicator>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                            </combobox::ItemIndicator>
+                        </combobox::Item>
+                    }
+                }}
+            />
+            <div
+                node_ref={sentinel_ref}
+                class={move || if has_more.get() { "py-2 flex justify-center text-muted-foreground" } else { "hidden" }}
+            >
+                <div class="w-4 h-4 rounded-full border-2 border-current animate-spin border-t-transparent" />
+            </div>
         </div>
     }
 }
 
-// Parent wires up the header spinner wherever it wants:
+// ── MyAsyncCombobox ───────────────────────────────────────────────────────────
+//
+// All async state lives here — outside combobox::Content — so signals and
+// Effects are created once and persist across open/close cycles.
+
 #[component]
 pub fn MyAsyncCombobox() -> impl IntoView {
-    let is_loading = RwSignal::new(false);
+    let query_and_page = RwSignal::<(String, u32)>::new((String::new(), 0));
+    let items = RwSignal::<Vec<(String, String)>>::new(vec![]);
+    let has_more = RwSignal::new(false);
+    let show_empty = RwSignal::new(false);
+    let is_loading = RwSignal::new(true);
+    let is_fetching = RwSignal::new(false);
+    let trigger_is_loading = RwSignal::new(false);
+
+    let load_more = Callback::new(move |_: ()| {
+        if is_fetching.get_untracked() || !has_more.get_untracked() { return; }
+        is_fetching.set(true);
+        query_and_page.update(|(_, p)| *p += 1);
+    });
+
     view! {
-        <combobox::Root inline=true>
+        <combobox::RootWith inline=true let:_c>
+            // Always-mounted query manager — outside Content, never torn down.
+            <AsyncQueryManager
+                query_and_page=query_and_page
+                items=items
+                has_more=has_more
+                show_empty=show_empty
+                is_loading=is_loading
+                is_fetching=is_fetching
+                on_loading_change=Callback::new(move |v| trigger_is_loading.set(v))
+            />
             <div class="relative">
-                <combobox::InputTrigger class="…" placeholder="Search…" />
-                <Show when=move || is_loading.get()>
-                    <div class="absolute right-2 top-1/2 -translate-y-1/2">
-                        // your spinner here
+                <combobox::InputTrigger class="…" placeholder="Search countries…" />
+                <Show when=move || trigger_is_loading.get()>
+                    <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <div class="w-3.5 h-3.5 rounded-full border-2 animate-spin border-muted-foreground border-t-transparent" />
                     </div>
                 </Show>
             </div>
-            <combobox::Content class="…">
-                <AsyncItems on_loading_change={Callback::new(move |v| is_loading.set(v))} />
+            <combobox::Content class="…"
+                show_class="opacity-100 scale-100"
+                hide_class="opacity-0 scale-95"
+            >
+                // Cheap display — no reactive setup on mount, just DOM nodes.
+                <ItemDisplay
+                    items=items
+                    is_loading=is_loading
+                    show_empty=show_empty
+                    has_more=has_more
+                    load_more=load_more
+                />
             </combobox::Content>
-        </combobox::Root>
+        </combobox::RootWith>
     }
 }"#;
 
@@ -674,113 +967,102 @@ pub async fn search_countries(
 
 #[cfg(not(feature = "csr"))]
 #[component]
-fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> impl IntoView {
+fn AsyncQueryManager(
+    query_and_page: RwSignal<(String, u32)>,
+    items: RwSignal<Vec<(String, String)>>,
+    has_more: RwSignal<bool>,
+    show_empty: RwSignal<bool>,
+    is_loading: RwSignal<bool>,
+    is_fetching: RwSignal<bool>,
+    on_loading_change: Callback<bool>,
+) -> impl IntoView {
     use biji_ui::components::combobox;
-    use leptos::html;
-    use leptos_use::{use_debounce_fn_with_arg, use_intersection_observer};
+    use leptos::reactive::spawn_local;
+    use leptos_use::use_debounce_fn_with_arg;
 
-    let ctx = expect_context::<combobox::ComboboxContext>();
+    let ctx = expect_context::<combobox::ComboboxState>();
 
-    // (query, page) drives the resource — query changes reset page to 0.
-    let query_and_page = RwSignal::new((String::new(), 0u32));
-    let has_more = RwSignal::new(false);
-    // Set to true exactly when a page-0 fetch returns an empty result.
-    // Reset to false as soon as a new fetch begins.
-    let show_empty = RwSignal::new(false);
-    // True while a fetch is in flight. Starts true (resource fires on mount).
-    let is_loading = RwSignal::new(true);
-
-    let update_query = use_debounce_fn_with_arg(
+    let set_query = use_debounce_fn_with_arg(
         move |q: String| {
-            // Skip if the query hasn't actually changed (avoids the initial
-            // debounce at t=300ms spuriously resetting state when query is
-            // still "" and the resource has already loaded).
             if q == query_and_page.get_untracked().0 {
                 return;
             }
-            query_and_page.set((q, 0));
-            has_more.set(false);
-            show_empty.set(false);
-            is_loading.set(true);
-            if let Some(cb) = on_loading_change {
-                cb.run(true);
-            }
+            batch(|| {
+                query_and_page.set((q, 0));
+                has_more.set(false);
+                show_empty.set(false);
+                is_loading.set(true);
+                on_loading_change.run(true);
+            });
         },
         300.0,
     );
     Effect::new(move |_| {
-        update_query(ctx.query.get());
+        set_query(ctx.query.get());
     });
 
-    let results = Resource::new(
-        move || query_and_page.get(),
-        |(q, p)| search_countries(q, p, 8),
-    );
+    let fetch_gen = RwSignal::new(0u64);
 
-    // Signal the parent we're loading as soon as this component mounts —
-    // the resource fires with ("", 0) immediately, before any debounce.
-    if let Some(cb) = on_loading_change {
-        cb.run(true);
-    }
+    on_loading_change.run(true);
 
-    // Stable item list: page=0 replaces, page>0 appends (no flicker).
-    let items = RwSignal::<Vec<(String, String)>>::new(vec![]);
-    let fetch_error = RwSignal::<Option<String>>::new(None);
-    let is_fetching = RwSignal::new(false);
+    Effect::new(move |_| {
+        let (q, page) = query_and_page.get();
+        let fetch_seq = fetch_gen.get_untracked() + 1;
+        fetch_gen.set(fetch_seq);
 
-    Effect::new(move |_| match results.get() {
-        None => {
-            // New fetch in flight — hide any stale empty state immediately.
-            show_empty.set(false);
-        }
-        Some(Ok((batch, more))) => {
-            let page = query_and_page.get_untracked().1;
-            if page == 0 {
-                let is_empty = batch.is_empty();
-                items.set(batch);
-                show_empty.set(is_empty);
-            } else {
-                items.update(|v| v.extend(batch));
+        spawn_local(async move {
+            let result = search_countries(q, page, 8).await;
+
+            if fetch_gen.get_untracked() != fetch_seq {
+                return;
             }
-            has_more.set(more);
-            fetch_error.set(None);
-            is_fetching.set(false);
-            is_loading.set(false);
-            if let Some(cb) = on_loading_change {
-                cb.run(false);
+
+            match result {
+                Ok((page_items, more)) => {
+                    let is_empty = page_items.is_empty();
+                    batch(|| {
+                        if page == 0 {
+                            items.set(page_items);
+                            show_empty.set(is_empty);
+                        } else {
+                            items.update(|v| v.extend(page_items));
+                        }
+                        has_more.set(more);
+                        is_fetching.set(false);
+                        is_loading.set(false);
+                        on_loading_change.run(false);
+                    });
+                }
+                Err(_) => {
+                    batch(|| {
+                        if page == 0 {
+                            items.set(vec![]);
+                        }
+                        has_more.set(false);
+                        show_empty.set(false);
+                        is_fetching.set(false);
+                        is_loading.set(false);
+                        on_loading_change.run(false);
+                    });
+                }
             }
-        }
-        Some(Err(e)) => {
-            if query_and_page.get_untracked().1 == 0 {
-                items.set(vec![]);
-            }
-            fetch_error.set(Some(e.to_string()));
-            has_more.set(false);
-            show_empty.set(false);
-            is_fetching.set(false);
-            is_loading.set(false);
-            if let Some(cb) = on_loading_change {
-                cb.run(false);
-            }
-        }
+        });
     });
+}
 
-    // Guarded load_more — no-op if already in flight or no more pages.
-    let load_more = move || {
-        if is_fetching.get_untracked() || !has_more.get_untracked() {
-            return;
-        }
-        is_fetching.set(true);
-        query_and_page.update(|(_, p)| *p += 1);
-        if let Some(cb) = on_loading_change {
-            cb.run(true);
-        }
-    };
+#[cfg(not(feature = "csr"))]
+#[component]
+fn ItemDisplay(
+    items: RwSignal<Vec<(String, String)>>,
+    is_loading: RwSignal<bool>,
+    show_empty: RwSignal<bool>,
+    has_more: RwSignal<bool>,
+    load_more: Callback<()>,
+) -> impl IntoView {
+    use biji_ui::components::combobox;
+    use leptos::html;
+    use leptos_use::use_intersection_observer;
 
-    // Sentinel div at the bottom of the list. When it scrolls into the viewport
-    // the IntersectionObserver fires load_more. It's always in the DOM (the
-    // `hidden` class hides it) so the observer can detect the hidden→visible
-    // transition without needing to be re-created.
     let sentinel_ref = NodeRef::<html::Div>::new();
     use_intersection_observer(sentinel_ref, move |entries, _| {
         if entries
@@ -788,7 +1070,7 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
             .map(|e| e.is_intersecting())
             .unwrap_or(false)
         {
-            load_more();
+            load_more.run(());
         }
     });
 
@@ -802,14 +1084,6 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
             <Show when={move || is_loading.get() && items.with(|v| v.is_empty())}>
                 <div class="flex justify-center py-4">
                     <div class="w-4 h-4 rounded-full border-2 animate-spin border-muted-foreground border-t-transparent" />
-                </div>
-            </Show>
-            <Show when={move || fetch_error.with(|e| e.is_some())}>
-                <div class="flex flex-col gap-1 items-center py-4 px-3 text-sm">
-                    <span class="font-medium text-destructive">"Server error"</span>
-                    <span class="text-xs text-muted-foreground">
-                        {move || fetch_error.with(|e| e.clone().unwrap_or_default())}
-                    </span>
                 </div>
             </Show>
             <Show when={move || show_empty.get()}>
@@ -843,9 +1117,6 @@ fn AsyncItems(#[prop(optional)] on_loading_change: Option<Callback<bool>>) -> im
                     }
                 }}
             />
-            // Sentinel: always in DOM, hidden when no more pages exist.
-            // The IntersectionObserver detects the hidden→visible transition
-            // and fires load_more when the user scrolls near the bottom.
             <div
                 node_ref={sentinel_ref}
                 class={move || {
@@ -878,23 +1149,41 @@ pub fn ComboboxAsyncExample() -> impl IntoView {
         bg-background shadow-md text-sm \
         transition origin-[var(--biji-transform-origin)]";
 
-    let last_value = RwSignal::new(String::from("None"));
-    // Owned by the parent — place the spinner anywhere you like.
-    let is_loading = RwSignal::new(false);
+    let query_and_page = RwSignal::<(String, u32)>::new((String::new(), 0));
+    let items = RwSignal::<Vec<(String, String)>>::new(vec![]);
+    let has_more = RwSignal::new(false);
+    let show_empty = RwSignal::new(false);
+    let is_loading = RwSignal::new(true);
+    let is_fetching = RwSignal::new(false);
+    let trigger_is_loading = RwSignal::new(false);
+
+    let load_more = Callback::new(move |_: ()| {
+        if is_fetching.get_untracked() || !has_more.get_untracked() {
+            return;
+        }
+        is_fetching.set(true);
+        query_and_page.update(|(_, p)| *p += 1);
+    });
 
     view! {
         <div class="flex flex-col gap-3 items-center">
-            <combobox::Root
-                inline=true
-                on_value_change={Callback::new(move |v: String| last_value.set(v))}
-            >
-                // Wrap the trigger so we can overlay the spinner on the right edge.
+            <combobox::RootWith inline=true let:c>
+                // Always-mounted query manager — outside Content, never torn down.
+                <AsyncQueryManager
+                    query_and_page=query_and_page
+                    items=items
+                    has_more=has_more
+                    show_empty=show_empty
+                    is_loading=is_loading
+                    is_fetching=is_fetching
+                    on_loading_change=Callback::new(move |v| trigger_is_loading.set(v))
+                />
                 <div class="relative">
                     <combobox::InputTrigger
                         class={INPUT_TRIGGER_CLS}
                         placeholder="Search countries\u{2026}"
                     />
-                    <Show when={move || is_loading.get()}>
+                    <Show when={move || trigger_is_loading.get()}>
                         <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                             <div class="w-4 h-4 rounded-full border-2 animate-spin border-muted-foreground border-t-transparent" />
                         </div>
@@ -905,13 +1194,22 @@ pub fn ComboboxAsyncExample() -> impl IntoView {
                     show_class="opacity-100 scale-100"
                     hide_class="opacity-0 scale-95"
                 >
-                    <AsyncItems on_loading_change={Callback::new(move |v| is_loading.set(v))} />
+                    // Cheap display — no reactive setup on mount, just DOM nodes.
+                    <ItemDisplay
+                        items=items
+                        is_loading=is_loading
+                        show_empty=show_empty
+                        has_more=has_more
+                        load_more=load_more
+                    />
                 </combobox::Content>
-            </combobox::Root>
-            <p class="text-xs text-muted-foreground">
-                "Selected: "
-                <span class="font-medium text-foreground">{move || last_value.get()}</span>
-            </p>
+                <p class="text-xs text-muted-foreground">
+                    "Selected: "
+                    <span class="font-medium text-foreground">
+                        {move || c.value.get().unwrap_or_else(|| "None".to_string())}
+                    </span>
+                </p>
+            </combobox::RootWith>
         </div>
     }
 }
@@ -936,8 +1234,6 @@ pub fn ComboboxInlineExample() -> impl IntoView {
         data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground \
         data-[disabled]:pointer-events-none data-[disabled]:opacity-50";
 
-    let last_value = RwSignal::new(String::from("None"));
-
     let fruits = [
         ("apple", "Apple"),
         ("apricot", "Apricot"),
@@ -958,10 +1254,7 @@ pub fn ComboboxInlineExample() -> impl IntoView {
 
     view! {
         <div class="flex flex-col gap-3 items-center">
-            <combobox::Root
-                inline=true
-                on_value_change={Callback::new(move |v: String| last_value.set(v))}
-            >
+            <combobox::RootWith inline=true let:c>
                 <combobox::InputTrigger class={INPUT_TRIGGER_CLS} placeholder="Search a fruit..." />
                 <combobox::Content
                     class={CONTENT_CLS}
@@ -1001,11 +1294,13 @@ pub fn ComboboxInlineExample() -> impl IntoView {
                             .collect_view()}
                     </div>
                 </combobox::Content>
-            </combobox::Root>
-            <p class="text-xs text-muted-foreground">
-                "Selected: "
-                <span class="font-medium text-foreground">{move || last_value.get()}</span>
-            </p>
+                <p class="text-xs text-muted-foreground">
+                    "Selected: "
+                    <span class="font-medium text-foreground">
+                        {move || c.value.get().unwrap_or_else(|| "None".to_string())}
+                    </span>
+                </p>
+            </combobox::RootWith>
         </div>
     }
 }

@@ -1,6 +1,5 @@
 pub mod context;
 pub mod root;
 
-pub use context::CheckedState;
-pub use root::Indicator;
-pub use root::Root;
+pub use context::{CheckboxState, CheckedState};
+pub use root::{Indicator, Root, RootWith, use_checkbox};

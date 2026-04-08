@@ -22,10 +22,10 @@ use crate::{
     cn,
     custom_animated_show::CustomAnimatedShow,
     items::{Focus, ManageFocus, NavigateItems},
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
-use super::context::{ComboboxContext, ComboboxItemContext};
+use super::context::{ComboboxItemContext, ComboboxState};
 
 static COMBOBOX_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -34,67 +34,136 @@ fn next_combobox_id() -> String {
     format!("biji-combobox-{id}")
 }
 
+fn build_state(
+    value: Option<RwSignal<Option<String>>>,
+    default_value: Option<String>,
+    label: Option<RwSignal<Option<String>>>,
+    positioning: Positioning,
+    hide_delay: Duration,
+    avoid_collisions: AvoidCollisions,
+    inline_mode: bool,
+) -> ComboboxState {
+    let open = RwSignal::new(false);
+    let data_state = Signal::derive(move || if open.get() { "open" } else { "closed" });
+    let value_sig = value.unwrap_or_else(|| RwSignal::new(default_value));
+    let state = ComboboxState {
+        trigger_ref: NodeRef::new(),
+        content_ref: NodeRef::new(),
+        input_ref: NodeRef::new(),
+        open,
+        value: value_sig,
+        selected_label: label.unwrap_or_else(|| RwSignal::new(None)),
+        query: RwSignal::new(String::new()),
+        data_state,
+        item_focus: RwSignal::new(None),
+        items: RwSignal::new(Default::default()),
+        hide_delay,
+        positioning,
+        arrow_size: 0,
+        combobox_id: StoredValue::new(next_combobox_id()),
+        avoid_collisions,
+        next_id: StoredValue::new(AtomicUsize::new(0)),
+        inline_mode,
+        suppress_next_open: StoredValue::new(false),
+        items_version: RwSignal::new(0),
+        items_notify_pending: StoredValue::new(false),
+    };
+    // Resolve the initial label once items mount (same pattern as Select).
+    // Subscribes to items_version (not items directly) to avoid O(N²) on batch mount.
+    Effect::new(move |_| {
+        state.items_version.get();
+        if state.selected_label.get_untracked().is_some() {
+            return;
+        }
+        let Some(val) = state.value.get_untracked() else {
+            return;
+        };
+        state.items.with_untracked(|m| {
+            if let Some(item) = m.values().find(|i| i.value.with_value(|iv| *iv == val)) {
+                let lbl = item.label.with_value(|l| l.get());
+                state.selected_label.set(Some(lbl));
+            }
+        });
+    });
+    state
+}
+
+pub fn use_combobox() -> ComboboxState {
+    expect_context::<ComboboxState>()
+}
+
 #[component]
-pub fn Root(
-    children: Children,
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(ComboboxState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
+    /// Controlled signal. When provided, the combobox reads and writes this signal directly.
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    /// Controlled label signal. When provided, the combobox uses this signal as the
+    /// selected label instead of managing it internally. Useful when the selected item
+    /// may not be present in the currently loaded page (e.g. paginated async lists)
+    /// and the label is sourced from an external context or server fetch.
+    #[prop(into, default = None)]
+    label: Option<RwSignal<Option<String>>>,
     #[prop(default = Positioning::BottomStart)] positioning: Positioning,
     #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
     #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
-    #[prop(optional)] on_value_change: Option<Callback<String>>,
     /// Set to `true` when using `InputTrigger` (the inline Headless-UI-style combobox).
     #[prop(default = false)]
     inline: bool,
 ) -> impl IntoView {
-    let ctx = ComboboxContext {
-        open: RwSignal::new(false),
-        value: RwSignal::new(value),
-        selected_label: RwSignal::new(None),
-        query: RwSignal::new(String::new()),
-        hide_delay,
-        positioning,
-        combobox_id: StoredValue::new(next_combobox_id()),
-        avoid_collisions,
-        on_value_change,
-        inline_mode: inline,
-        ..ComboboxContext::default()
-    };
-
-    // Resolve the initial label once items mount (same pattern as Select).
-    Effect::new(move |_| {
-        if ctx.selected_label.get_untracked().is_some() {
-            return;
-        }
-        let Some(val) = ctx.value.get_untracked() else {
-            return;
-        };
-        ctx.items.with(|m| {
-            if let Some(item) = m.values().find(|i| i.value.with_value(|iv| *iv == val)) {
-                let lbl = item.label.with_value(|l| l.clone());
-                ctx.selected_label.set(Some(lbl));
-            }
-        });
-    });
-
+    let state = build_state(value, default_value, label, positioning, hide_delay, avoid_collisions, inline);
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <RootEvents>
-                <div class={class}>{children()}</div>
+                <div class={class}>{children(state)}</div>
             </RootEvents>
         </Provider>
     }
 }
 
 #[component]
-fn RootEvents(children: Children) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(into, default = None)] value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(into, default = None)] label: Option<RwSignal<Option<String>>>,
+    #[prop(default = Positioning::BottomStart)] positioning: Positioning,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+    /// Set to `true` when using `InputTrigger` (the inline Headless-UI-style combobox).
+    #[prop(default = false)]
+    inline: bool,
+) -> impl IntoView {
+    view! {
+        <RootWith
+            value={value}
+            default_value={default_value}
+            label={label}
+            positioning={positioning}
+            hide_delay={hide_delay}
+            avoid_collisions={avoid_collisions}
+            inline={inline}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
+    }
+}
 
-    // Auto-highlight the first visible item when the query changes (always reset)
-    // or when the item list changes and nothing is focused yet (initial mount / open).
+#[component]
+fn RootEvents(children: Children) -> impl IntoView {
+    let ctx = expect_context::<ComboboxState>();
+
+    // Auto-highlight the first visible item when the query changes or when a new
+    // batch of items finishes mounting. Subscribes to items_version (not items
+    // directly) so this fires once per batch rather than once per item → O(1).
     Effect::new(move |prev_query: Option<String>| {
         let query = ctx.query.get();
-        ctx.items.with(|_| {}); // reactive dep without cloning
+        ctx.items_version.get();
         let query_changed = prev_query.as_deref() != Some(query.as_str());
         if query_changed || ctx.item_focus.get_untracked().is_none() {
             let first = ctx.navigate_first_item();
@@ -156,7 +225,7 @@ fn RootEvents(children: Children) -> impl IntoView {
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
 
     let _ = use_event_listener(ctx.trigger_ref, leptos::ev::click, move |_| {
         ctx.toggle();
@@ -215,9 +284,9 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 }
 
 #[component]
-pub fn Value(#[prop(into, optional)] placeholder: String) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
-    view! { <span>{move || ctx.selected_label.get().unwrap_or_else(|| placeholder.clone())}</span> }
+pub fn Value(#[prop(into, optional)] placeholder: StringProp) -> impl IntoView {
+    let ctx = expect_context::<ComboboxState>();
+    view! { <span>{move || ctx.selected_label.get().unwrap_or_else(|| placeholder.get())}</span> }
 }
 
 #[component]
@@ -227,7 +296,7 @@ pub fn Content(
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
     let content_ref = ctx.content_ref;
 
     let UseElementBoundingReturn {
@@ -409,7 +478,7 @@ pub fn Content(
                 if let Some(item) = item {
                     if !item.disabled {
                         let val = item.value.with_value(|v| v.clone());
-                        let lbl = item.label.with_value(|l| l.clone());
+                        let lbl = item.label.with_value(|l| l.get());
                         ctx.select(val, lbl);
                         if ctx.inline_mode {
                             ctx.suppress_next_open.set_value(true);
@@ -449,9 +518,9 @@ pub fn Content(
 #[component]
 pub fn Input(
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] placeholder: String,
+    #[prop(into, optional)] placeholder: StringProp,
 ) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
 
     let _ = use_event_listener(ctx.input_ref, leptos::ev::input, move |evt| {
         let val = event_target_value(&evt);
@@ -463,7 +532,7 @@ pub fn Input(
         <input
             node_ref={ctx.input_ref}
             type="text"
-            placeholder={placeholder}
+            placeholder={move || placeholder.get()}
             autocomplete="off"
             class={class}
         />
@@ -480,9 +549,9 @@ pub fn Input(
 #[component]
 pub fn InputTrigger(
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] placeholder: String,
+    #[prop(into, optional)] placeholder: StringProp,
 ) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
 
     // On focus: open the dropdown and select all text so typing replaces the label.
     let _ = use_event_listener(ctx.input_ref, leptos::ev::focus, move |_| {
@@ -560,7 +629,7 @@ pub fn InputTrigger(
                     if let Some(item) = item {
                         if !item.disabled {
                             let val = item.value.with_value(|v| v.clone());
-                            let lbl = item.label.with_value(|l| l.clone());
+                            let lbl = item.label.with_value(|l| l.get());
                             ctx.select(val, lbl);
                             // suppress_next_open not needed — we're already in the input
                         }
@@ -597,7 +666,7 @@ pub fn InputTrigger(
         <input
             node_ref={ctx.input_ref}
             type="text"
-            placeholder={placeholder}
+            placeholder={move || placeholder.get()}
             autocomplete="off"
             class={class}
         />
@@ -608,18 +677,18 @@ pub fn InputTrigger(
 pub fn Item(
     children: Children,
     #[prop(into)] value: String,
-    #[prop(into, optional)] label: Option<String>,
+    #[prop(into, optional)] label: Option<StringProp>,
     #[prop(into, optional)] class: String,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
 
     let index = ctx.next_index();
-    let label_text = label.unwrap_or_else(|| value.clone());
+    let label_sp = label.unwrap_or_else(|| StringProp::from(value.as_str()));
     let item_ctx = ComboboxItemContext {
         index,
         value: StoredValue::new(value),
-        label: StoredValue::new(label_text),
+        label: StoredValue::new(label_sp),
         disabled,
         item_ref: NodeRef::new(),
     };
@@ -636,7 +705,7 @@ pub fn Item(
         if q.is_empty() {
             return true;
         }
-        item_ctx.label.with_value(|l| l.to_lowercase().contains(&q))
+        item_ctx.label.with_value(|l| l.get().to_lowercase().contains(&q))
     });
 
     let _ = use_event_listener(item_ctx.item_ref, click, move |_| {
@@ -644,7 +713,7 @@ pub fn Item(
             return;
         }
         let val = item_ctx.value.with_value(|v| v.clone());
-        let lbl = item_ctx.label.with_value(|l| l.clone());
+        let lbl = item_ctx.label.with_value(|l| l.get());
         ctx.select(val, lbl);
         if ctx.inline_mode {
             ctx.suppress_next_open.set_value(true);
@@ -702,7 +771,7 @@ pub fn ItemText(children: Children) -> impl IntoView {
 
 #[component]
 pub fn ItemIndicator(children: ChildrenFn) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
+    let ctx = expect_context::<ComboboxState>();
     let item_ctx = expect_context::<ComboboxItemContext>();
 
     view! {
@@ -718,8 +787,11 @@ pub fn ItemIndicator(children: ChildrenFn) -> impl IntoView {
 
 #[component]
 pub fn Empty(children: ChildrenFn) -> impl IntoView {
-    let ctx = expect_context::<ComboboxContext>();
-    let has_visible = Memo::new(move |_| !ctx.visible_items().is_empty());
+    let ctx = expect_context::<ComboboxState>();
+    let has_visible = Memo::new(move |_| {
+        ctx.items_version.get(); // batch-mount notification
+        !ctx.visible_items().is_empty()
+    });
 
     view! {
         <Show when={move || !has_visible.get()} fallback={|| ()}>

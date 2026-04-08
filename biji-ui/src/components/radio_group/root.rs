@@ -1,40 +1,68 @@
-use std::sync::atomic::AtomicUsize;
-
 use leptos::{context::Provider, ev::{click, focus, keydown}, prelude::*};
 use leptos_use::use_event_listener;
 
 use crate::items::{FilterActiveItems, Focus, ManageFocus, NavigateItems};
 
-use super::context::{RadioGroupContext, RadioItemContext};
+use super::context::{RadioGroupState, RadioItemContext};
 
+/// Returns the [`RadioGroupState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+///
+/// Call this inside any child component that needs access to radio group state.
+pub fn use_radio_group() -> RadioGroupState {
+    expect_context::<RadioGroupState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`RadioGroupState`]
+/// directly inside the children via the `let:` binding.
+///
+/// ```rust
+/// <radio_group::RootWith let:rg>
+///     <p class="text-sm">{move || rg.value.get().unwrap_or_default()}</p>
+///     <radio_group::Item value="a">...</radio_group::Item>
+/// </radio_group::RootWith>
+/// ```
 #[component]
-pub fn Root(
-    children: Children,
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(RadioGroupState) -> IV + Send + Sync + 'static,
     #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
+    /// Controlled signal. When provided, the radio group reads and writes this signal directly.
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
     #[prop(default = false)] disabled: bool,
-    #[prop(optional)] on_value_change: Option<Callback<String>>,
 ) -> impl IntoView {
-    let ctx = RadioGroupContext {
-        value: RwSignal::new(value),
-        item_focus: RwSignal::new(None),
-        items: RwSignal::new(Default::default()),
-        disabled,
-        next_id: StoredValue::new(AtomicUsize::new(0)),
-        on_value_change,
-    };
+    let state = RadioGroupState::new(value, default_value, disabled);
 
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <div
                 role="radiogroup"
-                aria-disabled={if ctx.disabled { Some("true") } else { None }}
-                data-disabled={ctx.disabled}
+                aria-disabled={if state.disabled { Some("true") } else { None }}
+                data-disabled={state.disabled}
                 class={class}
             >
-                {children()}
+                {children(state)}
             </div>
         </Provider>
+    }
+}
+
+/// The standard radio group root. Renders a `<div role="radiogroup">` and provides
+/// [`RadioGroupState`] to all descendants via context.
+///
+/// Use [`RootWith`] instead when you need to access [`RadioGroupState`] inline via `let:rg`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(into, default = None)] value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(default = false)] disabled: bool,
+) -> impl IntoView {
+    view! {
+        <RootWith value=value default_value=default_value disabled=disabled class=class let:_>
+            {children()}
+        </RootWith>
     }
 }
 
@@ -45,20 +73,20 @@ pub fn Item(
     #[prop(into, optional)] class: String,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let group_ctx = expect_context::<RadioGroupContext>();
+    let group = expect_context::<RadioGroupState>();
 
-    let index = group_ctx.next_index();
+    let index = group.next_index();
     let item_ctx = RadioItemContext {
         index,
         value: StoredValue::new(value),
-        disabled: disabled || group_ctx.disabled,
+        disabled: disabled || group.disabled,
         trigger_ref: NodeRef::new(),
     };
 
-    group_ctx.upsert_item(index, item_ctx);
+    group.upsert_item(index, item_ctx);
 
     on_cleanup(move || {
-        group_ctx.remove_item(index);
+        group.remove_item(index);
     });
 
     let _ = use_event_listener(item_ctx.trigger_ref, click, move |_| {
@@ -66,14 +94,11 @@ pub fn Item(
             return;
         }
         let val = item_ctx.value.with_value(|v| v.clone());
-        group_ctx.select(val.clone());
-        if let Some(cb) = group_ctx.on_value_change {
-            cb.run(val);
-        }
+        group.select(val);
     });
 
     let _ = use_event_listener(item_ctx.trigger_ref, focus, move |_| {
-        group_ctx.set_focus(Some(item_ctx.index));
+        group.set_focus(Some(item_ctx.index));
     });
 
     let _ = use_event_listener(item_ctx.trigger_ref, keydown, move |evt| {
@@ -83,31 +108,25 @@ pub fn Item(
         match evt.key().as_str() {
             "ArrowDown" | "ArrowRight" => {
                 evt.prevent_default();
-                if let Some(next) = group_ctx.navigate_next_item() {
+                if let Some(next) = group.navigate_next_item() {
                     next.focus();
                     let val = next.value.with_value(|v| v.clone());
-                    group_ctx.select(val.clone());
-                    if let Some(cb) = group_ctx.on_value_change {
-                        cb.run(val);
-                    }
+                    group.select(val);
                 }
             }
             "ArrowUp" | "ArrowLeft" => {
                 evt.prevent_default();
-                if let Some(prev) = group_ctx.navigate_previous_item() {
+                if let Some(prev) = group.navigate_previous_item() {
                     prev.focus();
                     let val = prev.value.with_value(|v| v.clone());
-                    group_ctx.select(val.clone());
-                    if let Some(cb) = group_ctx.on_value_change {
-                        cb.run(val);
-                    }
+                    group.select(val);
                 }
             }
             _ => {}
         }
     });
 
-    let is_checked = Memo::new(move |_| item_ctx.is_checked(group_ctx.value.get()));
+    let is_checked = Memo::new(move |_| item_ctx.is_checked(group.value.get()));
 
     view! {
         <Provider value={item_ctx}>
@@ -124,8 +143,8 @@ pub fn Item(
                         "-1"
                     } else if is_checked.get() {
                         "0"
-                    } else if group_ctx.value.get().is_none()
-                        && group_ctx
+                    } else if group.value.get().is_none()
+                        && group
                             .filter_active_items()
                             .into_iter()
                             .next()
@@ -147,13 +166,13 @@ pub fn Item(
 
 #[component]
 pub fn Indicator(#[prop(into, optional)] class: String) -> impl IntoView {
-    let group_ctx = expect_context::<RadioGroupContext>();
+    let group = expect_context::<RadioGroupState>();
     let item_ctx = expect_context::<RadioItemContext>();
 
     view! {
         <span
             aria-hidden="true"
-            data-state={move || item_ctx.data_state(group_ctx.value.get())}
+            data-state={move || item_ctx.data_state(group.value.get())}
             data-disabled={item_ctx.disabled}
             class={class}
         />

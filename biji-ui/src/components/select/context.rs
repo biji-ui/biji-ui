@@ -15,87 +15,63 @@ use crate::{
         FilterActiveItems, Focus, GetIndex, IsActive, ManageFocus, NavigateItems, filter_active,
         next_item, previous_item,
     },
-    utils::positioning::{AvoidCollisions, Positioning},
+    utils::{positioning::{AvoidCollisions, Positioning}, props::StringProp},
 };
 
 #[derive(Copy, Clone)]
-pub struct SelectContext {
-    pub trigger_ref: NodeRef<Button>,
-    pub content_ref: NodeRef<Div>,
+pub struct SelectState {
+    pub(crate) trigger_ref: NodeRef<Button>,
+    pub(crate) content_ref: NodeRef<Div>,
     pub open: RwSignal<bool>,
     pub value: RwSignal<Option<String>>,
     /// The display label of the currently selected item. Cached at selection
     /// time so it survives the dropdown unmounting.
     pub selected_label: RwSignal<Option<String>>,
-    pub item_focus: RwSignal<Option<usize>>,
-    pub items: RwSignal<HashMap<usize, SelectItemContext>>,
-    pub hide_delay: Duration,
-    pub positioning: Positioning,
-    pub arrow_size: i32,
-    pub select_id: StoredValue<String>,
-    pub avoid_collisions: AvoidCollisions,
-    pub(crate) on_value_change: Option<Callback<String>>,
+    pub data_state: Signal<&'static str>,
+    pub(crate) item_focus: RwSignal<Option<usize>>,
+    pub(crate) items: RwSignal<HashMap<usize, SelectItemContext>>,
+    pub(crate) hide_delay: Duration,
+    pub(crate) positioning: Positioning,
+    pub(crate) arrow_size: i32,
+    pub(crate) select_id: StoredValue<String>,
+    pub(crate) avoid_collisions: AvoidCollisions,
     pub(crate) next_id: StoredValue<AtomicUsize>,
 }
 
-impl Default for SelectContext {
-    fn default() -> Self {
-        Self {
-            trigger_ref: NodeRef::default(),
-            content_ref: NodeRef::default(),
-            open: RwSignal::new(false),
-            value: RwSignal::new(None),
-            selected_label: RwSignal::new(None),
-            item_focus: RwSignal::new(None),
-            items: RwSignal::new(HashMap::new()),
-            hide_delay: Duration::from_millis(200),
-            positioning: Positioning::BottomStart,
-            arrow_size: 0,
-            select_id: StoredValue::new(String::new()),
-            avoid_collisions: AvoidCollisions::Flip,
-            on_value_change: None,
-            next_id: StoredValue::new(AtomicUsize::new(0)),
-        }
-    }
-}
-
-impl SelectContext {
-    pub fn next_index(&self) -> usize {
+impl SelectState {
+    pub(crate) fn next_index(&self) -> usize {
         self.next_id
             .with_value(|c| c.fetch_add(1, Ordering::Relaxed))
     }
 
-    pub fn upsert_item(&self, index: usize, item: SelectItemContext) {
+    pub(crate) fn upsert_item(&self, index: usize, item: SelectItemContext) {
         self.items.update(|m| {
             *m.entry(index).or_insert(item) = item;
         });
     }
 
-    pub fn remove_item(&self, index: usize) {
+    pub(crate) fn remove_item(&self, index: usize) {
         self.items.update(|m| {
             m.remove(&index);
         });
     }
 
-    pub fn select(&self, value: String, label: String) {
-        self.value.set(Some(value.clone()));
+    pub(crate) fn select(&self, value: String, label: String) {
+        self.value.set(Some(value));
         self.selected_label.set(Some(label));
-        if let Some(cb) = self.on_value_change {
-            cb.run(value);
-        }
         self.open.set(false);
     }
 
-    pub fn open(&self) {
+    pub(crate) fn open(&self) {
         self.open.set(true);
     }
 
-    pub fn close(&self) {
+    pub(crate) fn close(&self) {
         self.open.set(false);
         self.item_focus.set(None);
     }
 
-    pub fn toggle(&self) {
+    pub(crate) fn toggle(&self) {
         if self.open.get() {
             self.close();
         } else {
@@ -104,13 +80,13 @@ impl SelectContext {
     }
 }
 
-impl FilterActiveItems<SelectItemContext> for SelectContext {
+impl FilterActiveItems<SelectItemContext> for SelectState {
     fn filter_active_items(&self) -> Vec<SelectItemContext> {
         filter_active(self.items.get())
     }
 }
 
-impl ManageFocus for SelectContext {
+impl ManageFocus for SelectState {
     fn set_focus(&self, index: Option<usize>) {
         self.item_focus.set(index);
     }
@@ -120,7 +96,7 @@ impl ManageFocus for SelectContext {
     }
 }
 
-impl NavigateItems<SelectItemContext> for SelectContext {
+impl NavigateItems<SelectItemContext> for SelectState {
     fn navigate_first_item(&self) -> Option<SelectItemContext> {
         self.filter_active_items().into_iter().next()
     }
@@ -146,7 +122,7 @@ pub struct SelectItemContext {
     pub value: StoredValue<String>,
     /// Display label shown in the trigger when this item is selected.
     /// Defaults to `value` if not explicitly provided.
-    pub label: StoredValue<String>,
+    pub label: StoredValue<StringProp>,
     pub disabled: bool,
     pub item_ref: NodeRef<Div>,
 }

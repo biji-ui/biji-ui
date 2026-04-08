@@ -19,59 +19,52 @@ pub enum Orientation {
 
 #[derive(Copy, Clone, Default, PartialEq)]
 pub enum ActivationMode {
-    /// Arrow keys move focus AND activate the tab.
     #[default]
     Automatic,
-    /// Arrow keys move focus only; Enter/Space activates.
     Manual,
 }
 
 #[derive(Copy, Clone)]
-pub struct TabsContext {
+pub struct TabsState {
     pub value: RwSignal<Option<String>>,
-    pub item_focus: RwSignal<Option<usize>>,
-    pub items: RwSignal<HashMap<usize, TabItemContext>>,
     pub orientation: Orientation,
-    pub activation_mode: ActivationMode,
-    pub(crate) on_value_change: Option<Callback<String>>,
+    pub(crate) item_focus: RwSignal<Option<usize>>,
+    pub(crate) items: RwSignal<HashMap<usize, TabItemContext>>,
+    pub(crate) activation_mode: ActivationMode,
     pub(crate) next_id: StoredValue<AtomicUsize>,
-    /// Unique ID for this Root instance, used to namespace trigger/panel DOM IDs.
     pub(crate) root_id: usize,
 }
 
-impl TabsContext {
-    pub fn next_index(&self) -> usize {
+impl TabsState {
+    pub(crate) fn next_index(&self) -> usize {
         self.next_id
             .with_value(|c| c.fetch_add(1, Ordering::Relaxed))
     }
 
-    pub fn upsert_item(&self, index: usize, item: TabItemContext) {
+    pub(crate) fn upsert_item(&self, index: usize, item: TabItemContext) {
         self.items.update(|m| {
             *m.entry(index).or_insert(item) = item;
         });
     }
 
-    pub fn remove_item(&self, index: usize) {
+    pub(crate) fn remove_item(&self, index: usize) {
         self.items.update(|m| {
             m.remove(&index);
         });
     }
 
-    pub fn select(&self, value: String) {
-        self.value.set(Some(value.clone()));
-        if let Some(cb) = self.on_value_change {
-            cb.run(value);
-        }
+    pub(crate) fn select(&self, value: String) {
+        self.value.set(Some(value));
     }
 }
 
-impl FilterActiveItems<TabItemContext> for TabsContext {
+impl FilterActiveItems<TabItemContext> for TabsState {
     fn filter_active_items(&self) -> Vec<TabItemContext> {
         filter_active(self.items.get())
     }
 }
 
-impl ManageFocus for TabsContext {
+impl ManageFocus for TabsState {
     fn set_focus(&self, index: Option<usize>) {
         self.item_focus.set(index);
     }
@@ -81,7 +74,7 @@ impl ManageFocus for TabsContext {
     }
 }
 
-impl NavigateItems<TabItemContext> for TabsContext {
+impl NavigateItems<TabItemContext> for TabsState {
     fn navigate_first_item(&self) -> Option<TabItemContext> {
         self.filter_active_items().into_iter().next()
     }

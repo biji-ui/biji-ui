@@ -13,65 +13,60 @@ use crate::items::{
 };
 
 #[derive(Copy, Clone)]
-pub struct ContextMenuContext {
-    pub trigger_ref: NodeRef<Div>,
-    pub content_ref: NodeRef<Div>,
+pub struct ContextMenuState {
+    pub(crate) trigger_ref: NodeRef<Div>,
+    pub(crate) content_ref: NodeRef<Div>,
     pub open: RwSignal<bool>,
     /// Viewport X coordinate where the context menu was invoked.
     pub pointer_x: RwSignal<f64>,
     /// Viewport Y coordinate where the context menu was invoked.
     pub pointer_y: RwSignal<f64>,
-    pub item_focus: RwSignal<Option<usize>>,
-    pub items: RwSignal<HashMap<usize, ContextMenuItemContext>>,
-    pub allow_loop: bool,
-    pub hide_delay: Duration,
+    pub data_state: Signal<&'static str>,
+    pub(crate) item_focus: RwSignal<Option<usize>>,
+    pub(crate) items: RwSignal<HashMap<usize, ContextMenuItemContext>>,
+    pub(crate) allow_loop: bool,
+    pub(crate) hide_delay: Duration,
     pub(crate) menu_id: StoredValue<String>,
     pub(crate) next_id: StoredValue<AtomicUsize>,
-    pub(crate) on_open_change: Option<Callback<bool>>,
 }
 
-impl ContextMenuContext {
-    pub fn next_index(&self) -> usize {
-        self.next_id.with_value(|c| c.fetch_add(1, Ordering::Relaxed))
+impl ContextMenuState {
+    pub(crate) fn next_index(&self) -> usize {
+        self.next_id
+            .with_value(|c| c.fetch_add(1, Ordering::Relaxed))
     }
 
-    pub fn upsert_item(&self, index: usize, item: ContextMenuItemContext) {
+    pub(crate) fn upsert_item(&self, index: usize, item: ContextMenuItemContext) {
         self.items.update(|m| {
             *m.entry(index).or_insert(item) = item;
         });
     }
 
-    pub fn remove_item(&self, index: usize) {
+    pub(crate) fn remove_item(&self, index: usize) {
         self.items.update(|m| {
             m.remove(&index);
         });
     }
 
-    pub fn open_at(&self, x: f64, y: f64) {
+    pub(crate) fn open_at(&self, x: f64, y: f64) {
         self.pointer_x.set(x);
         self.pointer_y.set(y);
         self.open.set(true);
-        if let Some(cb) = self.on_open_change {
-            cb.run(true);
-        }
     }
 
-    pub fn close(&self) {
+    pub(crate) fn close(&self) {
         self.open.set(false);
         self.item_focus.set(None);
-        if let Some(cb) = self.on_open_change {
-            cb.run(false);
-        }
     }
 }
 
-impl FilterActiveItems<ContextMenuItemContext> for ContextMenuContext {
+impl FilterActiveItems<ContextMenuItemContext> for ContextMenuState {
     fn filter_active_items(&self) -> Vec<ContextMenuItemContext> {
         filter_active(self.items.get())
     }
 }
 
-impl ManageFocus for ContextMenuContext {
+impl ManageFocus for ContextMenuState {
     fn set_focus(&self, index: Option<usize>) {
         self.item_focus.set(index);
     }
@@ -81,7 +76,7 @@ impl ManageFocus for ContextMenuContext {
     }
 }
 
-impl NavigateItems<ContextMenuItemContext> for ContextMenuContext {
+impl NavigateItems<ContextMenuItemContext> for ContextMenuState {
     fn navigate_first_item(&self) -> Option<ContextMenuItemContext> {
         self.filter_active_items().into_iter().next()
     }

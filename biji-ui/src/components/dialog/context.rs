@@ -6,29 +6,17 @@ use leptos::{
 };
 
 #[derive(Copy, Clone)]
-pub struct DialogContext {
-    pub trigger_ref: NodeRef<Button>,
+pub struct DialogState {
     pub open: RwSignal<bool>,
-    pub root: RwSignal<RootContext>,
-    pub prevent_scroll: bool,
-    pub hide_delay: Duration,
+    pub data_state: Signal<&'static str>,
+    pub(crate) trigger_ref: NodeRef<Button>,
+    pub(crate) root: RwSignal<RootContext>,
+    pub(crate) prevent_scroll: bool,
+    pub(crate) hide_delay: Duration,
 }
 
-impl Default for DialogContext {
-    fn default() -> Self {
-        Self {
-            trigger_ref: NodeRef::default(),
-            open: RwSignal::new(false),
-            root: RwSignal::new(RootContext::default()),
-            prevent_scroll: true,
-            hide_delay: Duration::from_millis(200),
-        }
-    }
-}
-
-impl DialogContext {
+impl DialogState {
     pub fn open(&self) {
-        self.root.set(RootContext::default());
         self.open.set(true);
     }
 

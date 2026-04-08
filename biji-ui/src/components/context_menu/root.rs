@@ -25,7 +25,7 @@ use crate::{
     utils::prevent_scroll::use_prevent_scroll,
 };
 
-use super::context::{ContextMenuContext, ContextMenuItemContext};
+use super::context::{ContextMenuItemContext, ContextMenuState};
 
 static CONTEXT_MENU_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -34,41 +34,63 @@ fn next_menu_id() -> String {
     format!("biji-context-menu-{id}")
 }
 
-#[component]
-pub fn Root(
-    children: Children,
-    #[prop(into, optional)] class: String,
-    #[prop(default = true)] allow_loop: bool,
-    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
-    #[prop(optional)] on_open_change: Option<Callback<bool>>,
-) -> impl IntoView {
-    let ctx = ContextMenuContext {
+fn build_state(allow_loop: bool, hide_delay: Duration) -> ContextMenuState {
+    let open = RwSignal::new(false);
+    let data_state = Signal::derive(move || if open.get() { "open" } else { "closed" });
+    ContextMenuState {
         trigger_ref: NodeRef::new(),
         content_ref: NodeRef::new(),
-        open: RwSignal::new(false),
+        open,
         pointer_x: RwSignal::new(0.0),
         pointer_y: RwSignal::new(0.0),
+        data_state,
         item_focus: RwSignal::new(None),
         items: RwSignal::new(Default::default()),
         allow_loop,
         hide_delay,
         menu_id: StoredValue::new(next_menu_id()),
         next_id: StoredValue::new(AtomicUsize::new(0)),
-        on_open_change,
-    };
+    }
+}
 
+pub fn use_context_menu() -> ContextMenuState {
+    expect_context::<ContextMenuState>()
+}
+
+#[component]
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(ContextMenuState) -> IV + Send + Sync + 'static,
+    #[prop(into, optional)] class: String,
+    #[prop(default = true)] allow_loop: bool,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+) -> impl IntoView {
+    let state = build_state(allow_loop, hide_delay);
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <RootEvents>
-                <div class={class}>{children()}</div>
+                <div class={class}>{children(state)}</div>
             </RootEvents>
         </Provider>
     }
 }
 
 #[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(default = true)] allow_loop: bool,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+) -> impl IntoView {
+    view! {
+        <RootWith allow_loop={allow_loop} hide_delay={hide_delay} class={class} let:_>
+            {children()}
+        </RootWith>
+    }
+}
+
+#[component]
 fn RootEvents(children: Children) -> impl IntoView {
-    let ctx = expect_context::<ContextMenuContext>();
+    let ctx = expect_context::<ContextMenuState>();
 
     let ps_eff = use_prevent_scroll(move || ctx.open.get(), ctx.hide_delay);
     on_cleanup(move || drop(ps_eff));
@@ -101,7 +123,7 @@ fn RootEvents(children: Children) -> impl IntoView {
 
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<ContextMenuContext>();
+    let ctx = expect_context::<ContextMenuState>();
 
     let _ = use_event_listener(ctx.trigger_ref, leptos::ev::contextmenu, move |evt| {
         evt.prevent_default();
@@ -128,7 +150,7 @@ pub fn Content(
     #[prop(into, optional)] show_class: String,
     #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<ContextMenuContext>();
+    let ctx = expect_context::<ContextMenuState>();
     let content_ref = ctx.content_ref;
 
     let UseElementBoundingReturn {
@@ -143,7 +165,9 @@ pub fn Content(
         let raw_ch = *content_height.read();
         let _ = ctx.open.get();
 
-        let hidden = || "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: top left;".to_string();
+        let hidden = || {
+            "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: top left;".to_string()
+        };
 
         if raw_cw == 0.0 && raw_ch == 0.0 {
             return hidden();
@@ -214,55 +238,53 @@ pub fn Content(
         drop(focus_eff);
     });
 
-    let _ = use_event_listener(content_ref, keydown, move |evt| {
-        match evt.key().as_str() {
-            "ArrowDown" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_next_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+    let _ = use_event_listener(content_ref, keydown, move |evt| match evt.key().as_str() {
+        "ArrowDown" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_next_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "ArrowUp" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_previous_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+        }
+        "ArrowUp" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_previous_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "Home" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_first_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+        }
+        "Home" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_first_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "End" => {
-                evt.prevent_default();
-                if let Some(item) = ctx.navigate_last_item() {
-                    item.focus();
-                    ctx.set_focus(Some(item.index));
-                }
+        }
+        "End" => {
+            evt.prevent_default();
+            if let Some(item) = ctx.navigate_last_item() {
+                item.focus();
+                ctx.set_focus(Some(item.index));
             }
-            "Enter" | " " => {
-                evt.prevent_default();
-                if let Some(focused_idx) = ctx.item_focus.get_untracked() {
-                    let item = ctx.items.with_untracked(|m| m.get(&focused_idx).copied());
-                    if let Some(item) = item {
-                        if !item.disabled {
-                            if let Some(cb) = item.on_select {
-                                cb.run(());
-                            }
-                            ctx.close();
+        }
+        "Enter" | " " => {
+            evt.prevent_default();
+            if let Some(focused_idx) = ctx.item_focus.get_untracked() {
+                let item = ctx.items.with_untracked(|m| m.get(&focused_idx).copied());
+                if let Some(item) = item {
+                    if !item.disabled {
+                        if let Some(cb) = item.on_select {
+                            cb.run(());
                         }
+                        ctx.close();
                     }
                 }
             }
-            "Tab" => {
-                ctx.close();
-            }
-            _ => {}
         }
+        "Tab" => {
+            ctx.close();
+        }
+        _ => {}
     });
 
     view! {
@@ -289,7 +311,7 @@ pub fn Item(
     #[prop(default = false)] disabled: bool,
     #[prop(optional)] on_select: Option<Callback<()>>,
 ) -> impl IntoView {
-    let ctx = expect_context::<ContextMenuContext>();
+    let ctx = expect_context::<ContextMenuState>();
 
     let index = ctx.next_index();
     let item_ctx = ContextMenuItemContext {
@@ -344,14 +366,10 @@ pub fn Item(
 
 #[component]
 pub fn Separator(#[prop(into, optional)] class: String) -> impl IntoView {
-    view! {
-        <div role="separator" aria-orientation="horizontal" class={class} />
-    }
+    view! { <div role="separator" aria-orientation="horizontal" class={class} /> }
 }
 
 #[component]
 pub fn Label(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    view! {
-        <div class={class}>{children()}</div>
-    }
+    view! { <div class={class}>{children()}</div> }
 }

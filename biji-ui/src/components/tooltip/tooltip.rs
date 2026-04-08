@@ -9,7 +9,7 @@ use wasm_bindgen::JsCast;
 
 use crate::{
     cn,
-    components::tooltip::{context::TooltipContext, singleton},
+    components::tooltip::{context::TooltipState, singleton},
     custom_animated_show::CustomAnimatedShow,
     utils::{
         polygon::{get_points_from_el, make_hull, point_in_polygon},
@@ -24,9 +24,68 @@ fn next_tooltip_id() -> (usize, String) {
     (id, format!("biji-tooltip-{}", id))
 }
 
+/// Returns the [`TooltipState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+pub fn use_tooltip() -> TooltipState {
+    expect_context::<TooltipState>()
+}
+
+/// The render-prop variant of [`Root`]. Use this when you need access to [`TooltipState`]
+/// directly inside the children via the `let:` binding.
+#[component]
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(TooltipState) -> IV + Send + Sync + 'static,
+    #[prop(into, optional)] class: String,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = Positioning::default())] positioning: Positioning,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+) -> impl IntoView {
+    let (numeric_id, string_id) = next_tooltip_id();
+    let open = RwSignal::new(false);
+    let state = TooltipState {
+        open,
+        data_state: Signal::derive(move || if open.get() { "open" } else { "closed" }),
+        trigger_ref: NodeRef::new(),
+        content_ref: NodeRef::new(),
+        pointer_inside_trigger: RwSignal::new(false),
+        pointer_inside_content: RwSignal::new(false),
+        hide_delay,
+        positioning,
+        arrow_size: 8,
+        avoid_collisions,
+        numeric_id,
+        tooltip_id: StoredValue::new(string_id),
+    };
+
+    singleton::register(numeric_id, move || open.set(false));
+    on_cleanup(move || singleton::unregister(numeric_id));
+
+    view! {
+        <Provider value={state}>
+            <div class={class}>{children(state)}</div>
+        </Provider>
+    }
+}
+
+/// The standard tooltip root. Use [`RootWith`] instead when you need to access
+/// [`TooltipState`] inline via `let:t`.
+#[component]
+pub fn Root(
+    #[prop(into, optional)] class: String,
+    children: ChildrenFn,
+    #[prop(default = Duration::from_millis(200))] hide_delay: Duration,
+    #[prop(default = Positioning::default())] positioning: Positioning,
+    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
+) -> impl IntoView {
+    view! {
+        <RootWith hide_delay positioning avoid_collisions class let:_>
+            {children()}
+        </RootWith>
+    }
+}
+
 #[component]
 pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let tooltip_ctx = expect_context::<TooltipContext>();
+    let tooltip_ctx = expect_context::<TooltipState>();
 
     let trigger_ref = tooltip_ctx.trigger_ref;
 
@@ -51,7 +110,7 @@ pub fn Trigger(children: Children, #[prop(into, optional)] class: String) -> imp
 
 #[component]
 pub fn TriggerEvents(children: Children) -> impl IntoView {
-    let tooltip_ctx = expect_context::<TooltipContext>();
+    let tooltip_ctx = expect_context::<TooltipState>();
 
     let UseElementBoundingReturn {
         top: trigger_top,
@@ -73,14 +132,9 @@ pub fn TriggerEvents(children: Children) -> impl IntoView {
         let mut trigger_points =
             get_points_from_el(&(trigger_top, trigger_right, trigger_bottom, trigger_left));
 
-        // Use use_element_bounding signals only as reactive dependencies so this
-        // closure re-runs when the content mounts/unmounts.
         let _ = content_width.get();
         let _ = content_height.get();
 
-        // Read actual dimensions via offsetWidth/offsetHeight — identical to the
-        // approach in Content — so that CSS scale transforms (e.g. scale-95 during
-        // the open animation) do not produce shrunken values.
         let (cw, ch) = tooltip_ctx
             .content_ref
             .get_untracked()
@@ -178,52 +232,13 @@ pub fn TriggerEvents(children: Children) -> impl IntoView {
 }
 
 #[component]
-pub fn Root(
-    #[prop(into, optional)] class: String,
-    children: Children,
-    /// The timeout after which the component will be unmounted if `when == false`
-    #[prop(default = Duration::from_millis(200))]
-    hide_delay: Duration,
-    #[prop(default = Positioning::default())] positioning: Positioning,
-    #[prop(default = AvoidCollisions::Flip)] avoid_collisions: AvoidCollisions,
-) -> impl IntoView {
-    let (numeric_id, string_id) = next_tooltip_id();
-    let open_signal = RwSignal::new(false);
-
-    let ctx = TooltipContext {
-        hide_delay,
-        positioning,
-        avoid_collisions,
-        numeric_id,
-        tooltip_id: StoredValue::new(string_id),
-        open: open_signal,
-        ..TooltipContext::default()
-    };
-
-    singleton::register(numeric_id, move || open_signal.set(false));
-    on_cleanup(move || singleton::unregister(numeric_id));
-
-    view! {
-        <Provider value={ctx}>
-            <div class={class}>{children()}</div>
-        </Provider>
-    }
-}
-
-#[component]
 pub fn Content(
     children: ChildrenFn,
-    /// Optional CSS class to apply to both show and hide classes
-    #[prop(into, optional)]
-    class: String,
-    /// Optional CSS class to apply if `when == true`
-    #[prop(into, optional)]
-    show_class: String,
-    /// Optional CSS class to apply if `when == false`
-    #[prop(into, optional)]
-    hide_class: String,
+    #[prop(into, optional)] class: String,
+    #[prop(into, optional)] show_class: String,
+    #[prop(into, optional)] hide_class: String,
 ) -> impl IntoView {
-    let tooltip_ctx = expect_context::<TooltipContext>();
+    let tooltip_ctx = expect_context::<TooltipState>();
 
     let content_ref = tooltip_ctx.content_ref;
 
@@ -249,15 +264,15 @@ pub fn Content(
         let _ = left.read();
         let _ = width.read();
         let _ = height.read();
-        let hidden = || format!(
-            "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: {};",
-            tooltip_ctx.positioning.transform_origin()
-        );
+        let hidden = || {
+            format!(
+                "position: fixed; top: 0; left: 0; visibility: hidden; --biji-transform-origin: {};",
+                tooltip_ctx.positioning.transform_origin()
+            )
+        };
         if raw_cw == 0.0 && raw_ch == 0.0 {
             return hidden();
         }
-        // Use offsetWidth/offsetHeight to avoid measuring scaled-down dimensions
-        // when the hide_class includes a CSS scale transform.
         let Some(content_div) = tooltip_ctx.content_ref.get_untracked() else {
             return hidden();
         };
@@ -330,7 +345,7 @@ pub fn Content(
 
 #[component]
 pub fn Arrow(#[prop(into, optional)] class: String) -> impl IntoView {
-    let tooltip_ctx = expect_context::<TooltipContext>();
+    let tooltip_ctx = expect_context::<TooltipState>();
     view! {
         <div
             class={class}

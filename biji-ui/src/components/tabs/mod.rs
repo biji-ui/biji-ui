@@ -1,8 +1,5 @@
 pub mod context;
 pub mod root;
 
-pub use context::{ActivationMode, Orientation};
-pub use root::Content;
-pub use root::List;
-pub use root::Root;
-pub use root::Trigger;
+pub use context::{ActivationMode, Orientation, TabsState};
+pub use root::{Content, List, Root, RootWith, Trigger, use_tabs};

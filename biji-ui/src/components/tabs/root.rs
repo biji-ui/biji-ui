@@ -9,7 +9,7 @@ use leptos_use::use_event_listener;
 
 use crate::items::{FilterActiveItems, Focus, ManageFocus, NavigateItems};
 
-use super::context::{ActivationMode, Orientation, TabItemContext, TabsContext};
+use super::context::{ActivationMode, Orientation, TabItemContext, TabsState};
 
 static TABS_ROOT_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -24,28 +24,38 @@ fn tab_ids(root_id: usize, index: usize) -> (String, String) {
     )
 }
 
-#[component]
-pub fn Root(
-    children: Children,
-    #[prop(into, optional)] class: String,
-    #[prop(into, optional)] value: Option<String>,
-    #[prop(default = Orientation::Horizontal)] orientation: Orientation,
-    #[prop(default = ActivationMode::Automatic)] activation_mode: ActivationMode,
-    #[prop(optional)] on_value_change: Option<Callback<String>>,
-) -> impl IntoView {
-    let ctx = TabsContext {
-        value: RwSignal::new(value),
+fn build_state(
+    value: Option<RwSignal<Option<String>>>,
+    default_value: Option<String>,
+    orientation: Orientation,
+    activation_mode: ActivationMode,
+) -> TabsState {
+    let value_sig = value.unwrap_or_else(|| RwSignal::new(default_value));
+    TabsState {
+        value: value_sig,
         item_focus: RwSignal::new(None),
         items: RwSignal::new(Default::default()),
         orientation,
         activation_mode,
-        on_value_change,
         next_id: StoredValue::new(AtomicUsize::new(0)),
         root_id: next_root_id(),
-    };
+    }
+}
 
+/// Returns the [`TabsState`] from the nearest [`Root`] or [`RootWith`] ancestor.
+pub fn use_tabs() -> TabsState {
+    expect_context::<TabsState>()
+}
+
+#[component]
+fn RootBase(
+    children: ChildrenFn,
+    state: TabsState,
+    orientation: Orientation,
+    #[prop(into, optional)] class: String,
+) -> impl IntoView {
     view! {
-        <Provider value={ctx}>
+        <Provider value={state}>
             <div
                 class={class}
                 data-orientation={if orientation == Orientation::Horizontal {
@@ -60,9 +70,55 @@ pub fn Root(
     }
 }
 
+/// The render-prop variant of [`Root`]. Use this when you need access to [`TabsState`]
+/// directly inside the children via the `let:` binding.
+#[component]
+pub fn RootWith<IV: IntoView + 'static>(
+    children: impl Fn(TabsState) -> IV + Send + Sync + 'static,
+    #[prop(into, optional)] class: String,
+    /// Controlled signal. When provided, the tabs component reads and writes this signal directly.
+    #[prop(into, default = None)]
+    value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(default = Orientation::Horizontal)] orientation: Orientation,
+    #[prop(default = ActivationMode::Automatic)] activation_mode: ActivationMode,
+) -> impl IntoView {
+    let state = build_state(value, default_value, orientation, activation_mode);
+    view! {
+        <RootBase state={state} orientation={orientation} class={class}>
+            {children(state)}
+        </RootBase>
+    }
+}
+
+/// The standard tabs root. Use [`RootWith`] instead when you need to access
+/// [`TabsState`] inline via `let:t`.
+#[component]
+pub fn Root(
+    children: ChildrenFn,
+    #[prop(into, optional)] class: String,
+    #[prop(into, default = None)] value: Option<RwSignal<Option<String>>>,
+    #[prop(into, default = None)] default_value: Option<String>,
+    #[prop(default = Orientation::Horizontal)] orientation: Orientation,
+    #[prop(default = ActivationMode::Automatic)] activation_mode: ActivationMode,
+) -> impl IntoView {
+    view! {
+        <RootWith
+            value={value}
+            default_value={default_value}
+            orientation={orientation}
+            activation_mode={activation_mode}
+            class={class}
+            let:_
+        >
+            {children()}
+        </RootWith>
+    }
+}
+
 #[component]
 pub fn List(children: Children, #[prop(into, optional)] class: String) -> impl IntoView {
-    let ctx = expect_context::<TabsContext>();
+    let ctx = expect_context::<TabsState>();
     view! {
         <div
             role="tablist"
@@ -85,7 +141,7 @@ pub fn Trigger(
     #[prop(into, optional)] class: String,
     #[prop(default = false)] disabled: bool,
 ) -> impl IntoView {
-    let ctx = expect_context::<TabsContext>();
+    let ctx = expect_context::<TabsState>();
 
     let index = ctx.next_index();
     let (trigger_id, panel_id) = tab_ids(ctx.root_id, index);
@@ -178,8 +234,11 @@ pub fn Trigger(
         }
     });
 
-    let is_selected =
-        Memo::new(move |_| ctx.value.get().is_some_and(|v| item_ctx.value.with_value(|iv| v == *iv)));
+    let is_selected = Memo::new(move |_| {
+        ctx.value
+            .get()
+            .is_some_and(|v| item_ctx.value.with_value(|iv| v == *iv))
+    });
 
     view! {
         <button
@@ -203,14 +262,9 @@ pub fn Trigger(
                 } else if is_selected.get() {
                     "0"
                 } else if ctx.value.get().is_none()
-                    && ctx
-                        .filter_active_items()
-                        .into_iter()
-                        .next()
-                        .map(|i| i.index)
+                    && ctx.filter_active_items().into_iter().next().map(|i| i.index)
                         == Some(item_ctx.index)
                 {
-                    // If nothing is selected, first active tab gets tabindex=0.
                     "0"
                 } else {
                     "-1"
@@ -229,7 +283,7 @@ pub fn Content(
     #[prop(into)] value: String,
     #[prop(into, optional)] class: String,
 ) -> impl IntoView {
-    let ctx = expect_context::<TabsContext>();
+    let ctx = expect_context::<TabsState>();
     let tab_value = StoredValue::new(value);
 
     // Single scan: returns both IDs or None if no matching Trigger is registered yet.
@@ -237,7 +291,10 @@ pub fn Content(
     let ids: Memo<Option<(String, String)>> = Memo::new(move |_| {
         ctx.items.with(|m| {
             m.values()
-                .find(|item| item.value.with_value(|v| tab_value.with_value(|tv| v == tv)))
+                .find(|item| {
+                    item.value
+                        .with_value(|v| tab_value.with_value(|tv| v == tv))
+                })
                 .map(|item| {
                     (
                         item.trigger_id.with_value(|s| s.clone()),
@@ -247,8 +304,11 @@ pub fn Content(
         })
     });
 
-    let is_selected =
-        Memo::new(move |_| ctx.value.get().is_some_and(|v| tab_value.with_value(|tv| v == *tv)));
+    let is_selected = Memo::new(move |_| {
+        ctx.value
+            .get()
+            .is_some_and(|v| tab_value.with_value(|tv| v == *tv))
+    });
 
     view! {
         <div

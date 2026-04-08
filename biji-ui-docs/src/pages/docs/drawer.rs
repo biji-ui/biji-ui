@@ -1,4 +1,4 @@
-use leptos::{portal::Portal, prelude::*};
+use leptos::prelude::*;
 
 use crate::components::{
     api_table::{
@@ -14,7 +14,7 @@ const INSTALL_CODE: &str = concat!(
     "\", features = [\"drawer\"] }",
 );
 
-const USAGE_CODE: &str = r#"use leptos::{portal::Portal, prelude::*};
+const USAGE_CODE: &str = r#"use leptos::prelude::*;
 use biji_ui::components::drawer;
 
 #[component]
@@ -24,36 +24,68 @@ pub fn MyDrawer() -> impl IntoView {
             <drawer::Trigger class="px-4 py-2 rounded-md bg-primary text-primary-foreground">
                 "Open Drawer"
             </drawer::Trigger>
-            <Portal>
-                // Full-screen overlay
-                <drawer::Overlay
-                    class="fixed inset-0 z-[80] bg-black/50 transition"
-                    show_class="opacity-100 duration-300 ease-out"
-                    hide_class="opacity-0 duration-200 ease-in"
-                />
-                // Sliding panel
-                <drawer::Content
-                    class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
-                           border-border shadow-xl transition-transform"
-                    show_class="translate-x-0 duration-300 ease-out"
-                    hide_class="translate-x-full duration-200 ease-in"
-                >
-                    <div class="flex flex-col h-full p-6">
-                        <drawer::Title class="text-lg font-semibold">
-                            "Panel Title"
-                        </drawer::Title>
-                        <drawer::Description class="mt-1 text-sm text-muted-foreground">
-                            "Supplementary description text."
-                        </drawer::Description>
-                        <div class="mt-auto">
-                            <drawer::Close class="w-full px-4 py-2 rounded-md border">
-                                "Close"
-                            </drawer::Close>
-                        </div>
+            // Full-screen overlay
+            <drawer::Overlay
+                class="fixed inset-0 z-[80] bg-black/50 transition"
+                show_class="opacity-100 duration-300 ease-out"
+                hide_class="opacity-0 duration-200 ease-in"
+            />
+            // Sliding panel
+            <drawer::Content
+                class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
+                       border-border shadow-xl transition-transform"
+                show_class="translate-x-0 duration-300 ease-out"
+                hide_class="translate-x-full duration-200 ease-in"
+            >
+                <div class="flex flex-col h-full p-6">
+                    <drawer::Title class="text-lg font-semibold">
+                        "Panel Title"
+                    </drawer::Title>
+                    <drawer::Description class="mt-1 text-sm text-muted-foreground">
+                        "Supplementary description text."
+                    </drawer::Description>
+                    <div class="mt-auto">
+                        <drawer::Close class="w-full px-4 py-2 rounded-md border">
+                            "Close"
+                        </drawer::Close>
                     </div>
-                </drawer::Content>
-            </Portal>
+                </div>
+            </drawer::Content>
         </drawer::Root>
+    }
+}"#;
+
+const ROOT_WITH_CODE: &str = r#"use leptos::prelude::*;
+use biji_ui::components::drawer;
+
+#[component]
+pub fn MyDrawer() -> impl IntoView {
+    view! {
+        <drawer::RootWith let:d>
+            <p class="mb-2 text-sm text-muted-foreground">
+                {move || if d.open.get() { "Drawer is open" } else { "Drawer is closed" }}
+            </p>
+            <drawer::Trigger class="px-4 py-2 rounded-md bg-primary text-primary-foreground">
+                "Open Drawer"
+            </drawer::Trigger>
+            <drawer::Overlay
+                class="fixed inset-0 z-[80] bg-black/50 transition"
+                show_class="opacity-100 duration-300 ease-out"
+                hide_class="opacity-0 duration-200 ease-in"
+            />
+            <drawer::Content
+                class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l border-border shadow-xl transition-transform"
+                show_class="translate-x-0 duration-300 ease-out"
+                hide_class="translate-x-full duration-200 ease-in"
+            >
+                <div class="flex flex-col h-full p-6">
+                    <drawer::Title class="text-lg font-semibold">"Settings"</drawer::Title>
+                    <drawer::Close class="mt-auto w-full px-4 py-2 rounded-md border">
+                        "Close"
+                    </drawer::Close>
+                </div>
+            </drawer::Content>
+        </drawer::RootWith>
     }
 }"#;
 
@@ -202,6 +234,26 @@ pub fn DrawerDocPage() -> impl IntoView {
                 code={USAGE_CODE}
                 language="rust"
             />
+            <SectionHeading title="RootWith" />
+            <p class="mb-5 text-sm text-muted-foreground">
+                "Use "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"RootWith"</code>
+                " to access "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"DrawerState"</code>
+                " inline via the "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"let:"</code>
+                " binding. The state is "
+                <code class="text-xs font-mono bg-muted px-1 py-0.5 rounded">"Copy"</code>
+                " and safe to pass as a prop."
+            </p>
+            <DocPreview>
+                <DrawerRootWithExample />
+            </DocPreview>
+            <Code
+                class="[&>.shiki]:overflow-x-auto [&>.shiki]:p-4 [&>.shiki]:rounded-lg [&>.shiki]:text-sm"
+                code={ROOT_WITH_CODE}
+                language="rust"
+            />
             <SectionHeading title="Examples" />
             <h3 class="mt-8 mb-2 text-base font-semibold">"Side"</h3>
             <p class="mb-5 text-sm text-muted-foreground">
@@ -215,7 +267,7 @@ pub fn DrawerDocPage() -> impl IntoView {
                 <DrawerSidesExample />
             </DocPreview>
             <SectionHeading title="API Reference" />
-            <PropsTable title="Root" rows={ROOT_PROPS} />
+            <PropsTable title="Root / RootWith" rows={ROOT_PROPS} />
             <PropsTable title="Trigger" rows={TRIGGER_PROPS} />
             <PropsTable title="Overlay" rows={OVERLAY_PROPS} />
             <PropsTable title="Content" rows={CONTENT_PROPS} />
@@ -245,6 +297,51 @@ pub fn DrawerDocPage() -> impl IntoView {
 }
 
 #[component]
+pub fn DrawerRootWithExample() -> impl IntoView {
+    use biji_ui::components::drawer;
+
+    view! {
+        <div class="flex flex-col items-center gap-3 p-8">
+            <drawer::RootWith let:d>
+                <p class="text-sm text-muted-foreground">
+                    {move || if d.open.get() { "Drawer is open" } else { "Drawer is closed" }}
+                </p>
+                <drawer::Trigger class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium \
+                                        rounded-md border border-border bg-background \
+                                        hover:bg-accent transition-colors">
+                    "Open Drawer"
+                </drawer::Trigger>
+                <drawer::Overlay
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <drawer::Content
+                    class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
+                           border-border shadow-xl transition-transform"
+                    show_class="translate-x-0 duration-300 ease-out"
+                    hide_class="translate-x-full duration-200 ease-in"
+                >
+                    <div class="flex flex-col h-full p-6">
+                        <drawer::Title class="text-lg font-semibold">"Settings"</drawer::Title>
+                        <drawer::Description class="mt-1 text-sm text-muted-foreground">
+                            "Manage your preferences."
+                        </drawer::Description>
+                        <div class="mt-auto">
+                            <drawer::Close class="w-full px-4 py-2 text-sm font-medium rounded-md \
+                                                  bg-primary text-primary-foreground \
+                                                  hover:bg-primary/90 transition-colors">
+                                "Save Changes"
+                            </drawer::Close>
+                        </div>
+                    </div>
+                </drawer::Content>
+            </drawer::RootWith>
+        </div>
+    }
+}
+
+#[component]
 pub fn DrawerExample() -> impl IntoView {
     use biji_ui::components::drawer;
 
@@ -261,59 +358,57 @@ pub fn DrawerExample() -> impl IntoView {
                     </svg>
                     "Open Drawer"
                 </drawer::Trigger>
-                <Portal>
-                    <drawer::Overlay
-                        class="fixed inset-0 z-[80] bg-black/50 transition"
-                        show_class="opacity-100 duration-300 ease-out"
-                        hide_class="opacity-0 duration-200 ease-in"
-                    />
-                    <drawer::Content
-                        class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
-                               border-border shadow-xl transition-transform"
-                        show_class="translate-x-0 duration-300 ease-out"
-                        hide_class="translate-x-full duration-200 ease-in"
-                    >
-                        <div class="flex flex-col h-full p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <drawer::Title class="text-lg font-semibold">
-                                    "Settings"
-                                </drawer::Title>
-                                <drawer::Close class="flex items-center justify-center w-8 h-8 \
-                                                      rounded-md hover:bg-accent transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="w-4 h-4">
-                                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                                    </svg>
-                                </drawer::Close>
+                <drawer::Overlay
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <drawer::Content
+                    class="fixed inset-y-0 right-0 z-[90] w-80 bg-background border-l \
+                           border-border shadow-xl transition-transform"
+                    show_class="translate-x-0 duration-300 ease-out"
+                    hide_class="translate-x-full duration-200 ease-in"
+                >
+                    <div class="flex flex-col h-full p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <drawer::Title class="text-lg font-semibold">
+                                "Settings"
+                            </drawer::Title>
+                            <drawer::Close class="flex items-center justify-center w-8 h-8 \
+                                                  rounded-md hover:bg-accent transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="w-4 h-4">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </drawer::Close>
+                        </div>
+                        <drawer::Description class="text-sm text-muted-foreground mb-6">
+                            "Manage your account settings and preferences."
+                        </drawer::Description>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-3 border-b border-border">
+                                <span class="text-sm font-medium">"Notifications"</span>
+                                <span class="text-xs text-muted-foreground">"Enabled"</span>
                             </div>
-                            <drawer::Description class="text-sm text-muted-foreground mb-6">
-                                "Manage your account settings and preferences."
-                            </drawer::Description>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between py-3 border-b border-border">
-                                    <span class="text-sm font-medium">"Notifications"</span>
-                                    <span class="text-xs text-muted-foreground">"Enabled"</span>
-                                </div>
-                                <div class="flex items-center justify-between py-3 border-b border-border">
-                                    <span class="text-sm font-medium">"Dark Mode"</span>
-                                    <span class="text-xs text-muted-foreground">"System"</span>
-                                </div>
-                                <div class="flex items-center justify-between py-3 border-b border-border">
-                                    <span class="text-sm font-medium">"Language"</span>
-                                    <span class="text-xs text-muted-foreground">"English"</span>
-                                </div>
+                            <div class="flex items-center justify-between py-3 border-b border-border">
+                                <span class="text-sm font-medium">"Dark Mode"</span>
+                                <span class="text-xs text-muted-foreground">"System"</span>
                             </div>
-                            <div class="mt-auto pt-6">
-                                <drawer::Close class="w-full px-4 py-2 text-sm font-medium rounded-md \
-                                                      bg-primary text-primary-foreground \
-                                                      hover:bg-primary/90 transition-colors">
-                                    "Save Changes"
-                                </drawer::Close>
+                            <div class="flex items-center justify-between py-3 border-b border-border">
+                                <span class="text-sm font-medium">"Language"</span>
+                                <span class="text-xs text-muted-foreground">"English"</span>
                             </div>
                         </div>
-                    </drawer::Content>
-                </Portal>
+                        <div class="mt-auto pt-6">
+                            <drawer::Close class="w-full px-4 py-2 text-sm font-medium rounded-md \
+                                                  bg-primary text-primary-foreground \
+                                                  hover:bg-primary/90 transition-colors">
+                                "Save Changes"
+                            </drawer::Close>
+                        </div>
+                    </div>
+                </drawer::Content>
             </drawer::Root>
         </div>
     }
@@ -332,36 +427,34 @@ pub fn DrawerSidesExample() -> impl IntoView {
                                         hover:bg-accent transition-colors">
                     "Top"
                 </drawer::Trigger>
-                <Portal>
-                    <drawer::Overlay
-                        class="fixed inset-0 z-[80] bg-black/50 transition"
-                        show_class="opacity-100 duration-300 ease-out"
-                        hide_class="opacity-0 duration-200 ease-in"
-                    />
-                    <drawer::Content
-                        class="fixed inset-x-0 top-0 z-[90] h-48 bg-background border-b \
-                               border-border shadow-xl transition-transform"
-                        show_class="translate-y-0 duration-300 ease-out"
-                        hide_class="-translate-y-full duration-200 ease-in"
-                    >
-                        <div class="flex flex-col h-full p-6">
-                            <div class="flex items-center justify-between">
-                                <drawer::Title class="text-base font-semibold">"Top Drawer"</drawer::Title>
-                                <drawer::Close class="flex items-center justify-center w-8 h-8 \
-                                                      rounded-md hover:bg-accent transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="w-4 h-4">
-                                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                                    </svg>
-                                </drawer::Close>
-                            </div>
-                            <drawer::Description class="mt-2 text-sm text-muted-foreground">
-                                "Slides in from the top edge of the screen."
-                            </drawer::Description>
+                <drawer::Overlay
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <drawer::Content
+                    class="fixed inset-x-0 top-0 z-[90] h-48 bg-background border-b \
+                           border-border shadow-xl transition-transform"
+                    show_class="translate-y-0 duration-300 ease-out"
+                    hide_class="-translate-y-full duration-200 ease-in"
+                >
+                    <div class="flex flex-col h-full p-6">
+                        <div class="flex items-center justify-between">
+                            <drawer::Title class="text-base font-semibold">"Top Drawer"</drawer::Title>
+                            <drawer::Close class="flex items-center justify-center w-8 h-8 \
+                                                  rounded-md hover:bg-accent transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="w-4 h-4">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </drawer::Close>
                         </div>
-                    </drawer::Content>
-                </Portal>
+                        <drawer::Description class="mt-2 text-sm text-muted-foreground">
+                            "Slides in from the top edge of the screen."
+                        </drawer::Description>
+                    </div>
+                </drawer::Content>
             </drawer::Root>
 
             // Right
@@ -371,36 +464,34 @@ pub fn DrawerSidesExample() -> impl IntoView {
                                         hover:bg-accent transition-colors">
                     "Right"
                 </drawer::Trigger>
-                <Portal>
-                    <drawer::Overlay
-                        class="fixed inset-0 z-[80] bg-black/50 transition"
-                        show_class="opacity-100 duration-300 ease-out"
-                        hide_class="opacity-0 duration-200 ease-in"
-                    />
-                    <drawer::Content
-                        class="fixed inset-y-0 right-0 z-[90] w-72 bg-background border-l \
-                               border-border shadow-xl transition-transform"
-                        show_class="translate-x-0 duration-300 ease-out"
-                        hide_class="translate-x-full duration-200 ease-in"
-                    >
-                        <div class="flex flex-col h-full p-6">
-                            <div class="flex items-center justify-between">
-                                <drawer::Title class="text-base font-semibold">"Right Drawer"</drawer::Title>
-                                <drawer::Close class="flex items-center justify-center w-8 h-8 \
-                                                      rounded-md hover:bg-accent transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="w-4 h-4">
-                                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                                    </svg>
-                                </drawer::Close>
-                            </div>
-                            <drawer::Description class="mt-2 text-sm text-muted-foreground">
-                                "Slides in from the right edge of the screen."
-                            </drawer::Description>
+                <drawer::Overlay
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <drawer::Content
+                    class="fixed inset-y-0 right-0 z-[90] w-72 bg-background border-l \
+                           border-border shadow-xl transition-transform"
+                    show_class="translate-x-0 duration-300 ease-out"
+                    hide_class="translate-x-full duration-200 ease-in"
+                >
+                    <div class="flex flex-col h-full p-6">
+                        <div class="flex items-center justify-between">
+                            <drawer::Title class="text-base font-semibold">"Right Drawer"</drawer::Title>
+                            <drawer::Close class="flex items-center justify-center w-8 h-8 \
+                                                  rounded-md hover:bg-accent transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="w-4 h-4">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </drawer::Close>
                         </div>
-                    </drawer::Content>
-                </Portal>
+                        <drawer::Description class="mt-2 text-sm text-muted-foreground">
+                            "Slides in from the right edge of the screen."
+                        </drawer::Description>
+                    </div>
+                </drawer::Content>
             </drawer::Root>
 
             // Bottom
@@ -410,36 +501,34 @@ pub fn DrawerSidesExample() -> impl IntoView {
                                         hover:bg-accent transition-colors">
                     "Bottom"
                 </drawer::Trigger>
-                <Portal>
-                    <drawer::Overlay
-                        class="fixed inset-0 z-[80] bg-black/50 transition"
-                        show_class="opacity-100 duration-300 ease-out"
-                        hide_class="opacity-0 duration-200 ease-in"
-                    />
-                    <drawer::Content
-                        class="fixed inset-x-0 bottom-0 z-[90] h-48 bg-background border-t \
-                               border-border shadow-xl transition-transform"
-                        show_class="translate-y-0 duration-300 ease-out"
-                        hide_class="translate-y-full duration-200 ease-in"
-                    >
-                        <div class="flex flex-col h-full p-6">
-                            <div class="flex items-center justify-between">
-                                <drawer::Title class="text-base font-semibold">"Bottom Drawer"</drawer::Title>
-                                <drawer::Close class="flex items-center justify-center w-8 h-8 \
-                                                      rounded-md hover:bg-accent transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="w-4 h-4">
-                                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                                    </svg>
-                                </drawer::Close>
-                            </div>
-                            <drawer::Description class="mt-2 text-sm text-muted-foreground">
-                                "Slides in from the bottom edge of the screen."
-                            </drawer::Description>
+                <drawer::Overlay
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <drawer::Content
+                    class="fixed inset-x-0 bottom-0 z-[90] h-48 bg-background border-t \
+                           border-border shadow-xl transition-transform"
+                    show_class="translate-y-0 duration-300 ease-out"
+                    hide_class="translate-y-full duration-200 ease-in"
+                >
+                    <div class="flex flex-col h-full p-6">
+                        <div class="flex items-center justify-between">
+                            <drawer::Title class="text-base font-semibold">"Bottom Drawer"</drawer::Title>
+                            <drawer::Close class="flex items-center justify-center w-8 h-8 \
+                                                  rounded-md hover:bg-accent transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="w-4 h-4">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </drawer::Close>
                         </div>
-                    </drawer::Content>
-                </Portal>
+                        <drawer::Description class="mt-2 text-sm text-muted-foreground">
+                            "Slides in from the bottom edge of the screen."
+                        </drawer::Description>
+                    </div>
+                </drawer::Content>
             </drawer::Root>
 
             // Left
@@ -449,36 +538,34 @@ pub fn DrawerSidesExample() -> impl IntoView {
                                         hover:bg-accent transition-colors">
                     "Left"
                 </drawer::Trigger>
-                <Portal>
-                    <drawer::Overlay
-                        class="fixed inset-0 z-[80] bg-black/50 transition"
-                        show_class="opacity-100 duration-300 ease-out"
-                        hide_class="opacity-0 duration-200 ease-in"
-                    />
-                    <drawer::Content
-                        class="fixed inset-y-0 left-0 z-[90] w-72 bg-background border-r \
-                               border-border shadow-xl transition-transform"
-                        show_class="translate-x-0 duration-300 ease-out"
-                        hide_class="-translate-x-full duration-200 ease-in"
-                    >
-                        <div class="flex flex-col h-full p-6">
-                            <div class="flex items-center justify-between">
-                                <drawer::Title class="text-base font-semibold">"Left Drawer"</drawer::Title>
-                                <drawer::Close class="flex items-center justify-center w-8 h-8 \
-                                                      rounded-md hover:bg-accent transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="w-4 h-4">
-                                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                                    </svg>
-                                </drawer::Close>
-                            </div>
-                            <drawer::Description class="mt-2 text-sm text-muted-foreground">
-                                "Slides in from the left edge of the screen."
-                            </drawer::Description>
+                <drawer::Overlay
+                    class="fixed inset-0 z-[80] bg-black/50 transition"
+                    show_class="opacity-100 duration-300 ease-out"
+                    hide_class="opacity-0 duration-200 ease-in"
+                />
+                <drawer::Content
+                    class="fixed inset-y-0 left-0 z-[90] w-72 bg-background border-r \
+                           border-border shadow-xl transition-transform"
+                    show_class="translate-x-0 duration-300 ease-out"
+                    hide_class="-translate-x-full duration-200 ease-in"
+                >
+                    <div class="flex flex-col h-full p-6">
+                        <div class="flex items-center justify-between">
+                            <drawer::Title class="text-base font-semibold">"Left Drawer"</drawer::Title>
+                            <drawer::Close class="flex items-center justify-center w-8 h-8 \
+                                                  rounded-md hover:bg-accent transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="w-4 h-4">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </drawer::Close>
                         </div>
-                    </drawer::Content>
-                </Portal>
+                        <drawer::Description class="mt-2 text-sm text-muted-foreground">
+                            "Slides in from the left edge of the screen."
+                        </drawer::Description>
+                    </div>
+                </drawer::Content>
             </drawer::Root>
         </div>
     }

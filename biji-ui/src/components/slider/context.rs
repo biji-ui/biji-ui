@@ -1,25 +1,43 @@
 use leptos::{html::Div, prelude::*};
 
+/// Reactive state for a slider. Available via [`use_slider`](super::root::use_slider)
+/// or the `let:` binding on [`RootWith`](super::root::RootWith).
+///
+/// All fields are `Copy`, so it is safe to pass this struct to child components as a prop.
 #[derive(Copy, Clone)]
-pub struct SliderContext {
+pub struct SliderState {
     pub value: RwSignal<f64>,
     pub min: f64,
     pub max: f64,
     pub step: f64,
     pub disabled: bool,
-    pub track_ref: NodeRef<Div>,
-    pub(crate) on_value_change: Option<Callback<f64>>,
+    /// Position of the thumb as a percentage (0–100), derived from value/min/max.
+    pub percentage: Signal<f64>,
+    pub(crate) track_ref: NodeRef<Div>,
 }
 
-impl SliderContext {
-    pub fn percentage(&self) -> f64 {
-        let value = self.value.get();
-        let min = self.min;
-        let max = self.max;
-        if !value.is_finite() || !min.is_finite() || !max.is_finite() || max <= min {
-            return 0.0;
-        }
-        ((value - min) / (max - min) * 100.0).clamp(0.0, 100.0)
+impl SliderState {
+    pub(crate) fn new(
+        value: Option<RwSignal<f64>>,
+        default_value: f64,
+        min: f64,
+        max: f64,
+        step: f64,
+        disabled: bool,
+    ) -> Self {
+        let value_sig = value.unwrap_or_else(|| RwSignal::new(default_value.clamp(min, max)));
+        let percentage = Signal::derive(move || {
+            let v = value_sig.get();
+            if !v.is_finite() || !min.is_finite() || !max.is_finite() || max <= min {
+                return 0.0;
+            }
+            ((v - min) / (max - min) * 100.0).clamp(0.0, 100.0)
+        });
+        Self { value: value_sig, min, max, step, disabled, percentage, track_ref: NodeRef::new() }
+    }
+
+    pub fn data_state(&self) -> &'static str {
+        if self.disabled { "disabled" } else { "enabled" }
     }
 
     pub fn set_value_from_pct(&self, pct: f64) {
@@ -33,9 +51,5 @@ impl SliderContext {
             raw
         };
         self.value.set(stepped.clamp(self.min, self.max));
-    }
-
-    pub fn data_state(&self) -> &'static str {
-        if self.disabled { "disabled" } else { "enabled" }
     }
 }
